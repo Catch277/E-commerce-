@@ -1,0 +1,67 @@
+﻿@model IEnumerable<ECommerceWeb.Models.Product>
+
+<div class="container py-5">
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+
+            @TempData["Success"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                Tất cả sản phẩm
+            </h2>
+
+            <p class="text-muted mb-0">
+                Có @ViewBag.TotalProducts sản phẩm
+            </p>
+
+        </div>
+
+    </div>
+
+<div class="row g-4">
+
+    @foreach (var item in Model)
+    {
+        <partial name="_ProductCard" model="item"/>
+    }
+
+</div>
+
+    <nav class="mt-5">
+
+        <ul class="pagination justify-content-center">
+
+            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+            {
+                <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-page="@i">
+
+                        @i
+
+                    </a>
+
+                </li>
+            }
+
+        </ul>
+
+    </nav>
+
+</div>

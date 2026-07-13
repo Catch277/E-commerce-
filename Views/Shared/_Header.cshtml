@@ -1,0 +1,87 @@
+﻿<header class="bg-dark shadow-sm">
+
+    <div class="container">
+
+        <div class="row align-items-center py-3">
+
+            <!-- Logo -->
+            <div class="col-lg-2 col-md-3 mb-3 mb-lg-0">
+
+                <a asp-controller="Home"
+                   asp-action="Index"
+                   class="text-decoration-none">
+
+                    <h2 class="fw-bold text-warning mb-0">
+                        PC Store
+                    </h2>
+
+                </a>
+
+            </div>
+
+            <!-- Search -->
+            <div class="col-lg-7 col-md-5 mb-3 mb-lg-0">
+
+                <form asp-controller="Product"
+                      asp-action="Search"
+                      method="get">
+
+                    <div class="input-group">
+
+                        <input type="text"
+                               name="keyword"
+                               value="@ViewBag.Keyword"
+                               class="form-control"
+                               placeholder="Tìm CPU, VGA, RAM, SSD..." />
+
+                        <button class="btn btn-warning"
+                                type="submit">
+
+                            <i class="bi bi-search"></i>
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+            <!-- User -->
+            <div class="col-lg-3 col-md-4 text-lg-end text-center">
+
+                <div class="d-flex justify-content-end gap-2">
+
+                    <a href="#"
+                       class="btn btn-outline-light">
+
+                        <i class="bi bi-person"></i>
+
+                        Đăng nhập
+
+                    </a>
+
+                    <a href="#"
+                       class="btn btn-warning position-relative">
+
+                        <i class="bi bi-cart3"></i>
+
+                        Giỏ hàng
+
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+
+                            0
+
+                        </span>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</header>
