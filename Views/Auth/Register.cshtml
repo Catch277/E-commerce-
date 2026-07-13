@@ -1,0 +1,55 @@
+﻿@model ECommerceWeb.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Đăng ký tài khoản";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">@ViewData["Title"]</h2>
+
+                    <form asp-controller="Auth" asp-action="Register" method="post">
+                        <div class="mb-3">
+                            <label asp-for="FullName" class="form-label">Họ và tên</label>
+                            <input asp-for="FullName" class="form-control" placeholder="Nhập họ tên..." />
+                            <span asp-validation-for="FullName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label">Email</label>
+                            <input asp-for="Email" class="form-control" placeholder="Nhập email..." />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label">Mật khẩu</label>
+                            <input asp-for="Password" class="form-control" placeholder="Nhập mật khẩu..." />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="ConfirmPassword" class="form-label">Xác nhận mật khẩu</label>
+                            <input asp-for="ConfirmPassword" class="form-control" placeholder="Nhập lại mật khẩu..." />
+                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100 mb-3">
+                            <i class="fa-solid fa-user-plus"></i> Đăng ký
+                        </button>
+
+                        <div class="text-center">
+                            <span>Đã có tài khoản? </span>
+                            <a asp-controller="Auth" asp-action="Login" class="text-decoration-none">Đăng nhập</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

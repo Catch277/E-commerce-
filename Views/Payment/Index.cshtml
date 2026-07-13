@@ -1,0 +1,34 @@
+﻿@{
+    ViewData["Title"] = "Thanh toán đơn hàng";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fa-solid fa-credit-card"></i> Thanh toán qua VNPay</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Hiển thị thông báo lỗi nếu không tìm thấy đơn hàng -->
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+                    }
+
+                    <p>Nhập mã đơn hàng (OrderID) đã tồn tại trong CSDL để tiến hành test thanh toán:</p>
+
+                    <form asp-controller="Payment" asp-action="CreatePaymentUrl" method="post">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Mã đơn hàng (OrderID):</label>
+                            <input type="number" name="orderId" class="form-control" required placeholder="Ví dụ: 1" />
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fa-solid fa-money-bill-transfer"></i> Chuyển đến VNPay
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
