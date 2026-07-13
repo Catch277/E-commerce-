@@ -1,0 +1,125 @@
+﻿<nav class="navbar navbar-expand-lg navbar-dark bg-warning shadow-sm">
+
+    <div class="container">
+
+        <button class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#mainNavbar">
+
+            <span class="navbar-toggler-icon"></span>
+
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNavbar">
+
+            <ul class="navbar-nav mx-auto fw-semibold">
+
+                <li class="nav-item">
+                    <a asp-controller="Home"
+                       asp-action="Index"
+                       class="nav-link">
+
+                        <i class="bi bi-house-door-fill me-1"></i>
+
+                        Trang chủ
+
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a asp-controller="Product"
+                       asp-action="Index"
+                       class="nav-link">
+
+                        <i class="bi bi-grid me-1"></i>
+
+                        Tất cả
+
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a asp-controller="Product"
+                       asp-action="Category"
+                       asp-route-id="1"
+                       class="nav-link">
+
+                        CPU
+
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a asp-controller="Product"
+                       asp-action="Category"
+                       asp-route-id="2"
+                       class="nav-link">
+
+                        VGA
+
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a asp-controller="Product"
+                       asp-action="Category"
+                       asp-route-id="3"
+                       class="nav-link">
+
+                        RAM
+
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a asp-controller="Product"
+                       asp-action="Category"
+                       asp-route-id="4"
+                       class="nav-link">
+
+                        SSD
+
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a asp-controller="Product"
+                       asp-action="Category"
+                       asp-route-id="5"
+                       class="nav-link">
+
+                        Màn hình
+
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a asp-controller="Product"
+                       asp-action="Category"
+                       asp-route-id="6"
+                       class="nav-link">
+
+                        Bàn phím
+
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a asp-controller="Product"
+                       asp-action="Category"
+                       asp-route-id="7"
+                       class="nav-link">
+
+                        Chuột
+
+                    </a>
+                </li>
+
+            </ul>
+
+        </div>
+
+    </div>
+
+</nav>

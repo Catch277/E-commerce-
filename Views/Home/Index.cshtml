@@ -1,8 +1,236 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-}
+﻿@model IEnumerable<ECommerceWeb.Models.Product>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<partial name="_Hero" />
+
+<!-- ================= DANH MỤC ================= -->
+
+<section class="container my-5">
+
+    <div class="d-flex justify-content-between align-items-end mb-4">
+
+        <div>
+
+            <span class="text-warning fw-bold text-uppercase">
+                Khám phá
+            </span>
+
+            <h2 class="fw-bold mt-2">
+                Danh mục nổi bật
+            </h2>
+
+            <p class="text-muted mb-0">
+                Những danh mục được khách hàng quan tâm nhiều nhất.
+            </p>
+
+        </div>
+
+        <a asp-controller="Product"
+           asp-action="Index"
+           class="btn btn-outline-warning">
+
+            <i class="bi bi-grid"></i>
+
+            Xem tất cả
+
+        </a>
+
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-lg-3 col-md-6 col-6">
+
+            <a asp-controller="Product"
+               asp-action="Category"
+               asp-route-id="1"
+               class="text-decoration-none">
+
+                <div class="card category-card h-100">
+
+                    <div class="card-body text-center">
+
+                        <i class="bi bi-cpu category-icon"></i>
+
+                        <h5 class="fw-bold mt-3 mb-2">
+
+                            CPU
+
+                        </h5>
+
+                        <small class="text-muted">
+
+                            Intel • AMD
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </a>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6 col-6">
+
+            <a asp-controller="Product"
+               asp-action="Category"
+               asp-route-id="2"
+               class="text-decoration-none">
+
+                <div class="card category-card h-100">
+
+                    <div class="card-body text-center">
+
+                        <i class="bi bi-gpu-card category-icon"></i>
+
+                        <h5 class="fw-bold mt-3 mb-2">
+
+                            VGA
+
+                        </h5>
+
+                        <small class="text-muted">
+
+                            NVIDIA • AMD
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </a>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6 col-6">
+
+            <a asp-controller="Product"
+               asp-action="Category"
+               asp-route-id="3"
+               class="text-decoration-none">
+
+                <div class="card category-card h-100">
+
+                    <div class="card-body text-center">
+
+                        <i class="bi bi-memory category-icon"></i>
+
+                        <h5 class="fw-bold mt-3 mb-2">
+
+                            RAM
+
+                        </h5>
+
+                        <small class="text-muted">
+
+                            DDR4 • DDR5
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </a>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6 col-6">
+
+            <a asp-controller="Product"
+               asp-action="Category"
+               asp-route-id="4"
+               class="text-decoration-none">
+
+                <div class="card category-card h-100">
+
+                    <div class="card-body text-center">
+
+                        <i class="bi bi-device-ssd category-icon"></i>
+
+                        <h5 class="fw-bold mt-3 mb-2">
+
+                            SSD
+
+                        </h5>
+
+                        <small class="text-muted">
+
+                            NVMe • SATA
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ================= SẢN PHẨM ================= -->
+
+<section class="container mb-5" id="featured-products">
+
+    <div class="d-flex justify-content-between align-items-end mb-4">
+
+        <div>
+            <h2 class="fw-bold mt-2">
+
+                Sản phẩm nổi bật
+
+            </h2>
+
+            <p class="text-muted mb-0">
+
+                Các sản phẩm bán chạy và được đánh giá cao.
+
+            </p>
+
+        </div>
+
+        <a asp-controller="Product"
+           asp-action="Index"
+           class="btn btn-outline-warning">
+
+            <i class="bi bi-arrow-right-circle"></i>
+
+            Xem tất cả
+
+        </a>
+
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+
+        <div class="row g-4">
+
+            @foreach (var item in Model)
+            {
+                <partial name="_ProductCard" model="item" />
+            }
+
+        </div>
+
+    }
+    else
+    {
+
+        <div class="alert alert-info text-center">
+
+            <i class="bi bi-info-circle-fill"></i>
+
+            Hiện chưa có sản phẩm để hiển thị.
+
+        </div>
+
+    }
+
+</section>
