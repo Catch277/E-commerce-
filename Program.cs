@@ -1,11 +1,27 @@
-using Microsoft.EntityFrameworkCore;
 using ECommerceWeb.Data;
+using ECommerceWeb.Services;
+using ECommerceWeb.ViewModels;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Đăng ký ApplicationDbContext với SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Đăng ký VnPayAPI
+builder.Services.AddScoped<IVnPayService, VnPayService>();
+// Đăng ký MoMoAPI
+builder.Services.Configure<MomoOptionModel>(builder.Configuration.GetSection("MomoAPI"));
+builder.Services.AddScoped<IMomoService, MomoService>();
+// Cấu hình Authentication
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Auth/Login"; // Đường dẫn khi chưa đăng nhập bị văng ra
+        options.AccessDeniedPath = "/Auth/AccessDenied"; // Đường dẫn khi không đủ quyền
+    });
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -22,6 +38,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();

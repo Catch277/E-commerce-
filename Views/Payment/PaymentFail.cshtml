@@ -1,0 +1,26 @@
+﻿@{
+    ViewData["Title"] = "Thanh toán thất bại";
+}
+
+<div class="container mt-5 text-center">
+    <div class="card shadow p-5">
+        <div class="mb-4">
+            <i class="fa-solid fa-circle-xmark text-danger" style="font-size: 5rem;"></i>
+        </div>
+        <h2 class="text-danger mb-3">Giao dịch thất bại!</h2>
+        <p class="fs-5">Rất tiếc, quá trình thanh toán của bạn không thành công hoặc đã bị hủy.</p>
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger mx-auto" style="max-width: 500px;">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+
+        <div class="mt-4">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
+                <i class="fa-solid fa-house"></i> Về trang chủ
+            </a>
+        </div>
+    </div>
+</div>
