@@ -1,0 +1,109 @@
+﻿@model ECommerceWeb.Models.Product
+
+<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-4">
+
+    <div class="card product-card h-100 border-0">
+
+        <!-- Badge -->
+        <div class="position-absolute top-0 start-0 m-3">
+
+            <span class="badge bg-danger px-3 py-2">
+                NEW
+            </span>
+
+        </div>
+
+        <!-- Image -->
+        <div class="product-image">
+
+            <a asp-controller="Product"
+               asp-action="Details"
+               asp-route-id="@Model.ProductID">
+
+                <img src="@(string.IsNullOrWhiteSpace(Model.ImageUrl) ? "/images/no-image.png" : Model.ImageUrl)"
+                     class="img-fluid"
+                     alt="@Model.ProductName">
+
+            </a>
+
+        </div>
+
+        <!-- Body -->
+        <div class="card-body d-flex flex-column">
+
+            <small class="text-muted text-uppercase fw-semibold">
+
+                @Model.Category?.CategoryName
+
+            </small>
+
+            <h5 class="product-title mt-2">
+
+                @Model.ProductName
+
+            </h5>
+
+            <div class="mb-3">
+
+                <span class="text-warning">
+                    ★★★★★
+                </span>
+
+                <small class="text-muted">
+                    (5.0)
+                </small>
+
+            </div>
+
+            <div class="mt-auto">
+
+                <small class="text-decoration-line-through text-secondary">
+
+                    @((Model.Price * 1.15M).ToString("N0"))đ
+
+                </small>
+
+                <h4 class="text-danger fw-bold mt-1">
+
+                    @Model.Price.ToString("N0")đ
+
+                </h4>
+
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="card-footer bg-white border-0 pt-0">
+
+            <div class="d-grid gap-2">
+
+                <a asp-controller="Product"
+                   asp-action="Details"
+                   asp-route-id="@Model.ProductID"
+                   class="btn btn-outline-dark">
+
+                    <i class="bi bi-eye"></i>
+
+                    Chi tiết
+
+                </a>
+
+                <a asp-controller="Product"
+                   asp-action="AddToCart"
+                   asp-route-id="@Model.ProductID"
+                   class="btn btn-warning">
+
+                    <i class="bi bi-cart-plus-fill"></i>
+
+                    Thêm vào giỏ
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
