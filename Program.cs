@@ -9,6 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Đăng ký ApplicationDbContext với SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Đăng ký GHN API
+builder.Services.AddScoped<IGhnService, GhnService>();
 // Đăng ký VnPayAPI
 builder.Services.AddScoped<IVnPayService, VnPayService>();
 // Đăng ký MoMoAPI
