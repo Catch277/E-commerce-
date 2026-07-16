@@ -21,8 +21,11 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie(options =>
     {
         options.LoginPath = "/Auth/Login"; // Đường dẫn khi chưa đăng nhập bị văng ra
+        options.LogoutPath = "/Auth/Logout";
         options.AccessDeniedPath = "/Auth/AccessDenied"; // Đường dẫn khi không đủ quyền
     });
+// Cấu hình Service Hạng thành viên
+builder.Services.AddScoped<IMembershipService, MembershipService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

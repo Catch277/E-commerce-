@@ -11,12 +11,11 @@ namespace ECommerceWeb.ViewModels
         [RegularExpression("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$", ErrorMessage = "Email không hợp lệ")]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng nhập địa chỉ")]
-        public string Address { get; set; }
+        public string? Address { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng nhập số điện thoại")]
         [RegularExpression(@"^\+84[0-9]{9}$", ErrorMessage = "Số điện thoại phải gồm 9 chữ số theo sau")]
-        public string Phone { get; set; }
+        public string? Phone { get; set; }
+        public string? Gender { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập mật khẩu")]
         [DataType(DataType.Password)]

@@ -20,30 +20,51 @@
 
             <form asp-controller="Auth" asp-action="Register" method="post">
                 <div class="row mb-3">
+                    <!-- Tên -->
                     <div class="col-md-6">
                         <label asp-for="FullName" class="form-label">Họ và tên</label>
                         <input asp-for="FullName" class="form-control" placeholder="Nhập họ tên..."/>
                         <span asp-validation-for="FullName" class="text-danger small"></span>
                     </div>
+                    <!-- Email -->
                     <div class="col-md-6 mt-3 mt-md-0">
                         <label asp-for="Email" class="form-label">Email</label>
                         <input asp-for="Email" class="form-control" placeholder="Nhập email..."/>
                         <span asp-validation-for="Email" class="text-danger small"></span>
                     </div>
                 </div>
-
+                <!-- Địa chỉ -->
                 <div class="mb-3">
                     <label asp-for="Address" class="form-label">Địa chỉ</label>
                     <input asp-for="Address" class="form-control" placeholder="Nhập địa chỉ..."/>
                     <span asp-validation-for="Address" class="text-danger small"></span>
                 </div>
-
+                <!-- SĐT -->
                 <div class="mb-3">
                     <label asp-for="Phone" class="form-label">Số điện thoại</label>
                     <input asp-for="Phone" class="form-control" placeholder="Nhập số điện thoại..."/>
                     <span asp-validation-for="Phone" class="text-danger small"></span>
                 </div>
-
+                <!-- Giới tính -->
+                <div class="mb-3">
+                    <label class="form-label">Giới tính</label>
+                    <div class="d-flex gap-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" asp-for="Gender" value="Nam" id="genderMale">
+                            <label class="form-check-label" for="genderMale">Nam</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" asp-for="Gender" value="Nữ" id="genderFemale">
+                            <label class="form-check-label" for="genderFemale">Nữ</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" asp-for="Gender" value="" id="genderNone" checked>
+                            <label class="form-check-label" for="genderNone">Để trống</label>
+                        </div>
+                    </div>
+                    <span asp-validation-for="Gender" class="text-danger small"></span>
+                </div>
+                <!-- Mật khẩu -->
                 <div class="mb-3">
                     <label asp-for="Password" class="form-label">Mật khẩu</label>
                     <div class="position-relative">
@@ -68,7 +89,7 @@
                         </ul>
                     </div>
                 </div>
-
+                <!-- Xác nhận mật khẩu -->
                 <div class="mb-4">
                     <label asp-for="ConfirmPassword" class="form-label">Xác nhận mật khẩu</label>
                     <div class="position-relative">

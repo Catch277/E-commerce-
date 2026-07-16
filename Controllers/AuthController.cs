@@ -32,13 +32,25 @@ namespace ECommerceWeb.Controllers
                     ModelState.AddModelError("Email", "Email này đã được sử dụng.");
                     return View(model);
                 }
-
+                if (string.IsNullOrWhiteSpace(model.Gender))
+                {
+                    model.Gender = "";
+                }
+                if (string.IsNullOrWhiteSpace(model.Address))
+                {
+                    model.Address = "";
+                }
+                if (string.IsNullOrWhiteSpace(model.Phone))
+                {
+                    model.Phone = "";
+                }
                 var user = new User
                 {
                     FullName = model.FullName,
                     Email = model.Email,
                     Address = model.Address,
                     Phone = model.Phone,
+                    Gender = model.Gender,
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password),
                     Role = "Customer"
                 };

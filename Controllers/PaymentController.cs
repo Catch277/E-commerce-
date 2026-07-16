@@ -11,13 +11,19 @@ namespace ECommerceWeb.Controllers
         private readonly IVnPayService _vnPayService;
         private readonly ApplicationDbContext _context;
         private readonly IMomoService _momoService;
+        private readonly IMembershipService _membershipService;
 
         // Tiêm cả Service VNPay, Service MoMo và DbContext vào Controller
-        public PaymentController(IVnPayService vnPayService, IMomoService momoService, ApplicationDbContext context)
+        public PaymentController(
+            IVnPayService vnPayService,
+            IMomoService momoService,
+            ApplicationDbContext context,
+            IMembershipService membershipService)
         {
             _vnPayService = vnPayService;
             _momoService = momoService;
             _context = context;
+            _membershipService = membershipService;
         }
 
         // Trang hiển thị form nhập mã đơn hàng để Test
@@ -85,6 +91,7 @@ namespace ECommerceWeb.Controllers
 
                 _context.Payments.Add(payment);
                 await _context.SaveChangesAsync();
+                await _membershipService.AddPointsAsync(order.UserID, order.OrderID, order.TotalAmount);
             }
 
             TempData["SuccessMessage"] = "Thanh toán VNPay thành công!";
@@ -134,6 +141,7 @@ namespace ECommerceWeb.Controllers
                     TransactionCode = Request.Query["transId"] // Mã giao dịch của MoMo
                 });
                 await _context.SaveChangesAsync();
+                await _membershipService.AddPointsAsync(order.UserID, order.OrderID, order.TotalAmount);
             }
 
             TempData["SuccessMessage"] = "Thanh toán MoMo thành công!";
