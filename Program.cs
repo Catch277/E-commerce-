@@ -9,6 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Đăng ký ApplicationDbContext với SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Đăng ký GHN API
+builder.Services.AddScoped<IGhnService, GhnService>();
 // Đăng ký VnPayAPI
 builder.Services.AddScoped<IVnPayService, VnPayService>();
 // Đăng ký MoMoAPI
@@ -19,8 +21,11 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie(options =>
     {
         options.LoginPath = "/Auth/Login"; // Đường dẫn khi chưa đăng nhập bị văng ra
+        options.LogoutPath = "/Auth/Logout";
         options.AccessDeniedPath = "/Auth/AccessDenied"; // Đường dẫn khi không đủ quyền
     });
+// Cấu hình Service Hạng thành viên
+builder.Services.AddScoped<IMembershipService, MembershipService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

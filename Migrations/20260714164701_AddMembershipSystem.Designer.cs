@@ -4,6 +4,7 @@ using ECommerceWeb.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ECommerceWeb.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260714164701_AddMembershipSystem")]
+    partial class AddMembershipSystem
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -170,7 +172,7 @@ namespace ECommerceWeb.Migrations
                             ColorHex = "#e0e0e0",
                             IconClass = "fa-solid fa-user",
                             MinPoints = 0,
-                            TierName = "Tech-Newie"
+                            TierName = "Tech-NULL"
                         },
                         new
                         {
@@ -178,7 +180,7 @@ namespace ECommerceWeb.Migrations
                             ColorHex = "#f5c3a6",
                             IconClass = "fa-solid fa-star",
                             MinPoints = 300,
-                            TierName = "Tech-Member"
+                            TierName = "Tech-NEW"
                         },
                         new
                         {
@@ -186,7 +188,7 @@ namespace ECommerceWeb.Migrations
                             ColorHex = "#f5d17e",
                             IconClass = "fa-solid fa-crown",
                             MinPoints = 1500,
-                            TierName = "Tech-VIP"
+                            TierName = "Tech-MEM"
                         });
                 });
 
@@ -453,9 +455,6 @@ namespace ECommerceWeb.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("DateOfBirth")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -466,16 +465,9 @@ namespace ECommerceWeb.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Gender")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("PasswordUpdatedAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Phone")
                         .IsRequired()
@@ -496,120 +488,6 @@ namespace ECommerceWeb.Migrations
                     b.HasIndex("TierID");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("ECommerceWeb.Models.UserVoucher", b =>
-                {
-                    b.Property<int>("UserVoucherID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserVoucherID"), 1L, 1);
-
-                    b.Property<DateTime>("RedeemedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("UsedInOrderID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("VoucherID")
-                        .HasColumnType("int");
-
-                    b.HasKey("UserVoucherID");
-
-                    b.HasIndex("VoucherID");
-
-                    b.HasIndex("UserID", "VoucherID")
-                        .IsUnique();
-
-                    b.ToTable("UserVouchers");
-                });
-
-            modelBuilder.Entity("ECommerceWeb.Models.Voucher", b =>
-                {
-                    b.Property<int>("VoucherID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VoucherID"), 1L, 1);
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("DiscountType")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<decimal>("DiscountValue")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("ExpiryDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<decimal?>("MaxDiscountAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("MinOrderValue")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<int?>("UsageLimit")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UsedCount")
-                        .HasColumnType("int");
-
-                    b.HasKey("VoucherID");
-
-                    b.ToTable("Vouchers");
-
-                    b.HasData(
-                        new
-                        {
-                            VoucherID = 1,
-                            Code = "WELCOME50",
-                            Description = "Chào mừng thành viên mới",
-                            DiscountType = "Fixed",
-                            DiscountValue = 50000m,
-                            ExpiryDate = new DateTime(2026, 12, 31, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            MinOrderValue = 200000m,
-                            Title = "Giảm 50.000đ",
-                            UsedCount = 0
-                        },
-                        new
-                        {
-                            VoucherID = 2,
-                            Code = "SALE10",
-                            Description = "Áp dụng cho đơn hàng từ 500.000đ",
-                            DiscountType = "Percent",
-                            DiscountValue = 10m,
-                            ExpiryDate = new DateTime(2026, 12, 31, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            MaxDiscountAmount = 100000m,
-                            MinOrderValue = 500000m,
-                            Title = "Giảm 10%",
-                            UsageLimit = 1000,
-                            UsedCount = 0
-                        });
                 });
 
             modelBuilder.Entity("ECommerceWeb.Models.Cart", b =>
@@ -757,25 +635,6 @@ namespace ECommerceWeb.Migrations
                     b.Navigation("Tier");
                 });
 
-            modelBuilder.Entity("ECommerceWeb.Models.UserVoucher", b =>
-                {
-                    b.HasOne("ECommerceWeb.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ECommerceWeb.Models.Voucher", "Voucher")
-                        .WithMany("UserVouchers")
-                        .HasForeignKey("VoucherID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("User");
-
-                    b.Navigation("Voucher");
-                });
-
             modelBuilder.Entity("ECommerceWeb.Models.Cart", b =>
                 {
                     b.Navigation("CartItems");
@@ -796,11 +655,6 @@ namespace ECommerceWeb.Migrations
             modelBuilder.Entity("ECommerceWeb.Models.Order", b =>
                 {
                     b.Navigation("OrderDetails");
-                });
-
-            modelBuilder.Entity("ECommerceWeb.Models.Voucher", b =>
-                {
-                    b.Navigation("UserVouchers");
                 });
 #pragma warning restore 612, 618
         }
