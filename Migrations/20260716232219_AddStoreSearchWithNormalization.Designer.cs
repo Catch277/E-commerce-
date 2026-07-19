@@ -4,6 +4,7 @@ using ECommerceWeb.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ECommerceWeb.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260716232219_AddStoreSearchWithNormalization")]
+    partial class AddStoreSearchWithNormalization
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -95,40 +97,6 @@ namespace ECommerceWeb.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("ECommerceWeb.Models.ChatMessage", b =>
-                {
-                    b.Property<int>("ChatMessageID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ChatMessageID"), 1L, 1);
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("SenderType")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<int>("UserID")
-                        .HasColumnType("int");
-
-                    b.HasKey("ChatMessageID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("ChatMessages");
-                });
-
             modelBuilder.Entity("ECommerceWeb.Models.EmailLog", b =>
                 {
                     b.Property<int>("EmailID")
@@ -168,52 +136,6 @@ namespace ECommerceWeb.Migrations
                     b.HasIndex("UserID");
 
                     b.ToTable("EmailLogs");
-                });
-
-            modelBuilder.Entity("ECommerceWeb.Models.Feedback", b =>
-                {
-                    b.Property<int>("FeedbackID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FeedbackID"), 1L, 1);
-
-                    b.Property<string>("ContactInfo")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<string>("Topic")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int?>("UserID")
-                        .HasColumnType("int");
-
-                    b.HasKey("FeedbackID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("Feedbacks");
                 });
 
             modelBuilder.Entity("ECommerceWeb.Models.MembershipTier", b =>
@@ -876,17 +798,6 @@ namespace ECommerceWeb.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("ECommerceWeb.Models.ChatMessage", b =>
-                {
-                    b.HasOne("ECommerceWeb.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("ECommerceWeb.Models.EmailLog", b =>
                 {
                     b.HasOne("ECommerceWeb.Models.Order", "Order")
@@ -902,16 +813,6 @@ namespace ECommerceWeb.Migrations
                         .IsRequired();
 
                     b.Navigation("Order");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("ECommerceWeb.Models.Feedback", b =>
-                {
-                    b.HasOne("ECommerceWeb.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("User");
                 });

@@ -1,0 +1,181 @@
+﻿@model ECommerceWeb.ViewModels.StoreLocatorViewModel
+@{
+    ViewData["Title"] = "Tìm kiếm cửa hàng";
+}
+
+<style>
+    body {
+        background-color: #f7f9fd;
+    }
+
+    .store-search-box {
+        border: 1px solid #d4c5ab;
+        border-radius: 12px;
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #fff;
+    }
+
+        .store-search-box input {
+            border: none;
+            outline: none;
+            flex: 1;
+            font-size: 0.95rem;
+        }
+
+        .store-search-box i {
+            color: #827660;
+        }
+
+    .store-map-frame {
+        width: 100%;
+        height: 480px;
+        border: none;
+        border-radius: 12px;
+    }
+
+    .store-list-title {
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .store-list-sub {
+        color: #575e70;
+        font-size: 0.85rem;
+        margin-bottom: 16px;
+    }
+
+    .store-item {
+        border: 1px solid #eceef2;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: block;
+        color: inherit;
+    }
+
+        .store-item:hover {
+            box-shadow: 0 8px 20px rgba(0,0,0,.08);
+            transform: translateY(-2px);
+            color: inherit;
+        }
+
+        .store-item.selected {
+            border-color: #ffc107;
+            background: #fffdf5;
+        }
+
+        .store-item .store-name {
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .store-item .store-line {
+            font-size: 0.85rem;
+            color: #575e70;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+            .store-item .store-line i {
+                width: 16px;
+                text-align: center;
+                margin-top: 3px;
+                color: #827660;
+            }
+
+        .store-item .store-meta-row {
+            display: flex;
+            gap: 20px;
+            margin-top: 8px;
+        }
+</style>
+
+<div class="container mt-4 mb-5">
+
+    <!-- Quick Links -->
+    @await Html.PartialAsync("_ProfileQuickLinksPartial")
+
+    <div class="row g-3">
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            @await Html.PartialAsync("_ProfileSidebarPartial")
+        </div>
+
+        <!-- Nội dung chính -->
+        <div class="col-lg-9">
+            <div class="row g-3">
+
+                <!-- Cột bản đồ -->
+                <div class="col-lg-7">
+                    <div class="acc-card p-3" style="border-radius:18px; box-shadow:0 8px 25px rgba(0,0,0,.06); background:#fff;">
+                        <form asp-controller="Profile" asp-action="StoreLocator" method="get" class="store-search-box mb-3">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" name="keyword" value="@Model.Keyword" placeholder="Tìm kiếm khu vực...">
+                            @if (Model.SelectedStore != null)
+                            {
+                                <input type="hidden" name="selectedStoreId" value="@Model.SelectedStore.StoreID">
+                            }
+                        </form>
+
+                        @if (Model.SelectedStore?.Latitude != null && Model.SelectedStore?.Longitude != null)
+                        {
+                            <iframe class="store-map-frame"
+                                    src="https://www.google.com/maps?q=@(Model.SelectedStore.Latitude),@(Model.SelectedStore.Longitude)&z=15&output=embed">
+                            </iframe>
+                        }
+                        else
+                        {
+                            <div class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-map-location-dot" style="font-size:3rem; opacity:.3;"></i>
+                                <p class="mt-2">Không tìm thấy cửa hàng phù hợp hoặc chưa chọn bản đồ.</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Cột danh sách cửa hàng -->
+                <div class="col-lg-5">
+                    <div class="acc-card p-3" style="border-radius:18px; box-shadow:0 8px 25px rgba(0,0,0,.06); background:#fff;">
+                        <div class="store-list-title">Hệ thống cửa hàng</div>
+                        <div class="store-list-sub">Tìm thấy @Model.Stores.Count cửa hàng@(string.IsNullOrEmpty(Model.Keyword) ? "" : $" khớp với \"{Model.Keyword}\"")</div>
+
+                        @if (!Model.Stores.Any())
+                        {
+                            <div class="text-center py-4 text-muted">
+                                <i class="fa-solid fa-store-slash" style="font-size:2.5rem; opacity:.3;"></i>
+                                <p class="mt-2 mb-0">Không có cửa hàng nào phù hợp.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            @foreach (var store in Model.Stores)
+                            {
+                                var isSelected = Model.SelectedStore != null && Model.SelectedStore.StoreID == store.StoreID;
+                                <a asp-controller="Profile" asp-action="StoreLocator"
+                                   asp-route-keyword="@Model.Keyword"
+                                   asp-route-selectedStoreId="@store.StoreID"
+                                   class="store-item @(isSelected ? "selected" : "")">
+                                    <div class="store-name">@store.Name</div>
+                                    <div class="store-line"><i class="fa-solid fa-location-dot"></i> <span>@store.Address</span></div>
+                                    <div class="store-meta-row">
+                                        <div class="store-line mb-0"><i class="fa-solid fa-phone"></i> <span>@store.Phone</span></div>
+                                        <div class="store-line mb-0"><i class="fa-regular fa-clock"></i> <span>@store.OpenHours</span></div>
+                                    </div>
+                                </a>
+                            }
+                        }
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

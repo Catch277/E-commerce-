@@ -1,117 +1,88 @@
-﻿<footer class="bg-dark text-light mt-5">
-
-    <div class="container py-5">
-
-        <div class="row gy-4">
-
-            <!-- Giới thiệu -->
+<footer class="site-footer">
+    <div class="container site-footer__content">
+        <div class="row g-4">
             <div class="col-lg-4">
-
-                <h3 class="fw-bold text-warning mb-3">
-                    PC Store
-                </h3>
-
-                <p class="text-secondary">
-                    Chuyên cung cấp linh kiện máy tính, gaming gear và
-                    phụ kiện chính hãng với giá tốt, bảo hành uy tín.
-                </p>
-
-                <div class="d-flex gap-3 fs-4 mt-3">
-
-                    <a href="#" class="text-light">
-                        <i class="bi bi-facebook"></i>
-                    </a>
-
-                    <a href="#" class="text-light">
-                        <i class="bi bi-instagram"></i>
-                    </a>
-
-                    <a href="#" class="text-light">
-                        <i class="bi bi-youtube"></i>
-                    </a>
-
+                <a href="#" class="site-footer__brand">PC Store</a>
+                <p class="site-footer__description">@ViewBag.StoreDescription</p>
+                <div class="site-footer__social">
+                    <a href="#"><img src="~/images/social-facebook.svg" alt="Facebook" width="24" height="24"></a>
+                    <a href="#"><img src="~/images/social-instagram.svg" alt="Instagram" width="24" height="24"></a>
+                    <a href="#"><img src="~/images/social-youtube.svg" alt="YouTube" width="24" height="24"></a>
                 </div>
-
             </div>
 
-            <!-- Danh mục -->
-            <div class="col-lg-2">
-
-                <h5 class="fw-bold mb-3">
-                    Danh mục
-                </h5>
-
-                <ul class="list-unstyled footer-link">
-
+            <div class="col-6 col-lg-2">
+                <h6 class="site-footer__title">Danh mục</h6>
+                <ul class="site-footer__links">
                     <li><a href="#">CPU</a></li>
                     <li><a href="#">VGA</a></li>
                     <li><a href="#">RAM</a></li>
                     <li><a href="#">SSD</a></li>
-                    <li><a href="#">Mainboard</a></li>
-
                 </ul>
-
             </div>
 
-            <!-- Hỗ trợ -->
-            <div class="col-lg-3">
-
-                <h5 class="fw-bold mb-3">
-                    Hỗ trợ khách hàng
-                </h5>
-
-                <ul class="list-unstyled footer-link">
-
+            <div class="col-6 col-lg-2">
+                <h6 class="site-footer__title">Hỗ trợ khách hàng</h6>
+                <ul class="site-footer__links">
                     <li><a href="#">Chính sách bảo hành</a></li>
                     <li><a href="#">Đổi trả sản phẩm</a></li>
                     <li><a href="#">Hướng dẫn mua hàng</a></li>
                     <li><a href="#">Liên hệ</a></li>
-
                 </ul>
-
             </div>
 
-            <!-- Liên hệ -->
-            <div class="col-lg-3">
-
-                <h5 class="fw-bold mb-3">
-                    Thông tin liên hệ
-                </h5>
-
-                <p>
-                    📧 pcstore@gmail.com
-                </p>
-
-                <p>
-                    📞 0123 456 789
-                </p>
-
-                <p>
-                    📍 TP. Hồ Chí Minh
-                </p>
-
-                <p>
-                    🕗 08:00 - 22:00
-                </p>
-
+            <div class="col-lg-4">
+                <h6 class="site-footer__title">Thông tin liên hệ</h6>
+                <ul class="site-footer__contact">
+                    <li>
+                        <img src="~/images/footer-email.svg" alt="Email" width="20" height="20">
+                        <span>pcstore@gmail.com</span>
+                    </li>
+                    <li>
+                        <img src="~/images/footer-phone.svg" alt="Phone" width="20" height="20">
+                        <span>0123 456 789</span>
+                    </li>
+                    <li>
+                        <img src="~/images/footer-location.svg" alt="Location" width="20" height="20">
+                        <span>TP. Hồ Chí Minh</span>
+                    </li>
+                    <li>
+                        <img src="~/images/footer-clock.svg" alt="Clock" width="20" height="20">
+                        <span>08:00 - 22:00</span>
+                    </li>
+                </ul>
             </div>
-
         </div>
 
-        <hr class="border-secondary my-4">
-
-        <div class="d-flex justify-content-between align-items-center flex-wrap">
-
-            <span class="text-secondary">
-                © 2026 PC Store. All Rights Reserved.
-            </span>
-
-            <span class="text-secondary">
-                ASP.NET Core MVC | Bootstrap 5
-            </span>
-
+        <div class="site-footer__bottom">
+            <span>© @DateTime.Now.Year PC Store. All rights reserved.</span>
+            <div class="d-flex gap-3">
+                <a href="#">Điều khoản</a>
+                <a href="#">Bảo mật</a>
+            </div>
         </div>
-
     </div>
-
 </footer>
+
+<!-- Nút cuộn lên đầu trang - đã có sẵn CSS .home-scroll-top trong site.css -->
+<button type="button" class="home-scroll-top" id="scrollTopBtn" aria-label="Cuộn lên đầu trang">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 15l-6-6-6 6"/>
+    </svg>
+</button>
+
+<script>
+    (function () {
+        var btn = document.getElementById('scrollTopBtn');
+        window.addEventListener('scroll', function () {
+            if (window.scrollY > 400) {
+                btn.classList.add('is-visible');
+            } else {
+                btn.classList.remove('is-visible');
+            }
+        });
+        btn.addEventListener('click', function () {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    })();
+</script>

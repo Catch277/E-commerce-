@@ -1,4 +1,5 @@
 ﻿using ECommerceWeb.Data;
+using ECommerceWeb.Helpers;
 using ECommerceWeb.Models;
 using ECommerceWeb.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -54,6 +55,15 @@ namespace ECommerceWeb.Controllers
         }
 
         private const int PageSize = 5;
+
+        [HttpGet]
+        public IActionResult WarrantyLookup(string? keyword)
+        {
+            return View(new WarrantyLookupViewModel
+            {
+                Keyword = keyword?.Trim()
+            });
+        }
 
         public async Task<IActionResult> OrderHistory(string status, DateTime? fromDate, DateTime? toDate, int page = 1)
         {
@@ -232,7 +242,7 @@ namespace ECommerceWeb.Controllers
             return View(model);
         }
 
-        // ==== ACTION BỊ THIẾU #1: Cập nhật thông tin cá nhân ====
+        // ==== ACTION Cập nhật thông tin cá nhân ====
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateProfile(UpdateProfileViewModel model)
@@ -260,7 +270,7 @@ namespace ECommerceWeb.Controllers
             return RedirectToAction("AccountInfo");
         }
 
-        // ==== ACTION BỊ THIẾU #2: Đổi mật khẩu ====
+        // ==== ACTION Đổi mật khẩu ====
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
@@ -291,7 +301,7 @@ namespace ECommerceWeb.Controllers
             return RedirectToAction("AccountInfo");
         }
 
-        // ==== ACTION BỊ THIẾU #3: Áp dụng mã giảm giá ====
+        // ==== ACTION Áp dụng mã giảm giá ====
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ApplyVoucher(string voucherCode)
@@ -355,6 +365,204 @@ namespace ECommerceWeb.Controllers
         {
             if (string.IsNullOrEmpty(phone) || phone.Length < 5) return phone;
             return phone.Substring(0, 3) + new string('*', phone.Length - 5) + phone.Substring(phone.Length - 2);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> StoreLocator(string keyword, int? selectedStoreId)
+        {
+            List<StoreItemViewModel> stores;
+
+            if (string.IsNullOrWhiteSpace(keyword))
+            {
+                // Không tìm kiếm gì -> trả về tất cả, sắp theo tên
+                stores = await _context.Stores
+                    .Where(s => s.IsActive)
+                    .OrderBy(s => s.Name)
+                    .Select(s => MapToStoreItem(s))
+                    .ToListAsync();
+            }
+            else
+            {
+                var keywords = VietnameseTextHelper.SplitKeywords(keyword);
+
+                if (keywords.Length == 0)
+                {
+                    stores = new List<StoreItemViewModel>();
+                }
+                else
+                {
+                    // Lấy toàn bộ cửa hàng active về (dữ liệu cửa hàng thường nhỏ, vài chục -> vài trăm dòng
+                    // là tối đa thực tế cho 1 chuỗi bán lẻ, nên load hết về rồi tính điểm ở phía C# là hợp lý,
+                    // tránh phải viết LINQ phức tạp khó dịch sang SQL cho phần tính relevance score)
+                    var allStores = await _context.Stores
+                        .Where(s => s.IsActive)
+                        .ToListAsync();
+
+                    // Chấm điểm mỗi cửa hàng: +1 điểm cho mỗi từ khóa khớp được ở bất kỳ trường nào
+                    // (không yêu cầu khớp HẾT như bản cũ -> khớp càng nhiều càng lên đầu, thay vì "tất cả hoặc không gì cả")
+                    var scored = allStores
+                        .Select(s =>
+                        {
+                            var combinedText = $"{s.NameNormalized} {s.AddressNormalized} {s.DistrictNormalized}";
+                            int score = keywords.Count(kw => combinedText.Contains(kw));
+                            return new { Store = s, Score = score };
+                        })
+                        .Where(x => x.Score > 0) // vẫn loại cửa hàng không khớp từ nào cả
+                        .OrderByDescending(x => x.Score)
+                        .ThenBy(x => x.Store.Name)
+                        .Select(x => MapToStoreItem(x.Store))
+                        .ToList();
+
+                    stores = scored;
+                }
+            }
+
+            var selectedStore = selectedStoreId.HasValue
+                ? stores.FirstOrDefault(s => s.StoreID == selectedStoreId.Value)
+                : stores.FirstOrDefault();
+
+            var model = new StoreLocatorViewModel
+            {
+                Keyword = keyword,
+                Stores = stores,
+                SelectedStore = selectedStore
+            };
+
+            return View(model);
+        }
+
+        private static StoreItemViewModel MapToStoreItem(Store s)
+        {
+            return new StoreItemViewModel
+            {
+                StoreID = s.StoreID,
+                Name = s.Name,
+                Address = s.Address,
+                Phone = s.Phone,
+                OpenHours = s.OpenHours,
+                Latitude = s.Latitude,
+                Longitude = s.Longitude
+            };
+        }
+
+        // ==== Trang Góp ý & Phản hồi ====
+
+        [HttpGet]
+        public IActionResult Feedback()
+        {
+            ViewBag.Topics = new List<string>
+    {
+        "Chất lượng sản phẩm",
+        "Vận chuyển & Giao hàng",
+        "Thanh toán",
+        "Dịch vụ khách hàng",
+        "Góp ý về Website/App",
+        "Khác"
+    };
+
+            return View(new FeedbackFormViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Feedback(FeedbackFormViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Topics = new List<string>
+        {
+            "Chất lượng sản phẩm",
+            "Vận chuyển & Giao hàng",
+            "Thanh toán",
+            "Dịch vụ khách hàng",
+            "Góp ý về Website/App",
+            "Khác"
+        };
+                return View(model);
+            }
+
+            var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity.Name;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+
+            _context.Feedbacks.Add(new Feedback
+            {
+                UserID = user?.UserID,
+                FullName = model.FullName,
+                ContactInfo = model.ContactInfo,
+                Topic = model.Topic,
+                Content = model.Content,
+                Status = "Chờ xử lý",
+                CreatedAt = DateTime.Now
+            });
+
+            await _context.SaveChangesAsync();
+
+            TempData["FeedbackSuccess"] = "Cảm ơn bạn đã gửi góp ý! Chúng tôi sẽ phản hồi sớm nhất có thể.";
+            return RedirectToAction("Feedback");
+        }
+
+
+        // ==== Chat box - lấy lịch sử tin nhắn (gọi qua AJAX khi mở box chat) ====
+
+        [HttpGet]
+        public async Task<IActionResult> GetChatHistory()
+        {
+            var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity.Name;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+            if (user == null) return Unauthorized();
+
+            var messages = await _context.ChatMessages
+                .Where(c => c.UserID == user.UserID)
+                .OrderBy(c => c.CreatedAt)
+                .Select(c => new ChatMessageViewModel
+                {
+                    ChatMessageID = c.ChatMessageID,
+                    Message = c.Message,
+                    SenderType = c.SenderType,
+                    CreatedAt = c.CreatedAt
+                })
+                .ToListAsync();
+
+            return Json(messages);
+        }
+
+
+        // ==== Chat box - gửi tin nhắn mới (gọi qua AJAX khi bấm nút gửi) ====
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendChatMessage([FromForm] string message)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                return BadRequest("Nội dung tin nhắn không được để trống.");
+            }
+
+            var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity.Name;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+            if (user == null) return Unauthorized();
+
+            var chatMessage = new ChatMessage
+            {
+                UserID = user.UserID,
+                Message = message.Trim(),
+                SenderType = "User",
+                IsRead = false,
+                CreatedAt = DateTime.Now
+            };
+
+            _context.ChatMessages.Add(chatMessage);
+            await _context.SaveChangesAsync();
+
+            // TODO: khi có hệ thống Admin thật, bắn SignalR/notification cho admin ở đây
+
+            return Json(new ChatMessageViewModel
+            {
+                ChatMessageID = chatMessage.ChatMessageID,
+                Message = chatMessage.Message,
+                SenderType = chatMessage.SenderType,
+                CreatedAt = chatMessage.CreatedAt
+            });
         }
     }
 }
