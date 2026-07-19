@@ -41,7 +41,7 @@
 </section>
 
 <!-- ================= SĂN DEAL GIÁ HỜI ================= -->
-<section class="container py-4">
+<section id="hot-deals" class="container py-4">
     <div class="deal-section">
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
             <div>
@@ -68,7 +68,7 @@
 </section>
 
 <!-- ================= SẢN PHẨM MỚI VỀ ================= -->
-<section class="container py-4">
+<section id="new-arrivals" class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 style="font-size:24px;">Sản phẩm mới về</h2>
         <a href="#" class="fw-semibold text-dark">Xem tất cả <i class="fa-solid fa-arrow-right ms-1"></i></a>
@@ -84,7 +84,7 @@
 </section>
 
 <!-- ================= PC GAMING BỘ SẴN ================= -->
-<section class="container py-4">
+<section id="prebuilt-pc" class="container py-4">
     <div class="text-center mb-4">
         <h2 style="font-size:24px;">PC Gaming Bộ Sẵn</h2>
         <p class="text-muted">Hiệu năng tối ưu, lắp ráp chuyên nghiệp, bảo hành dài hạn</p>
@@ -121,16 +121,16 @@
 </section>
 
 <!-- ================= TIN TỨC & KINH NGHIỆM ================= -->
-<section class="container py-4">
+<section id="news" class=" container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 style="font-size:24px;">Tin tức &amp; Kinh nghiệm Build PC</h2>
-        <a href="#" class="fw-semibold text-dark">Xem tất cả <i class="fa-solid fa-arrow-right ms-1"></i></a>
+        <a href="#" class="fw-semibold text-dark text-decoration-none">Xem tất cả <i class="fa-solid fa-arrow-right ms-1"></i></a>
     </div>
     <div class="row g-4">
         @foreach (var article in Model.NewsArticles)
         {
             <div class="col-md-4">
-                <a href="@article.DetailUrl" class="news-card">
+                <a href="@article.DetailUrl" class="news-card text-decoration-none">
                     <img src="@(string.IsNullOrEmpty(article.ImageUrl) ? "/images/no-image.png" : article.ImageUrl)" alt="@article.Title">
                     <div class="news-body">
                         <div class="news-category">@article.Category</div>
@@ -160,15 +160,60 @@
         </div>
     </div>
 </section>
-
 <!-- ================= THƯƠNG HIỆU ĐỒNG HÀNH ================= -->
 <section class="container py-4">
     <h5 class="text-center mb-4">Thương hiệu đồng hành</h5>
     <div class="brand-strip">
-        <img src="https://placehold.co/120x40?text=Intel" alt="Intel">
-        <img src="https://placehold.co/120x40?text=NVIDIA" alt="NVIDIA">
-        <img src="https://placehold.co/120x40?text=ASUS" alt="ASUS">
-        <img src="https://placehold.co/120x40?text=MSI" alt="MSI">
-        <img src="https://placehold.co/120x40?text=Logitech" alt="Logitech">
+
+        <!-- ROW 1: Trượt sang TRÁI -->
+        <div class="marquee-row">
+            <div class="brand-track track-left">
+                <div class="brand-content">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Intel_logo_2023.svg/500px-Intel_logo_2023.svg.png" alt="Intel">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/21/Nvidia_logo.svg" alt="NVIDIA">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/ASUS_Logo.svg/500px-ASUS_Logo.svg.png" alt="ASUS">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Micro-Star_International_logo.svg/500px-Micro-Star_International_logo.svg.png" alt="MSI">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/1/17/Logitech_logo.svg" alt="Logitech">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Lenovo_%282015%29.svg/500px-Lenovo_%282015%29.svg.png" alt="Lenovo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_logo_black.svg/330px-Apple_logo_black.svg.png" alt="Apple">
+                </div>
+                <!-- Bản sao y hệt để tạo vòng lặp vô tận -->
+                <div class="brand-content" aria-hidden="true">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Intel_logo_2023.svg/500px-Intel_logo_2023.svg.png" alt="Intel">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/21/Nvidia_logo.svg" alt="NVIDIA">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/ASUS_Logo.svg/500px-ASUS_Logo.svg.png" alt="ASUS">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Micro-Star_International_logo.svg/500px-Micro-Star_International_logo.svg.png" alt="MSI">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/1/17/Logitech_logo.svg" alt="Logitech">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Lenovo_%282015%29.svg/500px-Lenovo_%282015%29.svg.png" alt="Lenovo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_logo_black.svg/330px-Apple_logo_black.svg.png" alt="Apple">
+                </div>
+            </div>
+        </div>
+
+        <!-- ROW 2: Trượt sang PHẢI -->
+        <div class="marquee-row">
+            <div class="brand-track track-right">
+                <div class="brand-content">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Dell_logo_2016.svg/330px-Dell_logo_2016.svg.png" alt="Dell">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Acer_2011.svg/500px-Acer_2011.svg.png" alt="Acer">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Samsung_Black_icon.svg/960px-Samsung_Black_icon.svg.png" alt="Samsung">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/LG_logo_%282014%29.svg/500px-LG_logo_%282014%29.svg.png" alt="LG">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/HP_logo_2025.svg/330px-HP_logo_2025.svg.png" alt="HP">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Gigabyte_Technology_logo_20080107.svg/500px-Gigabyte_Technology_logo_20080107.svg.png" alt="Gigabyte">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Sony_logo.svg/960px-Sony_logo.svg.png" alt="Sony">
+                </div>
+                <!-- Bản sao y hệt để tạo vòng lặp vô tận -->
+                <div class="brand-content" aria-hidden="true">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Dell_logo_2016.svg/330px-Dell_logo_2016.svg.png" alt="Dell">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Acer_2011.svg/500px-Acer_2011.svg.png" alt="Acer">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Samsung_Black_icon.svg/960px-Samsung_Black_icon.svg.png" alt="Samsung">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/LG_logo_%282014%29.svg/500px-LG_logo_%282014%29.svg.png" alt="LG">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/HP_logo_2025.svg/330px-HP_logo_2025.svg.png" alt="HP">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Gigabyte_Technology_logo_20080107.svg/500px-Gigabyte_Technology_logo_20080107.svg.png" alt="Gigabyte">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Sony_logo.svg/960px-Sony_logo.svg.png" alt="Sony">
+                </div>
+            </div>
+        </div>
+
     </div>
 </section>
