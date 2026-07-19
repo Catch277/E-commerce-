@@ -1,0 +1,38 @@
+<section class="container my-4">
+    <div class="row g-3">
+        <!-- Khối chính -->
+        <div class="col-lg-8">
+            <div class="hero-section h-100 text-white">
+                <div>
+                    <span class="hero-badge">HOT SALE</span>
+                    <h1 class="fw-bold">Build Your<br>Dream PC</h1>
+                    <p class="text-white-50 mb-4" style="max-width:480px;">Khám phá sức mạnh vô hạn với các linh kiện PC cao cấp nhất. Nhận ngay ưu đãi độc quyền khi build PC tại @ViewBag.StoreName.</p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="#" class="btn btn-warning">Bắt đầu Build</a>
+                        <a href="#" class="btn btn-outline-light">PC Configurators</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2 khối phụ -->
+        <div class="col-lg-4">
+            <div class="row g-3 h-100">
+                <div class="col-12">
+                    <div class="hero-side"
+                         style="background-image: linear-gradient(135deg, rgba(17,24,39,.7), rgba(31,41,55,.85)), url('https://placehold.co/500x260/1f2937/ffffff?text=@ViewBag.PromoImage1');">
+                        <span class="hero-side-tag">HOT</span>
+                        <div class="hero-side-title">@ViewBag.PromoTitle1</div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="hero-side"
+                         style="background-image: linear-gradient(135deg, rgba(17,24,39,.7), rgba(31,41,55,.85)), url('https://placehold.co/500x260/111827/ffffff?text=@ViewBag.PromoImage2');">
+                        <div class="hero-side-title">@ViewBag.PromoTitle2</div>
+                        <small class="text-white-50">@ViewBag.PromoSubtitle2</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

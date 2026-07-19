@@ -13,6 +13,9 @@ namespace ECommerceWeb.Models
 
         [Column(TypeName = "decimal(18,2)")]
         public decimal Price { get; set; }
+        // Giá gốc trước giảm - null nếu không giảm giá
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal? OldPrice { get; set; }
         public int Quantity { get; set; }
         public string ImageUrl { get; set; }
 
@@ -22,5 +25,9 @@ namespace ECommerceWeb.Models
         public Category Category { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public double Rating { get; set; } = 5.0;
+        public int ReviewCount { get; set; } = 0;
+
+        public bool IsNew { get; set; } = false;
     }
 }

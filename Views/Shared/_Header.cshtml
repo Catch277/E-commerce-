@@ -1,0 +1,44 @@
+<header class="py-3">
+    <div class="container d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <a href="/Index/Home" class="text-decoration-none">
+            <h2 class="fw-bold mb-0" style="color:#ffc107;">PC Store</h2>
+        </a>
+
+        <form class="d-flex flex-grow-1 mx-auto" style="max-width:480px;" role="search">
+            <input type="text" class="form-control" placeholder="Tìm CPU, VGA, RAM, SSD..." aria-label="Tìm kiếm sản phẩm">
+            <button type="submit" class="btn btn-warning"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </form>
+
+        <div class="d-flex align-items-center gap-3">
+            <div class="dropdown">
+                <a href="#" class="text-white dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-expanded="false" style="text-decoration:none;">
+                    <i class="fa-regular fa-user fs-5"></i>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <span>@User.Identity.Name</span>
+                    }
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <li><a class="dropdown-item" href="/Profile/Index">Tài khoản của tôi</a></li>
+                        <li><a class="dropdown-item" href="/Profile/OrderHistory">Đơn hàng của tôi</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/Auth/Logout">Đăng xuất</a></li>
+                    }
+                    else
+                    {
+                        <li><a class="dropdown-item" href="/Auth/Login">Đăng nhập</a></li>
+                        <li><a class="dropdown-item" href="/Auth/Login">Tài khoản của tôi</a></li>
+                        <li><a class="dropdown-item" href="/Auth/Login">Đơn hàng của tôi</a></li>
+                    }
+                </ul>
+            </div>
+
+            <a href="#" class="text-white position-relative" style="text-decoration:none;">
+                <i class="fa-solid fa-cart-shopping fs-5"></i>
+                <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle" style="font-size:.6rem;">@(ViewBag.CartCount ?? 0)</span>
+            </a>
+        </div>
+    </div>
+</header>

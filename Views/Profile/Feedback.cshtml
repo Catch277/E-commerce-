@@ -1,0 +1,142 @@
+﻿@model ECommerceWeb.ViewModels.FeedbackFormViewModel
+@{
+    ViewData["Title"] = "Góp ý & Phản hồi";
+    var topics = ViewBag.Topics as List<string> ?? new List<string>();
+}
+
+<style>
+    body {
+        background-color: #f7f9fd;
+    }
+
+    .feedback-icon-badge {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: #fff3c2;
+        color: #6d5100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .feedback-form label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #212529;
+        margin-bottom: 6px;
+    }
+
+        .feedback-form label .required-mark {
+            color: #d70018;
+            margin-left: 2px;
+        }
+
+    .feedback-form .form-control,
+    .feedback-form .form-select {
+        border: 1px solid #d4c5ab;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 0.95rem;
+    }
+
+        .feedback-form .form-control:focus,
+        .feedback-form .form-select:focus {
+            border-color: #ffc107;
+            box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.15);
+            outline: none;
+        }
+
+    .btn-submit-feedback {
+        background: #ffc107;
+        border: none;
+        color: #212529;
+        font-weight: 700;
+        border-radius: 10px;
+        padding: 12px 24px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .btn-submit-feedback:hover {
+            background: #e0a800;
+            color: #212529;
+        }
+</style>
+
+@if (TempData["FeedbackSuccess"] != null)
+{
+    <div class="alert alert-success acc-card mb-3" style="border-radius:18px;">
+        @TempData["FeedbackSuccess"]
+    </div>
+}
+
+<div class="container mt-4 mb-5">
+
+    @await Html.PartialAsync("_ProfileQuickLinksPartial")
+
+    <div class="row g-3">
+        <div class="col-lg-3">
+            @await Html.PartialAsync("_ProfileSidebarPartial")
+        </div>
+
+        <div class="col-lg-9">
+            <div class="acc-card p-4" style="border-radius:18px; box-shadow:0 8px 25px rgba(0,0,0,.06); background:#fff;">
+
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <span class="feedback-icon-badge"><i class="fa-regular fa-comment-dots"></i></span>
+                    <div>
+                        <h5 class="fw-bold mb-0">Góp ý &amp; Phản hồi</h5>
+                        <div class="text-muted small">Chúng tôi luôn lắng nghe để cải thiện chất lượng dịch vụ.</div>
+                    </div>
+                </div>
+                <hr class="mb-4">
+
+                <form asp-controller="Profile" asp-action="Feedback" method="post" class="feedback-form">
+                    @Html.AntiForgeryToken()
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label>Họ và tên<span class="required-mark">*</span></label>
+                            <input type="text" name="FullName" class="form-control" value="@Model.FullName" placeholder="Nhập tên của bạn..." required>
+                            <span class="text-danger small">@Html.ValidationMessage("FullName")</span>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Email/Số điện thoại<span class="required-mark">*</span></label>
+                            <input type="text" name="ContactInfo" class="form-control" placeholder="Nhập email hoặc SĐT" value="@Model.ContactInfo" required>
+                            <span class="text-danger small">@Html.ValidationMessage("ContactInfo")</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Chủ đề góp ý<span class="required-mark">*</span></label>
+                        <select name="Topic" class="form-select" required>
+                            <option value="">Chọn chủ đề...</option>
+                            @foreach (var topic in topics)
+                            {
+                                <option value="@topic" selected="@(Model.Topic == topic)">@topic</option>
+                            }
+                        </select>
+                        <span class="text-danger small">@Html.ValidationMessage("Topic")</span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label>Nội dung phản hồi<span class="required-mark">*</span></label>
+                        <textarea name="Content" class="form-control" rows="5"
+                                  placeholder="Xin vui lòng mô tả chi tiết góp ý hoặc vấn đề bạn gặp phải...">@Model.Content</textarea>
+                        <span class="text-danger small">@Html.ValidationMessage("Content")</span>
+                    </div>
+
+                    <button type="submit" class="btn-submit-feedback">
+                        <i class="fa-solid fa-paper-plane"></i> Gửi góp ý
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chat box widget - hiện ở mọi trang trong khu Profile nếu đặt trong _ProfileSidebar/_Layout, tạm đặt ở đây trước -->
+@await Html.PartialAsync("_ChatWidget")

@@ -1,0 +1,40 @@
+﻿@model ECommerceWeb.Models.Product
+
+<div class="container py-5">
+
+    <div class="row">
+
+        <div class="col-md-5">
+
+            <img src="@Model.ImageUrl"
+                 class="img-fluid rounded shadow">
+
+        </div>
+
+        <div class="col-md-7">
+
+            <h2>@Model.ProductName</h2>
+
+            <p class="text-muted">
+                @Model.Category.CategoryName
+            </p>
+
+            <h3 class="text-danger">
+                @Model.Price.ToString("N0") VNĐ
+            </h3>
+
+            <p>
+                @Model.Description
+            </p>
+
+            <button class="btn btn-warning btn-lg">
+
+                🛒 Thêm vào giỏ
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>

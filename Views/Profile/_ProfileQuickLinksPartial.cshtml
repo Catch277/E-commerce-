@@ -1,0 +1,54 @@
+﻿@{
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    string ActiveClass(string action) => currentAction == action ? "active-link" : "";
+}
+
+<style>
+    .quick-links {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 4px;
+    }
+
+        .quick-links .btn {
+            border-radius: 20px;
+            border: 1px solid #e0e0e0;
+            color: var(--pf-text-main, #212529);
+            margin-right: 10px;
+            font-weight: 500;
+            padding: 6px 15px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+            .quick-links .btn:hover {
+                border-color: var(--pf-primary-container, #ffc107);
+                color: var(--pf-on-primary-container, #6d5100);
+                background-color: var(--pf-account-active-bg, #fff3c2);
+            }
+
+            .quick-links .btn.active-link {
+                border-color: var(--pf-primary-container, #ffc107);
+                color: var(--pf-on-primary-container, #6d5100);
+                background-color: var(--pf-account-active-bg, #fff3c2);
+            }
+</style>
+
+<div class="profile-card p-3 mb-3 quick-links">
+    <a asp-controller="Profile" asp-action="Membership" class="btn bg-white @ActiveClass("Membership")">
+        <i class="fa-regular fa-gem me-1"></i> Hạng thành viên
+    </a>
+    <a href="#" class="btn bg-white">
+        <i class="fa-solid fa-ticket me-1"></i> Mã giảm giá
+    </a>
+    <a asp-controller="Profile" asp-action="OrderHistory" class="btn bg-white @ActiveClass("OrderHistory")">
+        <i class="fa-solid fa-clock-rotate-left me-1"></i> Lịch sử mua hàng
+    </a>
+    <a href="#" class="btn bg-white">
+        <i class="fa-solid fa-location-dot me-1"></i> Sổ địa chỉ
+    </a>
+    <a href="#" class="btn bg-white">
+        <i class="fa-solid fa-location-dot me-1"></i> Liên kết tài khoản
+    </a>
+</div>
