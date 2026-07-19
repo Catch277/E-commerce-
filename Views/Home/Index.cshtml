@@ -1,236 +1,174 @@
-﻿@model IEnumerable<ECommerceWeb.Models.Product>
+@model ECommerceWeb.ViewModels.HomeIndexViewModel
+@{
+    ViewData["Title"] = "Trang chủ";
+}
 
-<partial name="_Hero" />
+@await Html.PartialAsync("_Hero")
 
-<!-- ================= DANH MỤC ================= -->
-
-<section class="container my-5">
-
-    <div class="d-flex justify-content-between align-items-end mb-4">
-
-        <div>
-
-            <span class="text-warning fw-bold text-uppercase">
-                Khám phá
-            </span>
-
-            <h2 class="fw-bold mt-2">
-                Danh mục nổi bật
-            </h2>
-
-            <p class="text-muted mb-0">
-                Những danh mục được khách hàng quan tâm nhiều nhất.
-            </p>
-
+<!-- ================= DANH MỤC NỔI BẬT ================= -->
+<section class="container py-4 mt-2 mb-3">
+    <h2 class="mb-3" style="font-size:24px;">Danh mục nổi bật</h2>
+    <div class="row g-3 row-cols-2 row-cols-md-4">
+        <div class="col">
+            <a href="#" class="category-card text-decoration-none text-dark d-block p-4 text-center h-100">
+                <i class="bi bi-cpu category-icon"></i>
+                <div class="fw-bold mt-2">CPU</div>
+                <div class="text-muted small">Intel • AMD</div>
+            </a>
         </div>
-
-        <a asp-controller="Product"
-           asp-action="Index"
-           class="btn btn-outline-warning">
-
-            <i class="bi bi-grid"></i>
-
-            Xem tất cả
-
-        </a>
-
+        <div class="col">
+            <a href="#" class="category-card text-decoration-none text-dark d-block p-4 text-center h-100">
+                <i class="bi bi-gpu-card category-icon"></i>
+                <div class="fw-bold mt-2">VGA</div>
+                <div class="text-muted small">NVIDIA • AMD</div>
+            </a>
+        </div>
+        <div class="col">
+            <a href="#" class="category-card text-decoration-none text-dark d-block p-4 text-center h-100">
+                <i class="bi bi-memory category-icon"></i>
+                <div class="fw-bold mt-2">RAM</div>
+                <div class="text-muted small">DDR4 • DDR5</div>
+            </a>
+        </div>
+        <div class="col">
+            <a href="#" class="category-card text-decoration-none text-dark d-block p-4 text-center h-100">
+                <i class="bi bi-device-ssd category-icon"></i>
+                <div class="fw-bold mt-2">SSD</div>
+                <div class="text-muted small">NVMe • SATA</div>
+            </a>
+        </div>
     </div>
-
-    <div class="row g-4">
-
-        <div class="col-lg-3 col-md-6 col-6">
-
-            <a asp-controller="Product"
-               asp-action="Category"
-               asp-route-id="1"
-               class="text-decoration-none">
-
-                <div class="card category-card h-100">
-
-                    <div class="card-body text-center">
-
-                        <i class="bi bi-cpu category-icon"></i>
-
-                        <h5 class="fw-bold mt-3 mb-2">
-
-                            CPU
-
-                        </h5>
-
-                        <small class="text-muted">
-
-                            Intel • AMD
-
-                        </small>
-
-                    </div>
-
-                </div>
-
-            </a>
-
-        </div>
-
-        <div class="col-lg-3 col-md-6 col-6">
-
-            <a asp-controller="Product"
-               asp-action="Category"
-               asp-route-id="2"
-               class="text-decoration-none">
-
-                <div class="card category-card h-100">
-
-                    <div class="card-body text-center">
-
-                        <i class="bi bi-gpu-card category-icon"></i>
-
-                        <h5 class="fw-bold mt-3 mb-2">
-
-                            VGA
-
-                        </h5>
-
-                        <small class="text-muted">
-
-                            NVIDIA • AMD
-
-                        </small>
-
-                    </div>
-
-                </div>
-
-            </a>
-
-        </div>
-
-        <div class="col-lg-3 col-md-6 col-6">
-
-            <a asp-controller="Product"
-               asp-action="Category"
-               asp-route-id="3"
-               class="text-decoration-none">
-
-                <div class="card category-card h-100">
-
-                    <div class="card-body text-center">
-
-                        <i class="bi bi-memory category-icon"></i>
-
-                        <h5 class="fw-bold mt-3 mb-2">
-
-                            RAM
-
-                        </h5>
-
-                        <small class="text-muted">
-
-                            DDR4 • DDR5
-
-                        </small>
-
-                    </div>
-
-                </div>
-
-            </a>
-
-        </div>
-
-        <div class="col-lg-3 col-md-6 col-6">
-
-            <a asp-controller="Product"
-               asp-action="Category"
-               asp-route-id="4"
-               class="text-decoration-none">
-
-                <div class="card category-card h-100">
-
-                    <div class="card-body text-center">
-
-                        <i class="bi bi-device-ssd category-icon"></i>
-
-                        <h5 class="fw-bold mt-3 mb-2">
-
-                            SSD
-
-                        </h5>
-
-                        <small class="text-muted">
-
-                            NVMe • SATA
-
-                        </small>
-
-                    </div>
-
-                </div>
-
-            </a>
-
-        </div>
-
-    </div>
-
 </section>
 
-<!-- ================= SẢN PHẨM ================= -->
-
-<section class="container mb-5" id="featured-products">
-
-    <div class="d-flex justify-content-between align-items-end mb-4">
-
-        <div>
-            <h2 class="fw-bold mt-2">
-
-                Sản phẩm nổi bật
-
-            </h2>
-
-            <p class="text-muted mb-0">
-
-                Các sản phẩm bán chạy và được đánh giá cao.
-
-            </p>
-
+<!-- ================= SĂN DEAL GIÁ HỜI ================= -->
+<section class="container py-4">
+    <div class="deal-section">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <div>
+                <h2 class="deal-title mb-1" style="font-size:24px;"><i class="fa-solid fa-fire me-2"></i>Săn Deal Giá Hời</h2>
+                <div class="deal-subtitle">Ưu đãi cực sốc, số lượng có hạn</div>
+            </div>
+            <div class="countdown-box">
+                <span>Kết thúc trong:</span>
+                <span class="countdown-digit">@ViewBag.CountdownHours</span>:
+                <span class="countdown-digit">@ViewBag.CountdownMinutes</span>:
+                <span class="countdown-digit">@ViewBag.CountdownSeconds</span>
+            </div>
         </div>
 
-        <a asp-controller="Product"
-           asp-action="Index"
-           class="btn btn-outline-warning">
-
-            <i class="bi bi-arrow-right-circle"></i>
-
-            Xem tất cả
-
-        </a>
-
-    </div>
-
-    @if (Model != null && Model.Any())
-    {
-
-        <div class="row g-4">
-
-            @foreach (var item in Model)
+        <div class="row g-3">
+            @foreach (var product in Model.DealProducts)
             {
-                <partial name="_ProductCard" model="item" />
+                <div class="col-6 col-md-3">
+                    @await Html.PartialAsync("_ProductCard", product)
+                </div>
             }
-
         </div>
+    </div>
+</section>
 
-    }
-    else
-    {
+<!-- ================= SẢN PHẨM MỚI VỀ ================= -->
+<section class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 style="font-size:24px;">Sản phẩm mới về</h2>
+        <a href="#" class="fw-semibold text-dark">Xem tất cả <i class="fa-solid fa-arrow-right ms-1"></i></a>
+    </div>
+    <div class="row g-4">
+        @foreach (var product in Model.NewArrivals)
+        {
+            <div class="col-6 col-md-3">
+                @await Html.PartialAsync("_ProductCard", product)
+            </div>
+        }
+    </div>
+</section>
 
-        <div class="alert alert-info text-center">
+<!-- ================= PC GAMING BỘ SẴN ================= -->
+<section class="container py-4">
+    <div class="text-center mb-4">
+        <h2 style="font-size:24px;">PC Gaming Bộ Sẵn</h2>
+        <p class="text-muted">Hiệu năng tối ưu, lắp ráp chuyên nghiệp, bảo hành dài hạn</p>
+    </div>
+    <div class="row g-3">
+        @foreach (var pc in Model.PrebuiltPcs)
+        {
+            <div class="col-md-4">
+                <div class="prebuilt-card">
+                    <div class="prebuilt-img-wrap">
+                        @if (pc.IsBestSeller)
+                        {
+                            <span class="prebuilt-bestseller-tag">BÁN CHẠY</span>
+                        }
+                        <img src="@(string.IsNullOrEmpty(pc.ImageUrl) ? "/images/no-image.png" : pc.ImageUrl)" alt="@pc.Name">
+                    </div>
+                    <div class="prebuilt-body">
+                        <div class="prebuilt-name">@pc.Name</div>
+                        <ul class="prebuilt-specs">
+                            @foreach (var spec in pc.Specs)
+                            {
+                                <li><i class="fa-solid fa-circle-check"></i> @spec</li>
+                            }
+                        </ul>
+                        <div class="prebuilt-footer">
+                            <span class="prebuilt-price">@pc.Price.ToString("N0")đ</span>
+                            <a href="@pc.DetailUrl" class="btn btn-warning">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
 
-            <i class="bi bi-info-circle-fill"></i>
+<!-- ================= TIN TỨC & KINH NGHIỆM ================= -->
+<section class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 style="font-size:24px;">Tin tức &amp; Kinh nghiệm Build PC</h2>
+        <a href="#" class="fw-semibold text-dark">Xem tất cả <i class="fa-solid fa-arrow-right ms-1"></i></a>
+    </div>
+    <div class="row g-4">
+        @foreach (var article in Model.NewsArticles)
+        {
+            <div class="col-md-4">
+                <a href="@article.DetailUrl" class="news-card">
+                    <img src="@(string.IsNullOrEmpty(article.ImageUrl) ? "/images/no-image.png" : article.ImageUrl)" alt="@article.Title">
+                    <div class="news-body">
+                        <div class="news-category">@article.Category</div>
+                        <div class="news-title">@article.Title</div>
+                        <div class="news-excerpt">@article.Excerpt</div>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+</section>
 
-            Hiện chưa có sản phẩm để hiển thị.
-
+<!-- ================= ĐĂNG KÝ NHẬN TIN ================= -->
+<section class="container py-4">
+    <div class="newsletter-section">
+        <div class="row align-items-center g-3">
+            <div class="col-lg-6">
+                <h3 class="mb-1">Đăng ký nhận tin</h3>
+                <p class="text-white-50 mb-0">Nhận ngay các thông tin khuyến mãi mới nhất, mã giảm giá độc quyền và tin tức công nghệ hàng tuần từ @ViewBag.StoreName.</p>
+            </div>
+            <div class="col-lg-6">
+                <form class="d-flex">
+                    <input type="email" placeholder="Nhập email của bạn..." class="flex-grow-1" required>
+                    <button type="submit" class="btn btn-warning">Đăng ký</button>
+                </form>
+            </div>
         </div>
+    </div>
+</section>
 
-    }
-
+<!-- ================= THƯƠNG HIỆU ĐỒNG HÀNH ================= -->
+<section class="container py-4">
+    <h5 class="text-center mb-4">Thương hiệu đồng hành</h5>
+    <div class="brand-strip">
+        <img src="https://placehold.co/120x40?text=Intel" alt="Intel">
+        <img src="https://placehold.co/120x40?text=NVIDIA" alt="NVIDIA">
+        <img src="https://placehold.co/120x40?text=ASUS" alt="ASUS">
+        <img src="https://placehold.co/120x40?text=MSI" alt="MSI">
+        <img src="https://placehold.co/120x40?text=Logitech" alt="Logitech">
+    </div>
 </section>

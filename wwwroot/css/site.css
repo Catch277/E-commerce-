@@ -233,36 +233,155 @@ header {
    FOOTER
 ========================================= */
 
-footer {
-    background: var(--dark2);
+.site-footer {
+    margin-top: 5rem;
+    background: #2f3336;
+    color: #f8f9fa;
 }
 
-    footer p {
-        color: #adb5bd;
-    }
-
-.footer-link li {
-    margin-bottom: 10px;
+.site-footer__content {
+    padding-top: 3.15rem;
+    padding-bottom: 2.7rem;
 }
 
-.footer-link a {
-    color: #adb5bd;
+.site-footer__brand {
+    display: inline-block;
+    margin-bottom: 1.15rem;
+    color: var(--primary);
+    font-size: 1.45rem;
+    font-weight: 700;
+    letter-spacing: -.04em;
     text-decoration: none;
-    transition: .25s;
 }
 
-    .footer-link a:hover {
-        color: var(--primary);
-        padding-left: 5px;
+.site-footer__description {
+    max-width: 270px;
+    margin-bottom: 1.45rem;
+    color: #d2d4d5;
+    font-size: .98rem;
+    line-height: 1.65;
+}
+
+.site-footer__title {
+    margin: 0 0 1.25rem;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.site-footer__links,
+.site-footer__contact {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+    .site-footer__links li {
+        margin-bottom: .75rem;
     }
 
-footer i {
-    font-size: 22px;
-    transition: .25s;
+    .site-footer__links a,
+    .site-footer__contact a,
+    .site-footer__contact span {
+        color: #c8cbcd;
+        font-size: .98rem;
+        text-decoration: none;
+    }
+
+        .site-footer__links a:hover,
+        .site-footer__contact a:hover {
+            color: var(--primary);
+        }
+
+.site-footer__social {
+    display: flex;
+    gap: 1rem;
 }
 
-    footer i:hover {
-        color: var(--primary);
+.site-footer__contact li img {
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+    .site-footer__social a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+    }
+
+    .site-footer__social img {
+        width: 20px;
+        height: 20px;
+        object-fit: contain;
+    }
+
+.site-footer__contact li {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: .8rem;
+}
+
+.site-footer__contact img {
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+.site-footer__bottom {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 3.15rem;
+    padding-top: 1.6rem;
+    border-top: 1px solid #64676a;
+    color: #d2d4d5;
+    font-size: .88rem;
+}
+
+/*Nút cuộn lên đầu trang*/
+.home-scroll-top {
+    position: fixed;
+    right: 2rem;
+    bottom: 2rem;
+    z-index: 1020;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #ffc107; /* vàng */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(12px);
+    transition: opacity .25s ease, transform .25s ease, visibility .25s;
+}
+
+    .home-scroll-top.is-visible {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transform: translateY(0);
+    }
+
+    .home-scroll-top:hover {
+        transform: translateY(-3px);
+    }
+
+    .home-scroll-top svg {
+        display: block;
+        width: 24px;
+        height: 24px;
+        stroke: #212529; /* màu mũi tên */
     }
 
 /* =========================================
@@ -333,7 +452,317 @@ a {
         padding: .6rem 0;
     }
 
-    footer {
+    .site-footer {
         text-align: center;
     }
+
+    .site-footer__description {
+        margin-right: auto;
+        margin-left: auto;
+    }
+
+    .site-footer__social {
+        justify-content: center;
+    }
+
+    .site-footer__contact li {
+        justify-content: center;
+    }
+
+    .site-footer__bottom {
+        flex-direction: column;
+        align-items: center;
+        margin-top: 2rem;
+    }
+
+    .home-scroll-top {
+        right: 1rem;
+        bottom: 1rem;
+    }
 }
+
+/* =========================================
+   BỔ SUNG: HERO PHỤ (Bento side blocks)
+========================================= */
+
+.hero-side {
+    border-radius: var(--radius);
+    min-height: 155px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    background-size: cover;
+    background-position: center;
+    color: #fff;
+    transition: .3s;
+}
+
+    .hero-side:hover {
+        transform: translateY(-4px);
+    }
+
+.hero-badge {
+    display: inline-block;
+    background: #d70018;
+    color: #fff;
+    font-weight: 700;
+    padding: 4px 14px;
+    border-radius: 6px;
+    font-size: .85rem;
+    margin-bottom: 12px;
+    width: fit-content;
+}
+
+.hero-side-tag {
+    background: #d70018;
+    color: #fff;
+    font-weight: 700;
+    font-size: .72rem;
+    padding: 2px 10px;
+    border-radius: 4px;
+    width: fit-content;
+    margin-bottom: 6px;
+}
+
+.hero-side-title {
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+/* =========================================
+   BỔ SUNG: BADGE SẢN PHẨM
+========================================= */
+
+.badge-new,
+.badge-discount {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    background: #d70018;
+    color: #fff;
+    font-weight: 700;
+    font-size: .7rem;
+    padding: 3px 10px;
+    border-radius: 6px;
+    z-index: 2;
+}
+
+.product-image {
+    position: relative;
+}
+
+/* =========================================
+   BỔ SUNG: DEAL SECTION
+========================================= */
+
+.deal-section {
+    background: var(--dark);
+    border-radius: 24px;
+    padding: 32px;
+}
+
+.deal-title {
+    color: var(--primary);
+}
+
+.deal-subtitle {
+    color: #9ca3af;
+    font-size: .9rem;
+}
+
+.countdown-box {
+    background: var(--dark2);
+    color: #fff;
+    border-radius: 10px;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.countdown-digit {
+    background: #d70018;
+    color: #fff;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 4px 8px;
+    min-width: 32px;
+    text-align: center;
+}
+
+/* =========================================
+   BỔ SUNG: PREBUILT PC CARD
+========================================= */
+
+.prebuilt-card {
+    border: none;
+    border-radius: var(--radius);
+    background: white;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: .3s;
+    height: 100%;
+}
+
+    .prebuilt-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-hover);
+    }
+
+.prebuilt-img-wrap {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+    .prebuilt-img-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+.prebuilt-bestseller-tag {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: #d70018;
+    color: #fff;
+    font-weight: 700;
+    font-size: .7rem;
+    padding: 3px 10px;
+    border-radius: 6px;
+}
+
+.prebuilt-body {
+    padding: 20px;
+}
+
+.prebuilt-name {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+}
+
+ul.prebuilt-specs {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px;
+}
+
+    ul.prebuilt-specs li {
+        font-size: .85rem;
+        color: #4b5563;
+        padding: 3px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        ul.prebuilt-specs li i {
+            color: var(--primary);
+        }
+
+.prebuilt-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.prebuilt-price {
+    color: #d70018;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+/* =========================================
+   BỔ SUNG: NEWS CARD
+========================================= */
+
+.news-card {
+    border-radius: var(--radius);
+    background: white;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: .3s;
+    height: 100%;
+    display: block;
+}
+
+    .news-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .news-card img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+    }
+
+.news-body {
+    padding: 18px;
+}
+
+.news-category {
+    font-size: .72rem;
+    font-weight: 700;
+    color: #d70018;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.news-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text);
+}
+
+.news-excerpt {
+    font-size: .85rem;
+    color: #6b7280;
+}
+
+/* =========================================
+   BỔ SUNG: NEWSLETTER
+========================================= */
+
+.newsletter-section {
+    background: var(--dark2);
+    border-radius: 24px;
+    padding: 40px;
+    color: #fff;
+}
+
+    .newsletter-section input {
+        border: none;
+        border-radius: 10px 0 0 10px;
+        padding: 12px 16px;
+    }
+
+        .newsletter-section input:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+    .newsletter-section button {
+        border-radius: 0 10px 10px 0;
+    }
+
+/* =========================================
+   BỔ SUNG: BRAND STRIP
+========================================= */
+
+.brand-strip {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    opacity: .6;
+}
+
+    .brand-strip img {
+        max-height: 32px;
+        filter: grayscale(100%);
+    }

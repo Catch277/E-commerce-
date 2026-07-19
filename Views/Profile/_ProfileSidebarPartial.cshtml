@@ -101,7 +101,7 @@
                 <img src="~/images/order-history.svg" alt="Lịch sử mua hàng" class="sidebar-icon"/>
                 Lịch sử mua hàng
             </a>
-            <a href="#" class="list-group-item list-group-item-action">
+            <a asp-controller="Profile" asp-action="WarrantyLookup" class="list-group-item list-group-item-action @ActiveClass("WarrantyLookup")">
                 <img src="/images/warranty-search.svg" alt="Tra cứu bảo hành" class="sidebar-icon"/>
                 Tra cứu bảo hành
             </a>
@@ -113,11 +113,11 @@
                 <img src="~/images/account-info.svg" alt="Thông tin tài khoản" class="sidebar-icon"/>
                 Thông tin tài khoản
             </a>
-            <a href="#" class="list-group-item list-group-item-action">
+            <a asp-controller="Profile" asp-action="StoreLocator" class="list-group-item list-group-item-action @ActiveClass("StoreLocator")">
                 <img src="~/images/shop-search.svg" alt="Tìm kiếm cửa hàng" class="sidebar-icon"/>
                 Tìm kiếm cửa hàng
             </a>
-            <a href="#" class="list-group-item list-group-item-action">
+            <a asp-controller="Profile" asp-action="Feedback" class="list-group-item list-group-item-action @ActiveClass("Feedback")">
                 <img src="~/images/feedback-response.svg" alt="Góp ý - Phản hồi" class="sidebar-icon"/>
                 Góp ý - Phản hồi
             </a>

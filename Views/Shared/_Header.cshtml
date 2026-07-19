@@ -1,85 +1,44 @@
-﻿<header class="bg-dark shadow-sm">
-    <div class="container">
-        <div class="row align-items-center py-3">
+<header class="py-3">
+    <div class="container d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <a href="/Index/Home" class="text-decoration-none">
+            <h2 class="fw-bold mb-0" style="color:#ffc107;">PC Store</h2>
+        </a>
 
-            <!-- Logo -->
-            <div class="col-lg-2 col-md-3 mb-3 mb-lg-0">
-                <a asp-controller="Home" asp-action="Index" class="text-decoration-none">
-                    <h2 class="fw-bold text-warning mb-0">PC Store</h2>
-                </a>
-            </div>
+        <form class="d-flex flex-grow-1 mx-auto" style="max-width:480px;" role="search">
+            <input type="text" class="form-control" placeholder="Tìm CPU, VGA, RAM, SSD..." aria-label="Tìm kiếm sản phẩm">
+            <button type="submit" class="btn btn-warning"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </form>
 
-            <!-- Search -->
-            <div class="col-lg-7 col-md-5 mb-3 mb-lg-0">
-                <form asp-controller="Product" asp-action="Search" method="get">
-                    <div class="input-group">
-                        <input type="text" name="keyword" value="@ViewBag.Keyword" class="form-control" placeholder="Tìm CPU, VGA, RAM, SSD..." />
-                        <button class="btn btn-warning" type="submit">
-                            <i class="bi bi-search"></i>
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- User & Cart -->
-            <div class="col-lg-3 col-md-4 text-lg-end text-center">
-                <div class="d-flex justify-content-end gap-2">
-
-                    @if (User.Identity != null && User.Identity.IsAuthenticated)
+        <div class="d-flex align-items-center gap-3">
+            <div class="dropdown">
+                <a href="#" class="text-white dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-expanded="false" style="text-decoration:none;">
+                    <i class="fa-regular fa-user fs-5"></i>
+                    @if (User.Identity.IsAuthenticated)
                     {
-                        <!-- Dropdown User -->
-                        <div class="dropdown">
-                            <a href="#" class="btn btn-outline-light dropdown-toggle" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-person-check"></i>
-                                Chào, @User.Identity.Name!
-                            </a>
-
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <!-- Nút điều hướng sang trang Thông tin tài khoản -->
-                                <li>
-                                    <a class="dropdown-item" asp-controller="Profile" asp-action="Index">
-                                        <i class="bi bi-person-vcard me-2"></i> Thông tin tài khoản
-                                    </a>
-                                </li>
-
-                                <li><hr class="dropdown-divider"></li>
-
-                                @if (User.HasClaim(System.Security.Claims.ClaimTypes.Role, "Admin"))
-                                {
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Admin" asp-action="Index">
-                                            <i class="bi bi-speedometer2 me-2"></i> Trang Quản trị
-                                        </a>
-                                    </li>
-                                    <li><hr class="dropdown-divider"></li>
-                                }
-
-                                <li>
-                                    <a class="dropdown-item text-danger" asp-controller="Auth" asp-action="Logout">
-                                        <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+                        <span>@User.Identity.Name</span>
+                    }
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <li><a class="dropdown-item" href="/Profile/Index">Tài khoản của tôi</a></li>
+                        <li><a class="dropdown-item" href="/Profile/OrderHistory">Đơn hàng của tôi</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/Auth/Logout">Đăng xuất</a></li>
                     }
                     else
                     {
-                        <a asp-controller="Auth" asp-action="Login" class="btn btn-outline-light">
-                            <i class="bi bi-person"></i> Đăng nhập
-                        </a>
+                        <li><a class="dropdown-item" href="/Auth/Login">Đăng nhập</a></li>
+                        <li><a class="dropdown-item" href="/Auth/Login">Tài khoản của tôi</a></li>
+                        <li><a class="dropdown-item" href="/Auth/Login">Đơn hàng của tôi</a></li>
                     }
-
-                    <!-- Giỏ hàng -->
-                    <a href="#" class="btn btn-warning position-relative">
-                        <i class="bi bi-cart3"></i> Giỏ hàng
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                            0
-                        </span>
-                    </a>
-
-                </div>
+                </ul>
             </div>
 
+            <a href="#" class="text-white position-relative" style="text-decoration:none;">
+                <i class="fa-solid fa-cart-shopping fs-5"></i>
+                <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle" style="font-size:.6rem;">@(ViewBag.CartCount ?? 0)</span>
+            </a>
         </div>
     </div>
 </header>

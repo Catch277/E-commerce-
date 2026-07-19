@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ECommerceWeb.Models;
+using ECommerceWeb.Helpers;
 
 namespace ECommerceWeb.Data
 {
@@ -22,6 +23,10 @@ namespace ECommerceWeb.Data
         public DbSet<PointsHistory> PointsHistories { get; set; }
         public DbSet<Voucher> Vouchers { get; set; }
         public DbSet<UserVoucher> UserVouchers { get; set; }
+        public DbSet<Store> Stores { get; set; }
+        public DbSet<Feedback> Feedbacks { get; set; }
+        public DbSet<ChatMessage> ChatMessages { get; set; }
+        public DbSet<WarrantyTicket> WarrantyTickets { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -70,6 +75,18 @@ namespace ECommerceWeb.Data
             modelBuilder.Entity<UserVoucher>()
                 .HasIndex(uv => new { uv.UserID, uv.VoucherID })
                 .IsUnique();
+            //Feedback
+            modelBuilder.Entity<Feedback>()
+                .HasOne(f => f.User)
+                .WithMany()
+                .HasForeignKey(f => f.UserID)
+                .OnDelete(DeleteBehavior.SetNull);
+            // ChatMessage
+            modelBuilder.Entity<ChatMessage>()
+                .HasOne(c => c.User)
+                .WithMany()
+                .HasForeignKey(c => c.UserID)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // 2. Mồi dữ liệu (Seed Data) cho Hạng thành viên
             modelBuilder.Entity<MembershipTier>().HasData(
@@ -116,6 +133,121 @@ namespace ECommerceWeb.Data
                     IsActive = true
                 }
             );
+
+            // ==== Seed dữ liệu mẫu trong OnModelCreating (Khu vực TP. Hồ Chí Minh và Hà Nội) ====
+
+            modelBuilder.Entity<Store>().HasData(
+            new Store
+            {
+                StoreID = 1,
+                Name = "PC Master - Cầu Giấy",
+                Address = "123 Xuân Thủy, Dịch Vọng Hậu, Cầu Giấy, Hà Nội",
+                District = "Cầu Giấy",
+                Phone = "024 1234 5678",
+                OpenHours = "08:00 - 21:00",
+                Latitude = 21.0368,
+                Longitude = 105.7827,
+                NameNormalized = VietnameseTextHelper.RemoveDiacritics("PC Master - Cầu Giấy"),
+                AddressNormalized = VietnameseTextHelper.RemoveDiacritics("123 Xuân Thủy, Dịch Vọng Hậu, Cầu Giấy, Hà Nội"),
+                DistrictNormalized = VietnameseTextHelper.RemoveDiacritics("Cầu Giấy")
+            },
+            new Store
+            {
+                StoreID = 2,
+                Name = "PC Master - Đống Đa",
+                Address = "45 Thái Hà, Trung Liệt, Đống Đa, Hà Nội",
+                District = "Đống Đa",
+                Phone = "024 8765 4321",
+                OpenHours = "08:30 - 21:30",
+                Latitude = 21.0136,
+                Longitude = 105.8213,
+                NameNormalized = VietnameseTextHelper.RemoveDiacritics("PC Master - Đống Đa"),
+                AddressNormalized = VietnameseTextHelper.RemoveDiacritics("45 Thái Hà, Trung Liệt, Đống Đa, Hà Nội"),
+                DistrictNormalized = VietnameseTextHelper.RemoveDiacritics("Đống Đa")
+            },
+            new Store
+            {
+                StoreID = 3,
+                Name = "PC Master - Hai Bà Trưng",
+                Address = "78 Lê Thanh Nghị, Bách Khoa, Hai Bà Trưng, Hà Nội",
+                District = "Hai Bà Trưng",
+                Phone = "024 2468 1357",
+                OpenHours = "08:00 - 21:00",
+                Latitude = 21.0021,
+                Longitude = 105.8437,
+                NameNormalized = VietnameseTextHelper.RemoveDiacritics("PC Master - Hai Bà Trưng"),
+                AddressNormalized = VietnameseTextHelper.RemoveDiacritics("78 Lê Thanh Nghị, Bách Khoa, Hai Bà Trưng, Hà Nội"),
+                DistrictNormalized = VietnameseTextHelper.RemoveDiacritics("Hai Bà Trưng")
+            },
+            new Store
+            {
+                StoreID = 4,
+                Name = "PC Master - Hà Đông",
+                Address = "234 Quang Trung, Hà Đông, Hà Nội",
+                District = "Hà Đông",
+                Phone = "024 1357 2468",
+                OpenHours = "08:30 - 21:30",
+                Latitude = 20.9717,
+                Longitude = 105.7770,
+                NameNormalized = VietnameseTextHelper.RemoveDiacritics("PC Master - Hà Đông"),
+                AddressNormalized = VietnameseTextHelper.RemoveDiacritics("234 Quang Trung, Hà Đông, Hà Nội"),
+                DistrictNormalized = VietnameseTextHelper.RemoveDiacritics("Hà Đông")
+            },
+            new Store
+            {
+                StoreID = 5,
+                Name = "PC Master - Bình Thạnh",
+                Address = "56 Điện Biên Phủ, Phường 15, Bình Thạnh, TP. Hồ Chí Minh",
+                District = "Bình Thạnh",
+                Phone = "028 3512 6789",
+                OpenHours = "08:00 - 21:30",
+                Latitude = 10.8031,
+                Longitude = 106.7150,
+                NameNormalized = VietnameseTextHelper.RemoveDiacritics("PC Master - Bình Thạnh"),
+                AddressNormalized = VietnameseTextHelper.RemoveDiacritics("56 Điện Biên Phủ, Phường 15, Bình Thạnh, TP. Hồ Chí Minh"),
+                DistrictNormalized = VietnameseTextHelper.RemoveDiacritics("Bình Thạnh")
+            },
+            new Store
+            {
+                StoreID = 6,
+                Name = "PC Master - Quận 1",
+                Address = "88 Nguyễn Huệ, Bến Nghé, Quận 1, TP. Hồ Chí Minh",
+                District = "Quận 1",
+                Phone = "028 3822 4567",
+                OpenHours = "08:00 - 22:00",
+                Latitude = 10.7756,
+                Longitude = 106.7025,
+                NameNormalized = VietnameseTextHelper.RemoveDiacritics("PC Master - Quận 1"),
+                AddressNormalized = VietnameseTextHelper.RemoveDiacritics("88 Nguyễn Huệ, Bến Nghé, Quận 1, TP. Hồ Chí Minh"),
+                DistrictNormalized = VietnameseTextHelper.RemoveDiacritics("Quận 1")
+            }
+            );
+        }
+
+        public override int SaveChanges()
+        {
+            NormalizeStoreFields();
+            return base.SaveChanges();
+        }
+
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            NormalizeStoreFields();
+            return await base.SaveChangesAsync(cancellationToken);
+        }
+
+        private void NormalizeStoreFields()
+        {
+            var storeEntries = ChangeTracker.Entries<Store>()
+                .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified);
+
+            foreach (var entry in storeEntries)
+            {
+                var store = entry.Entity;
+                store.NameNormalized = VietnameseTextHelper.RemoveDiacritics(store.Name);
+                store.AddressNormalized = VietnameseTextHelper.RemoveDiacritics(store.Address);
+                store.DistrictNormalized = VietnameseTextHelper.RemoveDiacritics(store.District);
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ using ECommerceWeb.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ECommerceWeb.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260716225202_AddStoreLocator")]
+    partial class AddStoreLocator
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -95,40 +97,6 @@ namespace ECommerceWeb.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("ECommerceWeb.Models.ChatMessage", b =>
-                {
-                    b.Property<int>("ChatMessageID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ChatMessageID"), 1L, 1);
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("SenderType")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<int>("UserID")
-                        .HasColumnType("int");
-
-                    b.HasKey("ChatMessageID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("ChatMessages");
-                });
-
             modelBuilder.Entity("ECommerceWeb.Models.EmailLog", b =>
                 {
                     b.Property<int>("EmailID")
@@ -168,52 +136,6 @@ namespace ECommerceWeb.Migrations
                     b.HasIndex("UserID");
 
                     b.ToTable("EmailLogs");
-                });
-
-            modelBuilder.Entity("ECommerceWeb.Models.Feedback", b =>
-                {
-                    b.Property<int>("FeedbackID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FeedbackID"), 1L, 1);
-
-                    b.Property<string>("ContactInfo")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<string>("Topic")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int?>("UserID")
-                        .HasColumnType("int");
-
-                    b.HasKey("FeedbackID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("Feedbacks");
                 });
 
             modelBuilder.Entity("ECommerceWeb.Models.MembershipTier", b =>
@@ -489,18 +411,7 @@ namespace ECommerceWeb.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<string>("AddressNormalized")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
                     b.Property<string>("District")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("DistrictNormalized")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -518,18 +429,11 @@ namespace ECommerceWeb.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
-                    b.Property<string>("NameNormalized")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
                     b.Property<string>("OpenHours")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Phone")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
@@ -541,92 +445,50 @@ namespace ECommerceWeb.Migrations
                         new
                         {
                             StoreID = 1,
-                            Address = "123 Xuân Thủy, Dịch Vọng Hậu, Cầu Giấy, Hà Nội",
-                            AddressNormalized = "123 xuan thuy, dich vong hau, cau giay, ha noi",
-                            District = "Cầu Giấy",
-                            DistrictNormalized = "cau giay",
+                            Address = "250 Lê Hồng Phong, Phường 4, Quận 10, TP. Hồ Chí Minh",
+                            District = "Quận 10",
                             IsActive = true,
-                            Latitude = 21.036799999999999,
-                            Longitude = 105.78270000000001,
-                            Name = "PC Master - Cầu Giấy",
-                            NameNormalized = "pc master - cau giay",
+                            Latitude = 10.762499999999999,
+                            Longitude = 106.66800000000001,
+                            Name = "PC Master - Quận 10",
                             OpenHours = "08:00 - 21:00",
-                            Phone = "024 1234 5678"
+                            Phone = "028 3833 1234"
                         },
                         new
                         {
                             StoreID = 2,
-                            Address = "45 Thái Hà, Trung Liệt, Đống Đa, Hà Nội",
-                            AddressNormalized = "45 thai ha, trung liet, dong da, ha noi",
-                            District = "Đống Đa",
-                            DistrictNormalized = "dong da",
+                            Address = "123 Nguyễn Thị Minh Khai, Phường Bến Thành, Quận 1, TP. Hồ Chí Minh",
+                            District = "Quận 1",
                             IsActive = true,
-                            Latitude = 21.0136,
-                            Longitude = 105.82129999999999,
-                            Name = "PC Master - Đống Đa",
-                            NameNormalized = "pc master - dong da",
+                            Latitude = 10.772500000000001,
+                            Longitude = 106.69499999999999,
+                            Name = "PC Master - Quận 1",
                             OpenHours = "08:30 - 21:30",
-                            Phone = "024 8765 4321"
+                            Phone = "028 3925 5678"
                         },
                         new
                         {
                             StoreID = 3,
-                            Address = "78 Lê Thanh Nghị, Bách Khoa, Hai Bà Trưng, Hà Nội",
-                            AddressNormalized = "78 le thanh nghi, bach khoa, hai ba trung, ha noi",
-                            District = "Hai Bà Trưng",
-                            DistrictNormalized = "hai ba trung",
+                            Address = "456 Điện Biên Phủ, Phường 17, Quận Bình Thạnh, TP. Hồ Chí Minh",
+                            District = "Bình Thạnh",
                             IsActive = true,
-                            Latitude = 21.002099999999999,
-                            Longitude = 105.8437,
-                            Name = "PC Master - Hai Bà Trưng",
-                            NameNormalized = "pc master - hai ba trung",
+                            Latitude = 10.795,
+                            Longitude = 106.715,
+                            Name = "PC Master - Bình Thạnh",
                             OpenHours = "08:00 - 21:00",
-                            Phone = "024 2468 1357"
+                            Phone = "028 3512 9876"
                         },
                         new
                         {
                             StoreID = 4,
-                            Address = "234 Quang Trung, Hà Đông, Hà Nội",
-                            AddressNormalized = "234 quang trung, ha dong, ha noi",
-                            District = "Hà Đông",
-                            DistrictNormalized = "ha dong",
+                            Address = "789 Nguyễn Ảnh Thủ, Phường Hiệp Thành, Quận 12, TP. Hồ Chí Minh",
+                            District = "Quận 12",
                             IsActive = true,
-                            Latitude = 20.971699999999998,
-                            Longitude = 105.777,
-                            Name = "PC Master - Hà Đông",
-                            NameNormalized = "pc master - ha dong",
+                            Latitude = 10.85,
+                            Longitude = 106.63,
+                            Name = "PC Master - Quận 12",
                             OpenHours = "08:30 - 21:30",
-                            Phone = "024 1357 2468"
-                        },
-                        new
-                        {
-                            StoreID = 5,
-                            Address = "56 Điện Biên Phủ, Phường 15, Bình Thạnh, TP. Hồ Chí Minh",
-                            AddressNormalized = "56 dien bien phu, phuong 15, binh thanh, tp. ho chi minh",
-                            District = "Bình Thạnh",
-                            DistrictNormalized = "binh thanh",
-                            IsActive = true,
-                            Latitude = 10.803100000000001,
-                            Longitude = 106.715,
-                            Name = "PC Master - Bình Thạnh",
-                            NameNormalized = "pc master - binh thanh",
-                            OpenHours = "08:00 - 21:30",
-                            Phone = "028 3512 6789"
-                        },
-                        new
-                        {
-                            StoreID = 6,
-                            Address = "88 Nguyễn Huệ, Bến Nghé, Quận 1, TP. Hồ Chí Minh",
-                            AddressNormalized = "88 nguyen hue, ben nghe, quan 1, tp. ho chi minh",
-                            District = "Quận 1",
-                            DistrictNormalized = "quan 1",
-                            IsActive = true,
-                            Latitude = 10.775600000000001,
-                            Longitude = 106.7025,
-                            Name = "PC Master - Quận 1",
-                            NameNormalized = "pc master - quan 1",
-                            OpenHours = "08:00 - 22:00",
-                            Phone = "028 3822 4567"
+                            Phone = "028 3717 3456"
                         });
                 });
 
@@ -876,17 +738,6 @@ namespace ECommerceWeb.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("ECommerceWeb.Models.ChatMessage", b =>
-                {
-                    b.HasOne("ECommerceWeb.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("ECommerceWeb.Models.EmailLog", b =>
                 {
                     b.HasOne("ECommerceWeb.Models.Order", "Order")
@@ -902,16 +753,6 @@ namespace ECommerceWeb.Migrations
                         .IsRequired();
 
                     b.Navigation("Order");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("ECommerceWeb.Models.Feedback", b =>
-                {
-                    b.HasOne("ECommerceWeb.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("User");
                 });
