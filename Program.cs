@@ -29,6 +29,7 @@ builder.Services.AddScoped<IMembershipService, MembershipService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<EmailService>();
 
 var app = builder.Build();
 
