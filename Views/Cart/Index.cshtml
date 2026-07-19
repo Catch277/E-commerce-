@@ -1,0 +1,109 @@
+@model ECommerceWeb.Models.Cart
+
+<h2>Giỏ hàng</h2>
+
+@if (Model == null || Model.CartItems == null || !Model.CartItems.Any())
+{
+    <p>Giỏ hàng trống.</p>
+}
+else
+{
+    decimal total = 0;
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Sản phẩm</th>
+                <th>Đơn giá</th>
+                <th>Số lượng</th>
+                <th>Thành tiền</th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        @foreach (var item in Model.CartItems)
+        {
+            total += item.Quantity * item.UnitPrice;
+
+            <tr>
+
+                <td>@item.Product.ProductName</td>
+
+                <td>@item.UnitPrice.ToString("N0") VNĐ</td>
+
+                <td>
+
+                    <form asp-action="UpdateQuantity" method="post">
+
+                        <input type="hidden"
+                               name="cartItemId"
+                               value="@item.CartItemID" />
+
+                        <input type="number"
+                               name="quantity"
+                               value="@item.Quantity"
+                               min="1"/>
+
+                        <button class="btn btn-primary">
+                            Cập nhật
+                        </button>
+
+                    </form>
+
+                </td>
+
+                <td>
+
+                    @((item.Quantity * item.UnitPrice).ToString("N0")) VNĐ
+
+                </td>
+
+                <td>
+
+                    <a asp-action="Remove"
+                       asp-route-cartItemId="@item.CartItemID"
+                       class="btn btn-danger">
+
+                        Xóa
+
+                    </a>
+
+                </td>
+
+            </tr>
+        }
+
+        </tbody>
+
+    </table>
+
+    <h4>Tổng tiền :
+        @total.ToString("N0") VNĐ
+    </h4>
+
+    <a asp-action="Clear"
+       asp-route-userId="@Model.UserID"
+       class="btn btn-warning">
+
+       Xóa toàn bộ
+
+    </a>
+
+    <a asp-controller="Checkout"
+       asp-action="Index"
+       asp-route-userId="@Model.UserID"
+       class="btn btn-success">
+
+       Đặt hàng
+
+    </a>
+    <a asp-controller="Checkout"
+   asp-action="Index"
+   asp-route-userId="@Model.UserID"
+   class="btn btn-success">
+    Đặt hàng
+</a>
+
+}

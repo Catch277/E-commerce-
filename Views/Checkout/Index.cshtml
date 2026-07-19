@@ -1,0 +1,41 @@
+@model ECommerceWeb.ViewModels.CheckoutViewModel
+
+@{
+    ViewData["Title"] = "Đặt hàng";
+}
+
+<h2>Thông tin giao hàng</h2>
+
+<form asp-action="Index" method="post">
+
+    <input asp-for="UserID" type="hidden" />
+
+    <div class="mb-3">
+        <label asp-for="ShippingAddress" class="form-label">
+            Địa chỉ giao hàng
+        </label>
+
+        <input asp-for="ShippingAddress"
+               class="form-control" />
+
+        <span asp-validation-for="ShippingAddress"
+              class="text-danger"></span>
+    </div>
+
+    <button type="submit"
+            class="btn btn-success">
+        Đặt hàng
+    </button>
+
+    <a asp-controller="Cart"
+       asp-action="Index"
+       asp-route-userId="@Model.UserID"
+       class="btn btn-secondary">
+        Quay lại giỏ hàng
+    </a>
+
+</form>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+}

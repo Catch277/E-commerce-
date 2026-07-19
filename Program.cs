@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ECommerceWeb.Data;
+using ECommerceWeb.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<EmailService>();
 
 var app = builder.Build();
 
