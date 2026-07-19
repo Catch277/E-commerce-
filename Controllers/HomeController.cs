@@ -1,59 +1,115 @@
+using ECommerceWeb.Data;
+using ECommerceWeb.Models;
 using ECommerceWeb.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace ECommerceWeb.Controllers
 {
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        private readonly ApplicationDbContext _context;
+
+        public HomeController(ApplicationDbContext context)
         {
-            // TODO: thay bằng query thật từ DbContext khi có bảng Product/Order
-            // Dữ liệu dưới đây chỉ là placeholder để dựng layout, không phải sản phẩm thật
+            _context = context;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            // Deal: sản phẩm đang có giảm giá (OldPrice > Price)
+            var dealProducts = await _context.Products
+                .Include(p => p.Category)
+                .Where(p => p.OldPrice != null && p.OldPrice > p.Price)
+                .OrderByDescending(p => p.CreatedAt)
+                .Take(4)
+                .Select(p => MapToProductCard(p))
+                .ToListAsync();
+
+            // Sản phẩm mới về: IsNew = true
+            var newArrivals = await _context.Products
+                .Include(p => p.Category)
+                .Where(p => p.IsNew)
+                .OrderByDescending(p => p.CreatedAt)
+                .Take(4)
+                .Select(p => MapToProductCard(p))
+                .ToListAsync();
+
+            var prebuiltPcs = await _context.PrebuiltPcs
+                .Include(p => p.Specs)
+                .OrderBy(p => p.DisplayOrder)
+                .Select(p => new PrebuiltPcViewModel
+                {
+                    Name = p.Name,
+                    ImageUrl = p.ImageUrl,
+                    Price = p.Price,
+                    IsBestSeller = p.IsBestSeller,
+                    Specs = p.Specs.OrderBy(s => s.DisplayOrder).Select(s => s.SpecText).ToList()
+                })
+                .ToListAsync();
+
+            var newsArticles = await _context.NewsArticles
+                .Where(a => a.IsPublished)
+                .OrderByDescending(a => a.PublishedAt)
+                .Take(3)
+                .Select(a => new NewsArticleViewModel
+                {
+                    Category = a.Category,
+                    Title = a.Title,
+                    Excerpt = a.Excerpt,
+                    ImageUrl = a.ImageUrl
+                })
+                .ToListAsync();
 
             var model = new HomeIndexViewModel
             {
-                DealProducts = new List<ProductCardViewModel>
-                {
-                    new() { ProductName = "Tên sản phẩm", CategoryName = "Danh mục", Price = 0, OldPrice = 0, DiscountPercent = 0, ReviewCount = 0, ImageUrl = "/images/no-image.png" },
-                    new() { ProductName = "Tên sản phẩm", CategoryName = "Danh mục", Price = 0, OldPrice = 0, DiscountPercent = 0, ReviewCount = 0, ImageUrl = "/images/no-image.png" },
-                    new() { ProductName = "Tên sản phẩm", CategoryName = "Danh mục", Price = 0, OldPrice = 0, DiscountPercent = 0, ReviewCount = 0, ImageUrl = "/images/no-image.png" },
-                    new() { ProductName = "Tên sản phẩm", CategoryName = "Danh mục", Price = 0, OldPrice = 0, DiscountPercent = 0, ReviewCount = 0, ImageUrl = "/images/no-image.png" },
-                },
-                NewArrivals = new List<ProductCardViewModel>
-                {
-                    new() { ProductName = "Tên sản phẩm", CategoryName = "Danh mục", Price = 0, IsNew = true, ReviewCount = 0, ImageUrl = "/images/no-image.png" },
-                    new() { ProductName = "Tên sản phẩm", CategoryName = "Danh mục", Price = 0, IsNew = true, ReviewCount = 0, ImageUrl = "/images/no-image.png" },
-                    new() { ProductName = "Tên sản phẩm", CategoryName = "Danh mục", Price = 0, IsNew = true, ReviewCount = 0, ImageUrl = "/images/no-image.png" },
-                    new() { ProductName = "Tên sản phẩm", CategoryName = "Danh mục", Price = 0, IsNew = true, ReviewCount = 0, ImageUrl = "/images/no-image.png" },
-                },
-                PrebuiltPcs = new List<PrebuiltPcViewModel>
-                {
-                    new() { Name = "Bộ PC 1", Price = 0, ImageUrl = "/images/no-image.png", Specs = new() { "Thông số 1", "Thông số 2", "Thông số 3", "Thông số 4" } },
-                    new() { Name = "Bộ PC 2", Price = 0, ImageUrl = "/images/no-image.png", IsBestSeller = true, Specs = new() { "Thông số 1", "Thông số 2", "Thông số 3", "Thông số 4" } },
-                    new() { Name = "Bộ PC 3", Price = 0, ImageUrl = "/images/no-image.png", Specs = new() { "Thông số 1", "Thông số 2", "Thông số 3", "Thông số 4" } },
-                },
-                NewsArticles = new List<NewsArticleViewModel>
-                {
-                    new() { Category = "Chủ đề", Title = "Tiêu đề bài viết", Excerpt = "Mô tả ngắn bài viết...", ImageUrl = "/images/no-image.png" },
-                    new() { Category = "Chủ đề", Title = "Tiêu đề bài viết", Excerpt = "Mô tả ngắn bài viết...", ImageUrl = "/images/no-image.png" },
-                    new() { Category = "Chủ đề", Title = "Tiêu đề bài viết", Excerpt = "Mô tả ngắn bài viết...", ImageUrl = "/images/no-image.png" },
-                }
+                DealProducts = dealProducts,
+                NewArrivals = newArrivals,
+                PrebuiltPcs = prebuiltPcs,
+                NewsArticles = newsArticles
             };
 
             ViewBag.StoreName = "PC Store";
-            ViewBag.StoreDescription = "Mô tả cửa hàng";
+            ViewBag.StoreDescription = "Chuyên cung cấp linh kiện máy tính, gaming gear và phụ kiện chính hãng với giá tốt, bảo hành uy tín.";
             ViewBag.CartCount = 0;
-            ViewBag.CountdownHours = "00";
-            ViewBag.CountdownMinutes = "00";
-            ViewBag.CountdownSeconds = "00";
-            ViewBag.PromoTitle1 = "Tiêu đề khuyến mãi 1";
-            ViewBag.PromoImage1 = "Promo+1";
-            ViewBag.PromoTitle2 = "Tiêu đề khuyến mãi 2";
-            ViewBag.PromoSubtitle2 = "Mô tả phụ";
-            ViewBag.PromoImage2 = "Promo+2";
+            ViewBag.CountdownHours = "12";
+            ViewBag.CountdownMinutes = "45";
+            ViewBag.CountdownSeconds = "30";
+            ViewBag.PromoTitle1 = "Laptop Gaming Mới";
+            ViewBag.PromoImage1 = "Laptop+Gaming";
+            ViewBag.PromoTitle2 = "Linh kiện đỉnh cao";
+            ViewBag.PromoSubtitle2 = "VGA RTX 40 Series";
+            ViewBag.PromoImage2 = "VGA+RTX+40";
 
             return View(model);
+        }
+
+        private static ProductCardViewModel MapToProductCard(Product p)
+        {
+            int? discountPercent = null;
+            if (p.OldPrice.HasValue && p.OldPrice.Value > 0 && p.OldPrice.Value > p.Price)
+            {
+                discountPercent = (int)Math.Round((1 - (p.Price / p.OldPrice.Value)) * 100);
+            }
+
+            return new ProductCardViewModel
+            {
+                ProductID = p.ProductID,
+                ProductName = p.ProductName,
+                CategoryName = p.Category?.CategoryName ?? "",
+                ImageUrl = p.ImageUrl,
+                Price = p.Price,
+                OldPrice = p.OldPrice,
+                Rating = p.Rating,
+                ReviewCount = p.ReviewCount,
+                IsNew = p.IsNew,
+                DiscountPercent = discountPercent,
+                DetailUrl = "#"
+            };
         }
     }
 }

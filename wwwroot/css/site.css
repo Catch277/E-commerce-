@@ -35,6 +35,32 @@ main {
     min-height: 75vh;
 }
 
+/* Bật hiệu ứng cuộn mượt cho toàn trang */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Tạo khoảng đệm phía trên khi nhảy đến section, tránh bị navbar che */
+/* Điều chỉnh 80px nếu navbar của bạn cao hơn hoặc thấp hơn */
+section[id] {
+    scroll-margin-top: 80px;
+}
+
+    /* (Tuỳ chọn) Thêm hiệu ứng highlight nhẹ khi vừa nhảy tới để user dễ nhận biết */
+    section[id]:target {
+        animation: highlight-fade 1.5s ease-out;
+    }
+
+@keyframes highlight-fade {
+    0% {
+        background-color: rgba(255, 193, 7, 0.2);
+    }
+    /* Màu vàng nhạt của bg-warning */
+    100% {
+        background-color: transparent;
+    }
+}
+
 /* =========================================
    HEADER
 ========================================= */
@@ -753,16 +779,150 @@ ul.prebuilt-specs {
    BỔ SUNG: BRAND STRIP
 ========================================= */
 
+* ================= CONTAINER & MASKS ================= */
 .brand-strip {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 40px;
-    opacity: .6;
+    position: relative;
+    padding: 20px 0;
+    /* overflow: hidden được đẩy xuống .marquee-row để mask phủ đều 2 hàng */
 }
 
-    .brand-strip img {
-        max-height: 32px;
+/* Lớp phủ mờ 2 bên rìa (Edge fade masks) */
+.brand-strip::before,
+.brand-strip::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100px; /* Độ rộng vùng mờ */
+    z-index: 2;
+    pointer-events: none;
+}
+
+.brand-strip::before {
+    left: 0;
+    background: linear-gradient(to right, #fff, transparent); /* Đổi #fff thành màu nền section của bạn nếu không phải trắng */
+}
+
+.brand-strip::after {
+    right: 0;
+    background: linear-gradient(to left, #fff, transparent);
+}
+
+/* ================= ROWS & TRACKS ================= */
+.marquee-row {
+    overflow: hidden;
+    margin-bottom: 24px; /* Khoảng cách giữa 2 hàng */
+    position: relative;
+}
+
+    .marquee-row:last-child {
+        margin-bottom: 0;
+    }
+
+.brand-track {
+    display: flex;
+    will-change: transform;
+}
+
+/* Gán animation ngược chiều */
+.track-left {
+    animation: scroll-left 20s linear infinite;
+}
+
+.track-right {
+    animation: scroll-right 35s linear infinite;
+}
+
+/* Pause on hover cho cả 2 hàng */
+.brand-strip:hover .brand-track {
+    animation-play-state: paused;
+}
+
+/* ================= KEYFRAMES ================= */
+/* Trái sang Phải: Dịch từ 0 về -50% */
+@keyframes scroll-left {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* Phải sang Trái: Dịch từ -50% về 0 */
+@keyframes scroll-right {
+    0% {
+        transform: translateX(-50%);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+/* ================= CONTENT & LOGOS ================= */
+.brand-content {
+    display: flex;
+    gap: 60px;
+    align-items: center;
+    flex-shrink: 0;
+    /* Mẹo: Margin right giúp vòng lặp không bị hở gap ở điểm nối giữa 2 bản sao */
+    margin-right: 60px;
+}
+
+    .brand-content img {
+        height: 60px;
+        width: auto;
+        max-width: 150px;
+        object-fit: contain;
+        opacity: 0.7;
+        transition: opacity 0.3s ease, filter 0.3s ease;
         filter: grayscale(100%);
     }
+
+        .brand-content img:hover {
+            opacity: 1;
+            filter: grayscale(0%);
+        }
+
+/* ================= ACCESSIBILITY (REDUCED MOTION) ================= */
+@media (prefers-reduced-motion: reduce) {
+    .brand-track {
+        animation: none !important;
+        justify-content: center; /* Căn giữa khi đứng yên */
+    }
+    /* Ẩn bản sao đi để tránh bị nhân đôi logo khi đứng yên */
+    .brand-content[aria-hidden="true"] {
+        display: none;
+    }
+
+    .brand-content {
+        margin-right: 0; /* Bỏ margin thừa khi đứng yên */
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+        .brand-content img {
+            opacity: 1;
+            filter: grayscale(0%);
+        }
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+    .brand-content {
+        gap: 40px;
+        margin-right: 40px;
+    }
+
+        .brand-content img {
+            height: 40px;
+        }
+
+    .brand-strip::before,
+    .brand-strip::after {
+        width: 40px;
+    }
+}
+
