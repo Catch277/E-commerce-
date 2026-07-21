@@ -1,0 +1,185 @@
+﻿@model ECommerceWeb.ViewModels.Admin.AdminDashboardViewModel
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Dashboard";
+}
+
+@section Styles {
+    <style>
+        .kpi-card {
+            background: #fff; border-radius: 16px; padding: 22px;
+            box-shadow: 0 4px 14px rgba(0,0,0,.05); height: 100%;
+        }
+        .kpi-icon {
+            width: 46px; height: 46px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+            background: #f2f4f8; color: #575e70; margin-bottom: 14px;
+        }
+        .kpi-trend { font-size: .75rem; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
+        .kpi-trend.up { background: #d1fae5; color: #059669; }
+        .kpi-trend.down { background: #fee2e2; color: #d70018; }
+        .kpi-trend.flat { background: #eceef2; color: #575e70; }
+        .kpi-label { color: #575e70; font-size: .85rem; margin-bottom: 4px; }
+        .kpi-value { font-size: 1.9rem; font-weight: 800; }
+
+        .panel-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 14px rgba(0,0,0,.05); }
+        .panel-header { padding: 18px 22px; border-bottom: 1px solid #eceef2; display: flex; justify-content: space-between; align-items: center; }
+        .panel-header h5 { margin: 0; font-weight: 700; font-size: 1rem; }
+
+        .stock-badge { font-size: .72rem; font-weight: 700; padding: 3px 12px; border-radius: 999px; }
+        .stock-badge.critical { background: #fee2e2; color: #d70018; }
+        .stock-badge.warning { background: #fff3c2; color: #785900; }
+
+        .quick-action-btn {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 16px; border-radius: 12px; font-weight: 700; text-decoration: none; margin-bottom: 10px;
+        }
+        .quick-action-btn.primary { background: #ffc107; color: #212529; }
+        .quick-action-btn.primary:hover { background: #e0a800; color: #212529; }
+        .quick-action-btn.dark { background: #1f2937; color: #fff; }
+        .quick-action-btn.dark:hover { background: #111827; color: #fff; }
+        .quick-action-btn.light { background: #fff; color: #212529; border: 1px solid #eceef2; }
+        .quick-action-btn.light:hover { background: #f2f4f8; color: #212529; }
+    </style>
+}
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+    <h1 class="fw-bold mb-0" style="font-size:1.6rem;">Tổng quan</h1>
+    <div class="d-flex gap-2">
+        <button class="btn btn-light border"><i class="bi bi-calendar3 me-1"></i> Trong vòng 30 ngày</button>
+        <button class="btn" style="background:#1f2937; color:#fff;"><i class="bi bi-download me-1"></i> Xuất báo cáo</button>
+    </div>
+</div>
+
+<!-- KPI cards -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="kpi-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="kpi-icon"><i class="bi bi-box-seam-fill"></i></div>
+                <span class="kpi-trend up"><i class="bi bi-arrow-up-short"></i>+12%</span>
+            </div>
+            <div class="kpi-label">Số lượng sản phẩm</div>
+            <div class="kpi-value">@Model.TotalProducts.ToString("N0")</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="kpi-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="kpi-icon"><i class="bi bi-diagram-3-fill"></i></div>
+                <span class="kpi-trend flat"><i class="bi bi-dash"></i>0%</span>
+            </div>
+            <div class="kpi-label">Số lượng danh mục</div>
+            <div class="kpi-value">@Model.TotalCategories.ToString("N0")</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="kpi-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="kpi-icon"><i class="bi bi-people-fill"></i></div>
+                <span class="kpi-trend up"><i class="bi bi-arrow-up-short"></i>+5.2%</span>
+            </div>
+            <div class="kpi-label">Số lượng người dùng</div>
+            <div class="kpi-value">@Model.TotalUsers.ToString("N0")</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="kpi-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="kpi-icon" style="background:#fee2e2; color:#d70018;"><i class="bi bi-cart-fill"></i></div>
+                <span class="kpi-trend down"><i class="bi bi-arrow-down-short"></i>-2%</span>
+            </div>
+            <div class="kpi-label">Số đơn hàng trong hôm nay</div>
+            <div class="kpi-value">@Model.TotalOrders.ToString("N0")</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Cảnh báo kho hàng -->
+    <div class="col-lg-8">
+        <div class="panel-card h-100">
+            <div class="panel-header">
+                <h5><i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>Cảnh báo kho hàng</h5>
+                @if (Model.LowStockProductList != null && Model.LowStockProductList.Any())
+                {
+                    <a asp-action="Products" class="small fw-bold text-decoration-none" style="color:#785900;">Xem tất cả</a>
+                }
+            </div>
+
+            @if (Model.LowStockProductList == null || !Model.LowStockProductList.Any())
+            {
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-check-circle" style="font-size:2rem; opacity:.3;"></i>
+                    <p class="mb-0 mt-2">Không có sản phẩm nào sắp hết hàng.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr class="text-muted small text-uppercase">
+                                <th class="ps-4" style="font-weight:600;">Sản phẩm</th>
+                                <th style="font-weight:600;">SKU</th>
+                                <th style="font-weight:600;">Tồn kho</th>
+                                <th class="pe-4" style="font-weight:600;">Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var p in Model.LowStockProductList)
+                            {
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <img src="@(string.IsNullOrEmpty(p.ImageUrl) ? "/images/no-image.png" : p.ImageUrl)"
+                                                 style="width:40px;height:40px;object-fit:cover;border-radius:8px;">
+                                            <span class="fw-semibold">@p.ProductName</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted">#@p.ProductID</td>
+                                    <td class="fw-bold">@p.Quantity</td>
+                                    <td class="pe-4">
+                                        @if (p.Quantity <= 2)
+                                        {
+                                            <span class="stock-badge critical">Critical</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="stock-badge warning">Warning</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Thao tác nhanh -->
+    <div class="col-lg-4">
+        <div class="panel-card h-100">
+            <div class="panel-header">
+                <h5><i class="bi bi-lightning-charge-fill text-warning me-2"></i>Thao tác nhanh</h5>
+            </div>
+            <div class="p-3">
+                <a asp-action="CreateProduct" class="quick-action-btn primary">
+                    <span><i class="bi bi-plus-circle me-2"></i>Thêm Sản Phẩm Mới</span>
+                </a>
+                <a href="#" class="quick-action-btn dark">
+                    <span><i class="bi bi-megaphone me-2"></i>Tạo Khuyến Mãi</span>
+                </a>
+                <a href="#" class="quick-action-btn light">
+                    <span><i class="bi bi-receipt me-2"></i>Xử Lý Đơn Hàng Mới</span>
+                    @if (Model.TotalOrders > 0)
+                    {
+                        <span class="badge rounded-pill" style="background:#d70018;">@Model.TotalOrders</span>
+                    }
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

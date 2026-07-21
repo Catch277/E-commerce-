@@ -1,0 +1,145 @@
+﻿@model ECommerceWeb.ViewModels.Admin.AdminProductViewModel
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Sửa sản phẩm";
+}
+
+<div class="card border-0 shadow-sm mx-auto"
+     style="max-width: 850px;">
+    <div class="card-body p-4 p-md-5">
+        <div class="mb-4">
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-pencil-square text-primary me-2"></i>
+                Sửa sản phẩm
+            </h2>
+
+            <p class="text-muted mb-0">
+                Cập nhật thông tin sản phẩm #@Model.ProductID.
+            </p>
+        </div>
+
+        <form asp-action="EditProduct"
+              asp-route-id="@Model.ProductID"
+              method="post">
+
+            @Html.AntiForgeryToken()
+
+            <input asp-for="ProductID"
+                   type="hidden" />
+
+            <div asp-validation-summary="ModelOnly"
+                 class="alert alert-danger">
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ProductName"
+                       class="form-label fw-bold">
+                </label>
+
+                <input asp-for="ProductName"
+                       class="form-control" />
+
+                <span asp-validation-for="ProductName"
+                      class="text-danger">
+                </span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Description"
+                       class="form-label fw-bold">
+                </label>
+
+                <textarea asp-for="Description"
+                          rows="4"
+                          class="form-control">
+                </textarea>
+
+                <span asp-validation-for="Description"
+                      class="text-danger">
+                </span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="CategoryID"
+                       class="form-label fw-bold">
+                </label>
+
+                <select asp-for="CategoryID"
+                        asp-items="Model.Categories"
+                        class="form-select">
+                    <option value="">
+                        -- Chọn danh mục --
+                    </option>
+                </select>
+
+                <span asp-validation-for="CategoryID"
+                      class="text-danger">
+                </span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Price"
+                           class="form-label fw-bold">
+                    </label>
+
+                    <input asp-for="Price"
+                           type="number"
+                           min="0"
+                           step="1000"
+                           class="form-control" />
+
+                    <span asp-validation-for="Price"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Quantity"
+                           class="form-label fw-bold">
+                    </label>
+
+                    <input asp-for="Quantity"
+                           type="number"
+                           min="0"
+                           class="form-control" />
+
+                    <span asp-validation-for="Quantity"
+                          class="text-danger">
+                    </span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ImageUrl"
+                       class="form-label fw-bold">
+                </label>
+
+                <input asp-for="ImageUrl"
+                       class="form-control" />
+
+                <span asp-validation-for="ImageUrl"
+                      class="text-danger">
+                </span>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit"
+                        class="btn btn-primary fw-bold">
+                    <i class="bi bi-check-lg me-1"></i>
+                    Lưu thay đổi
+                </button>
+
+                <a asp-action="Products"
+                   class="btn btn-light">
+                    Hủy
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

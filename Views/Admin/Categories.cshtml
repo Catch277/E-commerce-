@@ -1,0 +1,163 @@
+﻿@model IEnumerable<ECommerceWeb.Models.Category>
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Quản lý danh mục";
+}
+
+@section Styles {
+    <style>
+        .cat-table-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 14px rgba(0,0,0,.05);
+            overflow: hidden;
+        }
+
+        .cat-table thead th {
+            font-weight: 600;
+            color: #575e70;
+            font-size: .82rem;
+            text-transform: none;
+            border-bottom: 1px solid #eceef2;
+            padding: 16px 20px;
+        }
+
+        .cat-table tbody td {
+            padding: 16px 20px;
+            vertical-align: middle;
+            border-bottom: 1px solid #f2f4f8;
+        }
+
+        .cat-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .cat-icon-circle {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #fff3c2;
+            color: #785900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .cat-count-badge {
+            background: #eceef2;
+            color: #212529;
+            font-weight: 700;
+            padding: 4px 14px;
+            border-radius: 999px;
+            font-size: .85rem;
+        }
+
+        .btn-icon-sm {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            border: 1px solid #eceef2;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            color: #575e70;
+        }
+
+            .btn-icon-sm:hover {
+                background: #f2f4f8;
+            }
+
+            .btn-icon-sm.danger:hover {
+                background: #fee2e2;
+                color: #d70018;
+                border-color: #fee2e2;
+            }
+    </style>
+}
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+    <div>
+        <h1 class="fw-bold mb-1" style="font-size:1.8rem;">Quản lý danh mục</h1>
+        <p class="text-muted mb-0">Sắp xếp và quản lý các danh mục sản phẩm.</p>
+    </div>
+    <a asp-action="CreateCategory" class="btn fw-bold" style="background:#ffc107; color:#212529;">
+        <i class="bi bi-plus-lg me-1"></i> Thêm danh mục
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="cat-table-card">
+    @if (!Model.Any())
+    {
+        <div class="text-center text-muted py-5">
+            <i class="bi bi-diagram-3" style="font-size:2.5rem; opacity:.3;"></i>
+            <p class="mt-3 mb-0">Chưa có danh mục nào.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table cat-table mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Icon</th>
+                        <th>Tên danh mục</th>
+                        <th>Mô tả</th>
+                        <th>Số lượng sản phẩm</th>
+                        <th class="text-end">Chỉnh sửa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var category in Model)
+                    {
+                        <tr>
+                            <td class="text-muted">#@category.CategoryID</td>
+                            <td>
+                                <span class="cat-icon-circle">
+                                    <i class="bi @(string.IsNullOrWhiteSpace(category.IconClass) ? "bi-cpu" : category.IconClass)"></i>
+                                </span>
+                            </td>
+                            <td class="fw-bold">@category.CategoryName</td>
+                            <td class="text-muted" style="max-width:320px;">
+                                @(string.IsNullOrWhiteSpace(category.Description) ? "Chưa có mô tả" : category.Description)
+                            </td>
+                            <td>
+                                <span class="cat-count-badge">@category.Products.Count</span>
+                            </td>
+                            <td class="text-end">
+                                <a asp-action="EditCategory" asp-route-id="@category.CategoryID" class="btn-icon-sm" title="Sửa">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form asp-action="DeleteCategory" asp-route-id="@category.CategoryID" method="post" class="d-inline"
+                                      onsubmit="return confirm('Bạn chắc chắn muốn xóa danh mục này?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn-icon-sm danger" title="Xóa">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
