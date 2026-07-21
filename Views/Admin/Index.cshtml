@@ -169,14 +169,14 @@
                 <a asp-action="CreateProduct" class="quick-action-btn primary">
                     <span><i class="bi bi-plus-circle me-2"></i>Thêm Sản Phẩm Mới</span>
                 </a>
-                <a href="#" class="quick-action-btn dark">
+                <a asp-controller="Admin" asp-action="CreateVoucher" class="quick-action-btn dark">
                     <span><i class="bi bi-megaphone me-2"></i>Tạo Khuyến Mãi</span>
                 </a>
-                <a href="#" class="quick-action-btn light">
+                <a asp-controller="Admin" asp-action="Orders" asp-route-status="Chờ xác nhận" class="quick-action-btn light">
                     <span><i class="bi bi-receipt me-2"></i>Xử Lý Đơn Hàng Mới</span>
-                    @if (Model.TotalOrders > 0)
+                    @if (Model.PendingOrders > 0)
                     {
-                        <span class="badge rounded-pill" style="background:#d70018;">@Model.TotalOrders</span>
+                        <span class="badge rounded-pill" style="background:#d70018;">@Model.PendingOrders</span>
                     }
                 </a>
             </div>

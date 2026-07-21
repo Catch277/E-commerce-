@@ -1,0 +1,194 @@
+﻿@model ECommerceWeb.ViewModels.Admin.AdminVoucherViewModel
+
+<div asp-validation-summary="ModelOnly"
+     class="alert alert-danger">
+</div>
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <label asp-for="Code"
+               class="form-label fw-semibold">
+        </label>
+
+        <input asp-for="Code"
+               class="form-control text-uppercase"
+               placeholder="Ví dụ: SALE10" />
+
+        <span asp-validation-for="Code"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="col-md-8">
+        <label asp-for="Title"
+               class="form-label fw-semibold">
+        </label>
+
+        <input asp-for="Title"
+               class="form-control"
+               placeholder="Ví dụ: Giảm 10% toàn bộ đơn hàng" />
+
+        <span asp-validation-for="Title"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="col-12">
+        <label asp-for="Description"
+               class="form-label fw-semibold">
+        </label>
+
+        <textarea asp-for="Description"
+                  rows="3"
+                  class="form-control">
+        </textarea>
+
+        <span asp-validation-for="Description"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="DiscountType"
+               class="form-label fw-semibold">
+        </label>
+
+        <select asp-for="DiscountType"
+                id="discountType"
+                class="form-select">
+            <option value="Fixed">
+                Giảm số tiền cố định
+            </option>
+
+            <option value="Percent">
+                Giảm theo phần trăm
+            </option>
+        </select>
+
+        <span asp-validation-for="DiscountType"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="DiscountValue"
+               class="form-label fw-semibold">
+        </label>
+
+        <input asp-for="DiscountValue"
+               type="number"
+               min="0"
+               step="0.01"
+               class="form-control" />
+
+        <span asp-validation-for="DiscountValue"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="col-md-4"
+         id="maxDiscountGroup">
+        <label asp-for="MaxDiscountAmount"
+               class="form-label fw-semibold">
+        </label>
+
+        <input asp-for="MaxDiscountAmount"
+               type="number"
+               min="0"
+               step="1000"
+               class="form-control" />
+
+        <span asp-validation-for="MaxDiscountAmount"
+              class="text-danger">
+        </span>
+
+        <div class="form-text">
+            Chỉ dùng với giảm theo phần trăm.
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="MinOrderValue"
+               class="form-label fw-semibold">
+        </label>
+
+        <input asp-for="MinOrderValue"
+               type="number"
+               min="0"
+               step="1000"
+               class="form-control" />
+
+        <span asp-validation-for="MinOrderValue"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="UsageLimit"
+               class="form-label fw-semibold">
+        </label>
+
+        <input asp-for="UsageLimit"
+               type="number"
+               min="1"
+               class="form-control"
+               placeholder="Để trống nếu không giới hạn" />
+
+        <span asp-validation-for="UsageLimit"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="ExpiryDate"
+               class="form-label fw-semibold">
+        </label>
+
+        <input asp-for="ExpiryDate"
+               type="date"
+               class="form-control" />
+
+        <span asp-validation-for="ExpiryDate"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="col-12">
+        <div class="form-check form-switch">
+            <input asp-for="IsActive"
+                   class="form-check-input" />
+
+            <label asp-for="IsActive"
+                   class="form-check-label fw-semibold">
+            </label>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const typeSelect =
+            document.getElementById("discountType");
+
+        const maxDiscountGroup =
+            document.getElementById("maxDiscountGroup");
+
+        function updateMaxDiscountVisibility() {
+            if (!typeSelect || !maxDiscountGroup) {
+                return;
+            }
+
+            maxDiscountGroup.style.display =
+                typeSelect.value === "Percent"
+                    ? ""
+                    : "none";
+        }
+
+        typeSelect.addEventListener(
+            "change",
+            updateMaxDiscountVisibility
+        );
+
+        updateMaxDiscountVisibility();
+    });
+</script>

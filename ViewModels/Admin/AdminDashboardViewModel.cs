@@ -9,6 +9,7 @@
         public int TotalUsers { get; set; }
 
         public int TotalOrders { get; set; }
+        public int PendingOrders { get; set; }
 
         public int LowStockProducts { get; set; }
         public List<ECommerceWeb.Models.Product> LowStockProductList { get; set; } = new();

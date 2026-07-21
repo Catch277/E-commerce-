@@ -30,11 +30,19 @@ namespace ECommerceWeb.Controllers
             var model = new AdminDashboardViewModel
             {
                 TotalProducts = await _context.Products.CountAsync(),
+
                 TotalCategories = await _context.Categories.CountAsync(),
+
                 TotalUsers = await _context.Users.CountAsync(),
+
                 TotalOrders = await _context.Orders.CountAsync(),
-                LowStockProducts = await _context.Products
+
+                PendingOrders = await _context.Orders
+                    .CountAsync(o => o.OrderStatus == "Chờ xác nhận"),
+
+                            LowStockProducts = await _context.Products
                     .CountAsync(p => p.Quantity <= 5),
+
                 LowStockProductList = lowStockProducts
             };
 
@@ -435,6 +443,593 @@ namespace ECommerceWeb.Controllers
             return RedirectToAction(nameof(Categories));
         }
 
+        // GET: /Admin/Orders
+        [HttpGet]
+        public async Task<IActionResult> Orders(
+            string? search,
+            string? status,
+            string? paymentMethod,
+            int page = 1)
+        {
+            const int pageSize = 10;
+
+            if (page < 1)
+            {
+                page = 1;
+            }
+
+            var query = _context.Orders
+                .AsNoTracking()
+                .AsQueryable();
+
+            // Tìm theo mã đơn, tên khách hoặc số điện thoại.
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var keyword = search.Trim();
+
+                if (int.TryParse(keyword, out int orderId))
+                {
+                    query = query.Where(o =>
+                        o.OrderID == orderId ||
+                        o.CustomerName.Contains(keyword) ||
+                        o.CustomerPhone.Contains(keyword));
+                }
+                else
+                {
+                    query = query.Where(o =>
+                        o.CustomerName.Contains(keyword) ||
+                        o.CustomerPhone.Contains(keyword) ||
+                        o.CustomerEmail.Contains(keyword));
+                }
+            }
+
+            // Lọc trạng thái đơn hàng.
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                query = query.Where(o => o.OrderStatus == status);
+            }
+
+            // Lọc phương thức thanh toán.
+            if (!string.IsNullOrWhiteSpace(paymentMethod))
+            {
+                query = query.Where(o =>
+                    o.PaymentMethod == paymentMethod);
+            }
+
+            var totalOrders = await query.CountAsync();
+
+            var totalPages = (int)Math.Ceiling(
+                totalOrders / (double)pageSize);
+
+            if (totalPages > 0 && page > totalPages)
+            {
+                page = totalPages;
+            }
+
+            var orders = await query
+                .OrderByDescending(o => o.OrderDate)
+                .ThenByDescending(o => o.OrderID)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(o => new AdminOrderListItemViewModel
+                {
+                    OrderID = o.OrderID,
+                    OrderDate = o.OrderDate,
+                    CustomerName = o.CustomerName,
+                    CustomerPhone = o.CustomerPhone,
+                    TotalAmount = o.TotalAmount,
+                    PaymentMethod = o.PaymentMethod,
+                    OrderStatus = o.OrderStatus,
+
+                    TotalItems = o.OrderDetails.Sum(
+                        detail => detail.Quantity),
+
+                    PaymentStatus = _context.Payments
+                        .Where(p => p.OrderID == o.OrderID)
+                        .Select(p => p.PaymentStatus)
+                        .FirstOrDefault() ?? "Chưa có thông tin"
+                })
+                .ToListAsync();
+
+            ViewBag.Search = search;
+            ViewBag.SelectedStatus = status;
+            ViewBag.SelectedPaymentMethod = paymentMethod;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages == 0 ? 1 : totalPages;
+            ViewBag.TotalOrders = totalOrders;
+
+            ViewBag.PendingOrderCount = await _context.Orders
+                .CountAsync(o => o.OrderStatus == "Chờ xác nhận");
+
+            return View(orders);
+        }
+
+        // GET: /Admin/OrderDetails/5
+        [HttpGet]
+        public async Task<IActionResult> OrderDetails(int id)
+        {
+            var order = await _context.Orders
+                .AsNoTracking()
+                .Include(o => o.User)
+                .Include(o => o.Voucher)
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(detail => detail.Product)
+                .FirstOrDefaultAsync(o => o.OrderID == id);
+
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            var payment = await _context.Payments
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.OrderID == id);
+
+            var shipping = await _context.Shippings
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.OrderID == id);
+
+            var model = new AdminOrderDetailViewModel
+            {
+                Order = order,
+                Payment = payment,
+                Shipping = shipping,
+                AllowedNextStatuses =
+                    GetAllowedNextOrderStatuses(order.OrderStatus)
+            };
+
+            return View(model);
+        }
+
+        // POST: /Admin/UpdateOrderStatus
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateOrderStatus(
+            int orderId,
+            string newStatus)
+        {
+            var order = await _context.Orders
+                .FirstOrDefaultAsync(o => o.OrderID == orderId);
+
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            newStatus = newStatus?.Trim() ?? string.Empty;
+
+            var allowedStatuses = GetAllowedNextOrderStatuses(order.OrderStatus);
+
+            if (!allowedStatuses.Contains(newStatus))
+            {
+                TempData["ErrorMessage"] =
+                    $"Không thể chuyển đơn từ " +
+                    $"\"{order.OrderStatus}\" sang \"{newStatus}\".";
+
+                return RedirectToAction(
+                    nameof(OrderDetails),
+                    new { id = orderId });
+            }
+
+            var previousStatus = order.OrderStatus;
+
+            await using var transaction =
+                await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                order.OrderStatus = newStatus;
+
+                // Khi bắt đầu giao hàng, tạo bản ghi Shipping nếu chưa có.
+                if (newStatus == "Đang giao")
+                {
+                    var shipping = await _context.Shippings
+                        .FirstOrDefaultAsync(s =>
+                            s.OrderID == orderId);
+
+                    if (shipping == null)
+                    {
+                        shipping = new Shipping
+                        {
+                            OrderID = orderId,
+                            ShippingCompany = "Chưa cập nhật",
+                            TrackingCode = string.Empty,
+                            ShippingStatus = "Đang giao",
+                            EstimatedDeliveryDate =
+                                DateTime.Now.AddDays(3)
+                        };
+
+                        _context.Shippings.Add(shipping);
+                    }
+                    else
+                    {
+                        shipping.ShippingStatus = "Đang giao";
+                    }
+                }
+
+                // Khi giao thành công, cập nhật cả Shipping.
+                if (newStatus == "Đã giao")
+                {
+                    var shipping = await _context.Shippings
+                        .FirstOrDefaultAsync(s =>
+                            s.OrderID == orderId);
+
+                    if (shipping != null)
+                    {
+                        shipping.ShippingStatus = "Đã giao";
+                    }
+
+                    // COD chỉ được xem là thanh toán thành công
+                    // khi khách đã nhận hàng.
+                    if (string.Equals(
+                        order.PaymentMethod,
+                        "COD",
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        var payment = await _context.Payments
+                            .FirstOrDefaultAsync(p =>
+                                p.OrderID == orderId);
+
+                        if (payment != null)
+                        {
+                            payment.PaymentStatus = "Thành công";
+                            payment.PaymentDate = DateTime.Now;
+                        }
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                TempData["SuccessMessage"] =
+                    $"Đã chuyển trạng thái đơn #{orderId} " +
+                    $"từ \"{previousStatus}\" sang \"{newStatus}\".";
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+
+                TempData["ErrorMessage"] =
+                    "Không thể cập nhật trạng thái đơn hàng.";
+
+                throw;
+            }
+
+            return RedirectToAction(
+                nameof(OrderDetails),
+                new { id = orderId });
+        }
+
+        private static List<string> GetAllowedNextOrderStatuses(string currentStatus)
+        {
+            return currentStatus switch
+            {
+                "Chờ xác nhận" => new List<string>
+            {
+                "Đã xác nhận"
+            },
+
+                "Đã xác nhận" => new List<string>
+            {
+                "Đang giao"
+            },
+
+                "Đang giao" => new List<string>
+            {
+                "Đã giao"
+            },
+                    _ => new List<string>()
+                };
+            }
+
+        // GET: /Admin/Vouchers
+        [HttpGet]
+        public async Task<IActionResult> Vouchers(
+            string? search,
+            string? status)
+        {
+            var query = _context.Vouchers
+                .AsNoTracking()
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var keyword = search.Trim();
+
+                query = query.Where(v =>
+                    v.Code.Contains(keyword) ||
+                    v.Title.Contains(keyword));
+            }
+
+            var now = DateTime.Now;
+
+            query = status switch
+            {
+                "active" => query.Where(v =>
+                    v.IsActive &&
+                    v.ExpiryDate >= now &&
+                    (!v.UsageLimit.HasValue ||
+                     v.UsedCount < v.UsageLimit.Value)),
+
+                "inactive" => query.Where(v => !v.IsActive),
+
+                "expired" => query.Where(v =>
+                    v.ExpiryDate < now),
+
+                "out-of-uses" => query.Where(v =>
+                    v.UsageLimit.HasValue &&
+                    v.UsedCount >= v.UsageLimit.Value),
+
+                _ => query
+            };
+
+            var vouchers = await query
+                .OrderByDescending(v => v.VoucherID)
+                .ToListAsync();
+
+            ViewBag.Search = search;
+            ViewBag.SelectedStatus = status;
+
+            return View(vouchers);
+        }
+
+        // GET: /Admin/CreateVoucher
+        [HttpGet]
+        public IActionResult CreateVoucher()
+        {
+            var model = new AdminVoucherViewModel
+            {
+                ExpiryDate = DateTime.Today.AddDays(30),
+                DiscountType = "Fixed",
+                IsActive = true
+            };
+
+            return View(model);
+        }
+
+        // POST: /Admin/CreateVoucher
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateVoucher(
+            AdminVoucherViewModel model)
+        {
+            NormalizeVoucherModel(model);
+            ValidateVoucherModel(model);
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            bool codeExists = await _context.Vouchers
+                .AnyAsync(v => v.Code == model.Code);
+
+            if (codeExists)
+            {
+                ModelState.AddModelError(
+                    nameof(model.Code),
+                    "Mã khuyến mãi này đã tồn tại.");
+
+                return View(model);
+            }
+
+            var voucher = new Voucher
+            {
+                Code = model.Code,
+                Title = model.Title.Trim(),
+                Description = model.Description?.Trim()
+                    ?? string.Empty,
+
+                DiscountType = model.DiscountType,
+                DiscountValue = model.DiscountValue,
+
+                MaxDiscountAmount =
+                    model.DiscountType == "Percent"
+                        ? model.MaxDiscountAmount
+                        : null,
+
+                MinOrderValue = model.MinOrderValue,
+                ExpiryDate = model.ExpiryDate.Date
+                    .AddDays(1)
+                    .AddTicks(-1),
+
+                UsageLimit = model.UsageLimit,
+                UsedCount = 0,
+                IsActive = model.IsActive
+            };
+
+            _context.Vouchers.Add(voucher);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] =
+                $"Đã tạo mã khuyến mãi {voucher.Code}.";
+
+            return RedirectToAction(nameof(Vouchers));
+        }
+
+        // GET: /Admin/EditVoucher/5
+        [HttpGet]
+        public async Task<IActionResult> EditVoucher(int id)
+        {
+            var voucher = await _context.Vouchers
+                .AsNoTracking()
+                .FirstOrDefaultAsync(v => v.VoucherID == id);
+
+            if (voucher == null)
+            {
+                return NotFound();
+            }
+
+            var model = new AdminVoucherViewModel
+            {
+                VoucherID = voucher.VoucherID,
+                Code = voucher.Code,
+                Title = voucher.Title,
+                Description = voucher.Description,
+                DiscountType = voucher.DiscountType,
+                DiscountValue = voucher.DiscountValue,
+                MaxDiscountAmount = voucher.MaxDiscountAmount,
+                MinOrderValue = voucher.MinOrderValue,
+                ExpiryDate = voucher.ExpiryDate.Date,
+                UsageLimit = voucher.UsageLimit,
+                IsActive = voucher.IsActive
+            };
+
+            return View(model);
+        }
+
+        // POST: /Admin/EditVoucher/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditVoucher(
+            int id,
+            AdminVoucherViewModel model)
+        {
+            if (id != model.VoucherID)
+            {
+                return BadRequest();
+            }
+
+            NormalizeVoucherModel(model);
+            ValidateVoucherModel(model);
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var voucher = await _context.Vouchers
+                .FirstOrDefaultAsync(v => v.VoucherID == id);
+
+            if (voucher == null)
+            {
+                return NotFound();
+            }
+
+            bool duplicateCode = await _context.Vouchers
+                .AnyAsync(v =>
+                    v.VoucherID != id &&
+                    v.Code == model.Code);
+
+            if (duplicateCode)
+            {
+                ModelState.AddModelError(
+                    nameof(model.Code),
+                    "Mã khuyến mãi này đã tồn tại.");
+
+                return View(model);
+            }
+
+            if (model.UsageLimit.HasValue &&
+                model.UsageLimit.Value < voucher.UsedCount)
+            {
+                ModelState.AddModelError(
+                    nameof(model.UsageLimit),
+                    $"Giới hạn lượt dùng không được nhỏ hơn " +
+                    $"số lượt đã sử dụng ({voucher.UsedCount}).");
+
+                return View(model);
+            }
+
+            voucher.Code = model.Code;
+            voucher.Title = model.Title.Trim();
+            voucher.Description =
+                model.Description?.Trim() ?? string.Empty;
+
+            voucher.DiscountType = model.DiscountType;
+            voucher.DiscountValue = model.DiscountValue;
+
+            voucher.MaxDiscountAmount =
+                model.DiscountType == "Percent"
+                    ? model.MaxDiscountAmount
+                    : null;
+
+            voucher.MinOrderValue = model.MinOrderValue;
+
+            voucher.ExpiryDate = model.ExpiryDate.Date
+                .AddDays(1)
+                .AddTicks(-1);
+
+            voucher.UsageLimit = model.UsageLimit;
+            voucher.IsActive = model.IsActive;
+
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] =
+                $"Đã cập nhật mã {voucher.Code}.";
+
+            return RedirectToAction(nameof(Vouchers));
+        }
+
+        // POST: /Admin/ToggleVoucherStatus/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleVoucherStatus(int id)
+        {
+            var voucher = await _context.Vouchers
+                .FirstOrDefaultAsync(v => v.VoucherID == id);
+
+            if (voucher == null)
+            {
+                TempData["ErrorMessage"] =
+                    "Không tìm thấy mã khuyến mãi.";
+
+                return RedirectToAction(nameof(Vouchers));
+            }
+
+            voucher.IsActive = !voucher.IsActive;
+
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] =
+                voucher.IsActive
+                    ? $"Đã bật mã {voucher.Code}."
+                    : $"Đã tắt mã {voucher.Code}.";
+
+            return RedirectToAction(nameof(Vouchers));
+        }
+
+        // POST: /Admin/DeleteVoucher/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteVoucher(int id)
+        {
+            var voucher = await _context.Vouchers
+                .FirstOrDefaultAsync(v => v.VoucherID == id);
+
+            if (voucher == null)
+            {
+                TempData["ErrorMessage"] =
+                    "Không tìm thấy mã khuyến mãi.";
+
+                return RedirectToAction(nameof(Vouchers));
+            }
+
+            bool usedInOrder = await _context.Orders
+                .AnyAsync(o => o.VoucherID == id);
+
+            bool assignedToUser = await _context.UserVouchers
+                .AnyAsync(uv => uv.VoucherID == id);
+
+            if (usedInOrder || assignedToUser ||
+                voucher.UsedCount > 0)
+            {
+                TempData["ErrorMessage"] =
+                    "Không thể xóa voucher đã được sử dụng hoặc " +
+                    "đã cấp cho người dùng. Hãy tắt voucher thay vì xóa.";
+
+                return RedirectToAction(nameof(Vouchers));
+            }
+
+            _context.Vouchers.Remove(voucher);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] =
+                $"Đã xóa mã {voucher.Code}.";
+
+            return RedirectToAction(nameof(Vouchers));
+        }
+
         private async Task<IEnumerable<SelectListItem>> GetCategoryOptionsAsync(int? selectedCategoryID = null)
         {
             return await _context.Categories
@@ -447,6 +1042,72 @@ namespace ECommerceWeb.Controllers
                     Selected = selectedCategoryID == c.CategoryID
                 })
                 .ToListAsync();
+        }
+
+        private static void NormalizeVoucherModel(AdminVoucherViewModel model)
+        {
+            model.Code = (model.Code ?? string.Empty)
+                .Trim()
+                .ToUpperInvariant();
+
+            model.Title =
+                model.Title?.Trim() ?? string.Empty;
+
+            model.Description =
+                model.Description?.Trim() ?? string.Empty;
+
+            model.DiscountType =
+                model.DiscountType?.Trim() ?? string.Empty;
+        }
+
+        private void ValidateVoucherModel(AdminVoucherViewModel model)
+        {
+            if (model.DiscountType != "Fixed" &&
+                model.DiscountType != "Percent")
+            {
+                ModelState.AddModelError(
+                    nameof(model.DiscountType),
+                    "Loại giảm giá không hợp lệ.");
+            }
+
+            if (model.DiscountType == "Percent")
+            {
+                if (model.DiscountValue <= 0 ||
+                    model.DiscountValue > 100)
+                {
+                    ModelState.AddModelError(
+                        nameof(model.DiscountValue),
+                        "Phần trăm giảm phải lớn hơn 0 và không vượt quá 100.");
+                }
+
+                if (model.MaxDiscountAmount.HasValue &&
+                    model.MaxDiscountAmount.Value <= 0)
+                {
+                    ModelState.AddModelError(
+                        nameof(model.MaxDiscountAmount),
+                        "Mức giảm tối đa phải lớn hơn 0.");
+                }
+            }
+
+            if (model.DiscountType == "Fixed")
+            {
+                model.MaxDiscountAmount = null;
+            }
+
+            if (model.ExpiryDate.Date < DateTime.Today)
+            {
+                ModelState.AddModelError(
+                    nameof(model.ExpiryDate),
+                    "Ngày hết hạn không được nhỏ hơn ngày hiện tại.");
+            }
+
+            if (model.UsageLimit.HasValue &&
+                model.UsageLimit.Value <= 0)
+            {
+                ModelState.AddModelError(
+                    nameof(model.UsageLimit),
+                    "Giới hạn lượt sử dụng phải lớn hơn 0.");
+            }
         }
     }
 }

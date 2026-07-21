@@ -307,9 +307,13 @@
                                                 Model.SubTotal >= voucher.MinOrderValue;
 
                                             <button type="button"
-                                                    class="voucher-option btn text-start border p-2 @(eligible ? "" : "disabled opacity-50")"
-                                                    data-code="@voucher.Code"
-                                                    disabled="@(!eligible)">
+                                                class="voucher-option btn text-start border p-2 @(eligible ? "" : "disabled opacity-50")"
+                                                data-code="@voucher.Code"
+                                                data-discount-type="@voucher.DiscountType"
+                                                data-discount-value="@voucher.DiscountValue.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                                data-max-discount="@(voucher.MaxDiscountAmount?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "")"
+                                                data-min-order="@voucher.MinOrderValue.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                                disabled="@(!eligible)">
 
                                                 <div class="d-flex justify-content-between gap-2">
                                                     <strong style="color:#b8860b;">
@@ -387,6 +391,17 @@
                                 <span class="text-secondary">Phí vận chuyển</span>
                                 <span class="fw-medium" id="summaryShippingFee">Chưa tính</span>
                             </div>
+                            <div class="d-flex justify-content-between text-success"
+                                 id="voucherDiscountRow"
+                                 style="display:none !important;">
+
+                                <span>Giảm bằng voucher</span>
+
+                                <span class="fw-medium"
+                                      id="summaryVoucherDiscount">
+                                    -0đ
+                                </span>
+                            </div>
                             @{
                                 decimal preDiscount = Model.OriginalTotal - Model.SubTotal;
                             }
@@ -448,6 +463,9 @@
             const shippingFeeDisplay = document.getElementById('ShippingFeeDisplay');
             const summaryShippingFee = document.getElementById('summaryShippingFee');
             const summaryGrandTotal = document.getElementById('summaryGrandTotal');
+            const voucherCodeInput = document.getElementById('VoucherCodeInput');
+            const voucherDiscountRow = document.getElementById('voucherDiscountRow');
+            const summaryVoucherDiscount =document.getElementById('summaryVoucherDiscount');
 
             const checkoutForm = document.getElementById('checkoutForm');
             const checkoutSubmitButton = document.getElementById('checkoutSubmitButton');
@@ -460,6 +478,8 @@
             const selectedDistrictName = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DistrictName));
             const selectedWardCode = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.WardCode));
             const subTotal = @Model.SubTotal;
+            let currentShippingFee = 0;
+            let currentVoucherDiscount = 0;
 
             // ==========================================
             // 3. CÁC HÀM TIỆN ÍCH (HELPER FUNCTIONS)
@@ -470,17 +490,107 @@
                 return Math.round(n).toLocaleString('vi-VN') + 'đ';
             }
 
-            // Tính lại tổng tiền (Cộng thêm phí ship)
-            function recalcTotal(fee) {
-                summaryGrandTotal.textContent = formatVnd(subTotal + fee);
+            function calculateVoucherDiscount(button) {
+                if (!button) {
+                    return 0;
+                }
+
+                const discountType =
+                    button.dataset.discountType;
+
+                const discountValue =
+                    Number(button.dataset.discountValue) || 0;
+
+                const maxDiscount =
+                    Number(button.dataset.maxDiscount) || 0;
+
+                const minOrder =
+                    Number(button.dataset.minOrder) || 0;
+
+                if (subTotal < minOrder) {
+                    return 0;
+                }
+
+                let discount = 0;
+
+                if (discountType === 'Percent') {
+                    discount =
+                        subTotal * discountValue / 100;
+
+                    if (maxDiscount > 0) {
+                        discount = Math.min(
+                            discount,
+                            maxDiscount
+                        );
+                    }
+                } else {
+                    discount = discountValue;
+                }
+
+                return Math.min(
+                    discount,
+                    subTotal
+                );
             }
+
+            function applyVoucherButton(button) {
+                if (!button || button.disabled) {
+                    currentVoucherDiscount = 0;
+
+                    voucherDiscountRow.style.setProperty(
+                        'display',
+                        'none',
+                        'important'
+                    );
+
+                    summaryVoucherDiscount.textContent =
+                        '-0đ';
+
+                    recalcTotal();
+                    return;
+                }
+
+                currentVoucherDiscount =
+                    calculateVoucherDiscount(button);
+
+                if (currentVoucherDiscount > 0) {
+                    voucherDiscountRow.style.removeProperty(
+                        'display'
+                    );
+
+                    summaryVoucherDiscount.textContent =
+                        '-' + formatVnd(
+                            currentVoucherDiscount
+                        );
+                } else {
+                    voucherDiscountRow.style.setProperty(
+                        'display',
+                        'none',
+                        'important'
+                    );
+
+                    summaryVoucherDiscount.textContent =
+                        '-0đ';
+                }
+
+                recalcTotal();
+            }
+
+            // Tính lại tổng tiền (Cộng thêm phí ship)
+            function recalcTotal() {
+            const grandTotal = Math.max(0, subTotal - currentVoucherDiscount + currentShippingFee);
+            summaryGrandTotal.textContent =
+                formatVnd(grandTotal);
+        }
 
             // Reset hiển thị phí ship về trạng thái ban đầu
             function resetShippingFee(message) {
                 shippingFeeDisplay.value = message;
                 summaryShippingFee.textContent = 'Chưa tính';
                 shippingFeeInput.value = 0;
-                recalcTotal(0);
+
+                currentShippingFee = 0;
+                recalcTotal();
             }
 
             // Xóa dữ liệu dropdown con khi dropdown cha thay đổi
@@ -630,6 +740,7 @@
                         }
                         summaryShippingFee.textContent = data.isFreeShip ? 'Miễn phí' : formatVnd(data.fee);
                         shippingFeeInput.value = data.fee;
+                        currentShippingFee = Number(data.fee) || 0;
 
                         // Cập nhật lại tổng tiền
                         recalcTotal(data.fee);
@@ -650,24 +761,98 @@
             });
 
             // Voucher
-            document.querySelectorAll('.voucher-option').forEach(button => {
-                button.addEventListener('click', function () {
-                    const input = document.getElementById('VoucherCodeInput');
+            document.querySelectorAll(
+                    '.voucher-option'
+                ).forEach(button => {
 
-                    // Gán mã voucher vào input
-                    if (input) {
-                        input.value = this.dataset.code;
-                    }
+                    button.addEventListener(
+                        'click',
+                        function () {
 
-                    // Xóa highlight của tất cả các voucher khác
-                    document.querySelectorAll('.voucher-option').forEach(item => {
-                        item.classList.remove('border-warning', 'bg-warning-subtle');
+                            if (this.disabled) {
+                                return;
+                            }
+
+                            if (voucherCodeInput) {
+                                voucherCodeInput.value =
+                                    this.dataset.code;
+                            }
+
+                            document.querySelectorAll(
+                                '.voucher-option'
+                            ).forEach(item => {
+                                item.classList.remove(
+                                    'border-warning',
+                                    'bg-warning-subtle'
+                                );
+                            });
+
+                            this.classList.add(
+                                'border-warning',
+                                'bg-warning-subtle'
+                            );
+
+                            applyVoucherButton(this);
+                        }
+                    );
+                });
+
+                    if (voucherCodeInput) {
+            voucherCodeInput.addEventListener(
+                'input',
+                function () {
+
+                    const enteredCode =
+                        this.value
+                            .trim()
+                            .toUpperCase();
+
+                    const matchingButton =
+                        [...document.querySelectorAll(
+                            '.voucher-option'
+                        )].find(button =>
+                            button.dataset.code
+                                .toUpperCase()
+                                === enteredCode
+                        );
+
+                    document.querySelectorAll(
+                        '.voucher-option'
+                    ).forEach(item => {
+                        item.classList.remove(
+                            'border-warning',
+                            'bg-warning-subtle'
+                        );
                     });
 
-                    // Highlight voucher đang được chọn
-                    this.classList.add('border-warning', 'bg-warning-subtle');
-                });
-            });
+                    if (matchingButton &&
+                        !matchingButton.disabled) {
+
+                        matchingButton.classList.add(
+                            'border-warning',
+                            'bg-warning-subtle'
+                        );
+
+                        applyVoucherButton(
+                            matchingButton
+                        );
+                    } else {
+                        currentVoucherDiscount = 0;
+
+                        voucherDiscountRow.style.setProperty(
+                            'display',
+                            'none',
+                            'important'
+                        );
+
+                        summaryVoucherDiscount.textContent =
+                            '-0đ';
+
+                        recalcTotal();
+                    }
+                }
+            );
+        }
 
             // Ngăn người dùng click liên tục vào nút Submit (Chống spam/duplicate order)
             if (checkoutForm && checkoutSubmitButton) {
@@ -686,6 +871,36 @@
             // ==========================================
             // 6. KHỞI CHẠY (INITIALIZATION)
             // ==========================================
+            if (voucherCodeInput &&
+    voucherCodeInput.value.trim()) {
+
+    const currentCode =
+        voucherCodeInput.value
+            .trim()
+            .toUpperCase();
+
+    const matchingButton =
+        [...document.querySelectorAll(
+            '.voucher-option'
+        )].find(button =>
+            button.dataset.code
+                .toUpperCase()
+                === currentCode
+        );
+
+    if (matchingButton &&
+        !matchingButton.disabled) {
+
+        matchingButton.classList.add(
+            'border-warning',
+            'bg-warning-subtle'
+        );
+
+        applyVoucherButton(
+            matchingButton
+        );
+    }
+}
             loadProvinces(); // Gọi chạy mặc định khi load xong trang
 
         });
