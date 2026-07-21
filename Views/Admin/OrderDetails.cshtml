@@ -1,0 +1,285 @@
+﻿@model ECommerceWeb.ViewModels.Admin.AdminOrderDetailViewModel
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = $"Đơn hàng #{Model.Order.OrderID}";
+
+    var order = Model.Order;
+}
+
+<div class="d-flex flex-wrap justify-content-between
+            align-items-center gap-3 mb-4">
+    <div>
+        <a asp-action="Orders"
+           class="text-decoration-none text-muted">
+            <i class="bi bi-arrow-left"></i>
+            Quay lại danh sách
+        </a>
+
+        <h2 class="fw-bold mt-2 mb-1">
+            Đơn hàng #@order.OrderID
+        </h2>
+
+        <p class="text-muted mb-0">
+            Đặt lúc @order.OrderDate.ToString("dd/MM/yyyy HH:mm")
+        </p>
+    </div>
+
+    <span class="badge bg-warning-subtle
+                 text-warning-emphasis fs-6 px-3 py-2">
+        @order.OrderStatus
+    </span>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<div class="row g-4">
+    <div class="col-xl-8">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="fw-bold mb-0">
+                    Sản phẩm trong đơn
+                </h5>
+            </div>
+
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Sản phẩm</th>
+                                <th>Đơn giá</th>
+                                <th>Số lượng</th>
+                                <th class="text-end pe-4">
+                                    Thành tiền
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var detail
+                                in order.OrderDetails)
+                            {
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="d-flex
+                                                    align-items-center
+                                                    gap-3">
+                                            @if (!string.IsNullOrWhiteSpace(
+                                                detail.Product?.ImageUrl))
+                                            {
+                                                <img src="@detail.Product.ImageUrl"
+                                                     width="55"
+                                                     height="55"
+                                                     style="object-fit:cover;
+                                                            border-radius:8px;"
+                                                     alt="@detail.Product.ProductName" />
+                                            }
+
+                                            <div class="fw-semibold">
+                                                @(detail.Product?.ProductName
+                                                    ?? $"Sản phẩm #{detail.ProductID}")
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        @detail.UnitPrice.ToString("N0") đ
+                                    </td>
+
+                                    <td>
+                                        @detail.Quantity
+                                    </td>
+
+                                    <td class="text-end pe-4 fw-bold">
+                                        @((detail.UnitPrice *
+                                            detail.Quantity).ToString("N0")) đ
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">
+                    Tổng thanh toán
+                </h5>
+
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Phí vận chuyển</span>
+                    <span>
+                        @order.ShippingFee.ToString("N0") đ
+                    </span>
+                </div>
+
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Giảm giá</span>
+                    <span class="text-success">
+                        -@order.DiscountAmount.ToString("N0") đ
+                    </span>
+                </div>
+
+                <hr />
+
+                <div class="d-flex justify-content-between fs-5">
+                    <strong>Tổng cộng</strong>
+
+                    <strong class="text-danger">
+                        @order.TotalAmount.ToString("N0") đ
+                    </strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">
+                    Thông tin khách hàng
+                </h5>
+
+                <div class="mb-3">
+                    <small class="text-muted">
+                        Họ và tên
+                    </small>
+
+                    <div class="fw-semibold">
+                        @order.CustomerName
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <small class="text-muted">
+                        Số điện thoại
+                    </small>
+
+                    <div class="fw-semibold">
+                        @order.CustomerPhone
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <small class="text-muted">
+                        Email
+                    </small>
+
+                    <div class="fw-semibold">
+                        @order.CustomerEmail
+                    </div>
+                </div>
+
+                <div>
+                    <small class="text-muted">
+                        Địa chỉ nhận hàng
+                    </small>
+
+                    <div class="fw-semibold">
+                        @order.ShippingAddress
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">
+                    Thanh toán
+                </h5>
+
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Phương thức</span>
+                    <strong>@order.PaymentMethod</strong>
+                </div>
+
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Trạng thái</span>
+                    <strong>
+                        @(Model.Payment?.PaymentStatus
+                            ?? "Chưa có thông tin")
+                    </strong>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(
+                    Model.Payment?.TransactionCode))
+                {
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            Mã giao dịch
+                        </small>
+
+                        <div class="font-monospace">
+                            @Model.Payment.TransactionCode
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">
+                    Xử lý đơn hàng
+                </h5>
+
+                @if (Model.AllowedNextStatuses.Any())
+                {
+                    <form asp-action="UpdateOrderStatus"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden"
+                               name="orderId"
+                               value="@order.OrderID" />
+
+                        <label class="form-label fw-semibold">
+                            Chuyển sang trạng thái
+                        </label>
+
+                        <select name="newStatus"
+                                class="form-select mb-3"
+                                required>
+                            @foreach (var status
+                                in Model.AllowedNextStatuses)
+                            {
+                                <option value="@status">
+                                    @status
+                                </option>
+                            }
+                        </select>
+
+                        <button type="submit"
+                                class="btn btn-warning w-100 fw-bold"
+                                onclick="return confirm(
+                                    'Xác nhận cập nhật trạng thái đơn hàng?');">
+                            Cập nhật trạng thái
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <div class="alert alert-secondary mb-0">
+                        Đơn hàng hiện không có bước xử lý tiếp theo.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

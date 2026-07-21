@@ -138,6 +138,12 @@
                 <a asp-controller="Admin" asp-action="Categories" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Categories" ? "active" : "")">
                     <i class="bi bi-diagram-3-fill"></i> Danh mục
                 </a>
+                <a asp-controller="Admin" asp-action="Orders" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Orders" ? "active" : "")">
+                    <i class="bi bi-receipt"></i><span>Đơn hàng</span>
+                </a>
+                <a asp-controller="Admin" asp-action="Vouchers" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Vouchers" ? "active" : "")">
+                    <i class="bi bi-receipt"></i><span>Vouchers</span>
+                </a>
             </nav>
 
             <div class="admin-sidebar-footer">
