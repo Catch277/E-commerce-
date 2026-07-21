@@ -1,0 +1,791 @@
+﻿@model ECommerceWeb.ViewModels.AccountInfoViewModel
+@{
+    ViewData["Title"] = "Thông tin tài khoản";
+}
+
+<!--
+    Design tokens lấy từ DESIGN.md (Technical Gaming E-Commerce)
+    Không style header/footer ở đây - phần đó dùng layout riêng.
+-->
+<style>
+    /* ---- Profile page background ---- */
+    body {
+        background-color: #f4f6f8;
+        font-family: 'Inter', sans-serif;
+        color: #212529;
+    }
+
+    /* ---- Reusable card (đồng bộ với Index) ---- */
+    .profile-card {
+        background: #ffffff;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+
+    /* ---- Summary header card ---- */
+    .acc-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        border: 2px solid #ffc107;
+        object-fit: cover;
+    }
+
+    .badge-tier-pill {
+        padding: 3px 10px;
+        border-radius: 4px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        background: #eceef2;
+        color: #575e70;
+    }
+
+    .badge-student-pill {
+        padding: 3px 10px;
+        border-radius: 4px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        background: #10b981;
+        color: #fff;
+    }
+
+    .icon-badge-circle {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff3c2;
+        color: #6d5100;
+        font-size: 1.15rem;
+    }
+
+    .divider-v {
+        width: 1px;
+        background: #eceef2;
+        align-self: stretch;
+    }
+
+    .member-channel-badge {
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        background: #ffc107;
+        color: #212529;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    /* ---- Content cards ---- */
+    .acc-section-title {
+        font-weight: 700;
+        font-size: 1.05rem;
+    }
+
+    .acc-link-action {
+        color: #6d5100;
+        font-weight: 600;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+        .acc-link-action:hover {
+            text-decoration: underline;
+        }
+
+    .acc-label {
+        color: #575e70;
+        font-size: 0.85rem;
+        margin-bottom: 2px;
+    }
+
+    .acc-value {
+        font-weight: 600;
+        color: #212529;
+    }
+
+    /* ---- Voucher ---- */
+    .voucher-card {
+        border: 1px dashed #ffc107;
+        border-radius: 12px;
+        padding: 14px 16px;
+        background: #fffdf5;
+    }
+
+    .voucher-title {
+        color: #6d5100;
+        font-weight: 700;
+    }
+
+    .voucher-copy {
+        color: #6d5100;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+    }
+
+    /* ---- Address ---- */
+    .address-box {
+        border: 1px solid #eceef2;
+        border-radius: 12px;
+        padding: 16px;
+        background: #f2f4f8;
+    }
+
+    .addr-tag {
+        font-size: 0.72rem;
+        padding: 2px 8px;
+        border-radius: 4px;
+        background: #eceef2;
+        color: #575e70;
+        font-weight: 600;
+    }
+
+    .addr-tag-default {
+        background: #fff3c2;
+        color: #6d5100;
+    }
+
+    /* ---- Linked accounts ---- */
+    .linked-provider-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 1rem;
+    }
+
+    .linked-status-badge {
+        font-size: 0.75rem;
+        padding: 2px 10px;
+        border-radius: 10px;
+        background: #e6f7ee;
+        color: #10b981;
+        font-weight: 600;
+    }
+
+    /* ---- Voucher input ---- */
+    .voucher-input-group input {
+        border-radius: 10px 0 0 10px;
+        border: 1px solid #eceef2;
+    }
+
+    .voucher-input-group .btn-apply {
+        border-radius: 0 10px 10px 0;
+        background: #ffc107;
+        border-color: #ffc107;
+        color: #212529;
+        font-weight: 700;
+    }
+
+        .voucher-input-group .btn-apply:hover {
+            background: #e0a800;
+            border-color: #e0a800;
+        }
+</style>
+
+<div class="container mt-4 mb-5">
+    <!-- ============ 1. TOAST THÔNG BÁO (dán đầu container) ============ -->
+    @if (TempData["ProfileSuccess"] != null || TempData["ProfileError"] != null
+         || TempData["PasswordSuccess"] != null || TempData["PasswordError"] != null
+         || TempData["VoucherSuccess"] != null || TempData["VoucherError"] != null)
+    {
+        <div class="alert @((TempData["ProfileError"] ?? TempData["PasswordError"] ?? TempData["VoucherError"]) != null ? "alert-danger" : "alert-success") acc-card mb-3">
+            @(TempData["ProfileSuccess"] ?? TempData["ProfileError"]
+              ?? TempData["PasswordSuccess"] ?? TempData["PasswordError"]
+              ?? TempData["VoucherSuccess"] ?? TempData["VoucherError"])
+        </div>
+    }
+
+    <!-- SECTION 1: Header tổng quan tài khoản -->
+    <div class="profile-card p-3 mb-3">
+        <div class="row align-items-center g-3">
+            <div class="col-lg-4 d-flex align-items-center">
+                <img src="https://ui-avatars.com/api/?name=@Model.FullName&background=ffc107&color=6d5100&rounded=true&size=64"
+                     alt="Avatar" class="acc-avatar me-3">
+                <div>
+                    <h5 class="mb-1 fw-bold">@Model.FullName</h5>
+                    <div class="text-muted small mb-2">@Model.PhoneMasked <i class="fa-solid fa-pen ms-1" style="cursor:pointer;"></i></div>
+                    <div class="d-flex gap-1">
+                        <span class="badge-tier-pill">@Model.CurrentTierCode</span>
+                        @if (Model.IsStudentVerified)
+                        {
+                            <span class="badge-student-pill">S-Student</span>
+                        }
+                    </div>
+                    @if (Model.TierRefreshDate.HasValue)
+                    {
+                        <div class="text-muted small mt-1"><i class="fa-regular fa-clock me-1"></i>Cập nhật lại sau @Model.TierRefreshDate.Value.ToString("dd/MM/yyyy")</div>
+                    }
+                </div>
+            </div>
+
+            <div class="col-lg-1 d-none d-lg-block divider-v mx-auto"></div>
+
+            <div class="col-6 col-lg-2">
+                <div class="d-flex align-items-center">
+                    <span class="icon-badge-circle me-2"><i class="fa-solid fa-cart-shopping"></i></span>
+                    <div>
+                        <div class="fw-bold fs-5">@Model.TotalOrders</div>
+                        <div class="text-muted small">Tổng số đơn hàng đã mua</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-1 d-none d-lg-block divider-v mx-auto"></div>
+
+            <div class="col-6 col-lg-3">
+                <div class="d-flex align-items-center">
+                    <span class="icon-badge-circle me-2"><i class="fa-solid fa-sack-dollar"></i></span>
+                    <div>
+                        <div class="fw-bold fs-5">@Model.TotalSpent.ToString("N0")đ</div>
+                        <div class="text-muted small">
+                            Tổng tiền tích lũy
+                            @if (Model.AmountToNextTier > 0)
+                            {
+                                <span> &bull; Cần chi tiêu thêm <strong>@Model.AmountToNextTier.ToString("N0")</strong> để lên hạng <strong>@Model.NextTierCode</strong></span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-1 d-none d-lg-block divider-v mx-auto"></div>
+
+            <div class="col-lg-2 text-center">
+                <div class="text-muted small mb-1 d-inline-block text-start" style="word-break: break-word;">
+                    Bạn đang ở trang hồ sơ cá nhân
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 2: Quick links -->
+    @await Html.PartialAsync("_ProfileQuickLinksPartial")
+
+    <!-- SECTION 3: Sidebar + nội dung -->
+    <div class="row g-3">
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            @await Html.PartialAsync("_ProfileSidebarPartial")
+        </div>
+
+        <!-- Nội dung chính -->
+        <div class="col-lg-9">
+            <div class="row g-3">
+
+                <!-- Thông tin cá nhân -->
+                <div class="col-lg-6">
+                    <div class="profile-card p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="acc-section-title">Thông tin cá nhân</span>
+                            <a href="#" class="acc-link-action" data-bs-toggle="modal" data-bs-target="#updateProfileModal">
+                                <i class="fa-solid fa-pen me-1"></i>Cập nhật
+                            </a>
+                        </div>
+                        <div class="row row-cols-2 g-3">
+                            <div class="col">
+                                <div class="acc-label">Họ và tên:</div>
+                                <div class="acc-value">@Model.FullName</div>
+                            </div>
+                            <div class="col">
+                                <div class="acc-label">Số điện thoại:</div>
+                                <div class="acc-value">@Model.Phone</div>
+                            </div>
+                            <div class="col">
+                                <div class="acc-label">Giới tính:</div>
+                                <div class="acc-value">@Model.Gender</div>
+                            </div>
+                            <div class="col">
+                                <div class="acc-label">Email:</div>
+                                <div class="acc-value">@Model.Email</div>
+                            </div>
+                            <div class="col-12">
+                                <div class="acc-label">Ngày sinh:</div>
+                                <div class="acc-value">@(Model.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")</div>
+                            </div>
+                            <div class="col-12">
+                                <div class="acc-label">Địa chỉ mặc định:</div>
+                                <div class="acc-value">@Model.DefaultAddress</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mã giảm giá của tôi -->
+                <div class="col-lg-6">
+                    <div class="profile-card p-4 h-100">
+                        <div class="mb-3">
+                            <span class="acc-section-title"><i class="fa-solid fa-tags me-2" style="color:#ffc107;"></i>Mã giảm giá của tôi</span>
+                        </div>
+                        <form asp-controller="Profile" asp-action="ApplyVoucher" method="post" class="input-group voucher-input-group mb-3">
+                            @Html.AntiForgeryToken()
+                            <input type="text" name="voucherCode" class="form-control" placeholder="Nhập mã giảm giá" required>
+                            <button type="submit" class="btn btn-apply">Áp dụng</button>
+                        </form>
+
+                        @if (!Model.Vouchers.Any())
+                        {
+                            <div class="text-center py-3">
+                                <i class="fa-solid fa-ticket text-muted" style="font-size: 2.5rem; opacity: 0.3;"></i>
+                                <p class="text-muted small mt-2 mb-0">Bạn chưa có mã giảm giá nào.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="d-flex flex-column gap-2">
+                                @foreach (var v in Model.Vouchers)
+                                {
+                                    <div class="voucher-card d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="voucher-title">@v.Title</div>
+                                            <div class="text-muted small">@v.Description</div>
+                                            <div class="text-muted small">Hết hạn: @v.ExpiryDate.ToString("dd/MM/yyyy")</div>
+                                        </div>
+                                        <span class="voucher-copy">Sao chép</span>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Sổ địa chỉ -->
+                <div class="col-lg-6">
+                    <div class="profile-card p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="acc-section-title">Sổ địa chỉ</span>
+                            <a href="#" class="acc-link-action"><i class="fa-solid fa-plus me-1"></i>Thêm địa chỉ</a>
+                        </div>
+
+                        @if (!Model.Addresses.Any())
+                        {
+                            <div class="text-center py-3">
+                                <i class="fa-solid fa-location-dot text-muted" style="font-size: 2.5rem; opacity: 0.3;"></i>
+                                <p class="text-muted small mt-2 mb-0">Bạn chưa có địa chỉ nào được lưu.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            @foreach (var addr in Model.Addresses)
+                            {
+                                <div class="address-box mb-2">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <span class="fw-bold">@addr.Label</span>
+                                        <span class="addr-tag"><i class="fa-solid fa-house me-1"></i>@addr.TypeTag</span>
+                                        @if (addr.IsDefault)
+                                        {
+                                            <span class="addr-tag addr-tag-default">Mặc định</span>
+                                        }
+                                    </div>
+                                    <div class="mb-1"><span class="fw-semibold">@addr.ReceiverName</span> &nbsp;|&nbsp; @addr.Phone</div>
+                                    <div class="text-muted small mb-2">@addr.FullAddress</div>
+                                    <hr class="my-2">
+                                    <div class="d-flex gap-3 small">
+                                        <a href="#" class="text-danger text-decoration-none">Xóa</a>
+                                        <a href="#" class="text-primary text-decoration-none">Cập nhật</a>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <!-- Mật khẩu -->
+                <div class="col-lg-6">
+                    <div class="profile-card p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="acc-section-title">Mật khẩu</span>
+                            <a href="#" class="acc-link-action" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                <i class="fa-solid fa-pen me-1"></i>Thay đổi mật khẩu
+                            </a>
+                        </div>
+                        <div class="acc-label">Cập nhật lần cuối lúc:</div>
+                        <div class="acc-value">@(Model.PasswordLastUpdated?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa có dữ liệu")</div>
+                    </div>
+                </div>
+
+                <!-- Tài khoản liên kết -->
+                <div class="col-lg-6">
+                    <div class="profile-card p-4 h-100">
+                        <div class="mb-3">
+                            <span class="acc-section-title">Tài khoản liên kết</span>
+                        </div>
+                        <div class="d-flex flex-column gap-3">
+
+                            <!-- Google -->
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="~/images/google.svg" alt="Google">
+                                    <span class="fw-semibold">Google</span>
+                                </div>
+                                <a href="#" class="acc-link-action small">Liên kết</a>
+                            </div>
+
+                            <!-- Zalo -->
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="~/images/zalo.svg" alt="Zalo">
+                                    <span class="fw-semibold">Zalo</span>
+                                </div>
+                                <a href="#" class="acc-link-action small">Liên kết</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ============ MODAL 1: CẬP NHẬT THÔNG TIN CÁ NHÂN (THEO MẪU) ============ -->
+    <!-- ============ MODAL CẬP NHẬT THÔNG TIN CÁ NHÂN (ĐÃ TỐI ƯU) ============ -->
+    <div class="modal fade" id="updateProfileModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 18px; background-color: #ffffff; box-shadow: 0 8px 25px rgba(0,0,0,0.1); border: none; overflow: hidden;">
+                <form asp-controller="Profile" asp-action="UpdateProfile" method="post" id="updateProfileForm">
+                    @Html.AntiForgeryToken()
+                    <!-- Header -->
+                    <div class="modal-header border-0 px-5 py-4" style="border-bottom: 1px solid #eceef2;">
+                        <h5 class="modal-title fw-bold" style="font-family: 'Inter', sans-serif; font-size: 20px; color: #181c1f;">Cập nhật thông tin cá nhân</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <!-- Body (giảm padding) -->
+                    <div class="modal-body px-5 py-4" style="max-height: calc(100vh - 200px); overflow-y: auto;">
+                        <!-- Họ và tên -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="font-family: 'Inter', sans-serif; font-size: 0.78rem; color: #575e70; margin-bottom: 4px;">Họ và tên</label>
+                            <input type="text" name="FullName" class="form-control" value="@Model.FullName" required
+                                   style="border-radius: 10px; background-color: #ffffff; border: 1px solid #e0e3e6; padding: 8px 14px; font-size: 15px; color: #212529; transition: all 0.2s;"
+                                   onfocus="this.style.borderColor='#ffc107'; this.style.boxShadow='0 0 0 3px rgba(255,193,7,0.25)'"
+                                   onblur="this.style.borderColor='#e0e3e6'; this.style.boxShadow='none'">
+                        </div>
+
+                        <!-- Số điện thoại (prefix +84, focus vàng) -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="font-family: 'Inter', sans-serif; font-size: 0.78rem; color: #575e70; margin-bottom: 4px;">Số điện thoại</label>
+                            <div class="d-flex align-items-center" style="border-radius: 10px; border: 1px solid #e0e3e6; background-color: #ffffff; padding: 0; transition: all 0.2s;" id="phoneWrapper">
+                                <span style="padding: 8px 0 8px 14px; font-size: 15px; color: #212529; font-weight: 600; background: transparent; border: none; white-space: nowrap;">+84</span>
+                                <input type="text" id="phoneNumber" name="Phone" class="form-control" value="@(Model.Phone?.StartsWith("+84") == true ? Model.Phone.Substring(3) : Model.Phone)" required
+                                       style="border: none; background: transparent; border-radius: 0 10px 10px 0; padding: 8px 14px 8px 6px; font-size: 15px; color: #212529; outline: none; width: 100%;"
+                                       maxlength="9" inputmode="numeric" pattern="[0-9]*"
+                                       onfocus="document.getElementById('phoneWrapper').style.borderColor='#ffc107'; document.getElementById('phoneWrapper').style.boxShadow='0 0 0 3px rgba(255,193,7,0.25)'"
+                                       onblur="document.getElementById('phoneWrapper').style.borderColor='#e0e3e6'; document.getElementById('phoneWrapper').style.boxShadow='none'"
+                                       oninput="this.value = this.value.replace(/\D/g, '').slice(0, 9);">
+                            </div>
+                            <small class="text-muted" style="font-size: 0.75rem; color: #575e70;">Nhập 9 số sau mã +84</small>
+                        </div>
+
+                        <!-- Giới tính -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="font-family: 'Inter', sans-serif; font-size: 0.78rem; color: #575e70; margin-bottom: 4px;">Giới tính</label>
+                            <select name="Gender" class="form-select" style="border-radius: 10px; background-color: #ffffff; 
+border: 1px solid #e0e3e6; padding: 8px 14px; font-size: 15px; color: #212529; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=" http: //www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%23575e70" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline></svg>'); background-repeat: no-repeat; background-position: right 12px center; background-size: 20px; transition: all 0.2s;"
+                                onfocus="this.style.borderColor='#ffc107'; this.style.boxShadow='0 0 0 3px rgba(255,193,7,0.25)'"
+                                onblur="this.style.borderColor='#e0e3e6'; this.style.boxShadow='none'">
+                                <option value="">-- Chọn giới tính --</option>
+                                <option value="Nam" selected="@(Model.Gender == "Nam")">Nam</option>
+                                <option value="Nữ" selected="@(Model.Gender == "Nữ")">Nữ</option>
+                                <option value="Khác" selected="@(Model.Gender == "Khác")">Khác</option>
+                            </select>
+                        </div>
+
+                        <!-- Ngày sinh -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="font-family: 'Inter', sans-serif; font-size: 0.78rem; color: #575e70; margin-bottom: 4px;">Ngày sinh</label>
+                            <input type="date" name="DateOfBirth" class="form-control" value="@(Model.DateOfBirth?.ToString("yyyy-MM-dd"))"
+                                   style="border-radius: 10px; background-color: #ffffff; border: 1px solid #e0e3e6; padding: 8px 14px; font-size: 15px; color: #212529; transition: all 0.2s;"
+                                   onfocus="this.style.borderColor='#ffc107'; this.style.boxShadow='0 0 0 3px rgba(255,193,7,0.25)'"
+                                   onblur="this.style.borderColor='#e0e3e6'; this.style.boxShadow='none'">
+                        </div>
+
+                        <!-- Địa chỉ mặc định -->
+                        <div class="mb-1">
+                            <label class="form-label fw-semibold" style="font-family: 'Inter', sans-serif; font-size: 0.78rem; color: #575e70; margin-bottom: 4px;">Địa chỉ mặc định</label>
+                            <textarea name="Address" class="form-control" rows="2" style="border-radius: 10px; background-color: #ffffff; border: 1px solid #e0e3e6; padding: 8px 14px; font-size: 15px; color: #212529; resize: none; transition: all 0.2s;"
+                                      onfocus="this.style.borderColor='#ffc107'; this.style.boxShadow='0 0 0 3px rgba(255,193,7,0.25)'"
+                                      onblur="this.style.borderColor='#e0e3e6'; this.style.boxShadow='none'">@Model.DefaultAddress</textarea>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="modal-footer border-0 px-5 py-3" style="border-top: 1px solid #eceef2; background-color: #ffffff; border-radius: 0 0 18px 18px;">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 10px; font-family: 'Inter', sans-serif; font-weight: 600; color: #212529; background-color: #f2f4f8; border: 1px solid #e0e3e6; padding: 8px 20px; transition: all 0.2s;"
+                                onmouseover="this.style.backgroundColor='#e6e8ec'"
+                                onmouseout="this.style.backgroundColor='#f2f4f8'">
+                            Hủy
+                        </button>
+                        <button type="submit" class="btn" style="border-radius: 10px; background-color: #ffc107; color: #6d5100; font-family: 'Inter', sans-serif; font-weight: 700; padding: 8px 20px; border: none; transition: all 0.2s;"
+                                onmouseover="this.style.backgroundColor='#e0a800'; this.style.transform='translateY(-2px)'"
+                                onmouseout="this.style.backgroundColor='#ffc107'; this.style.transform='translateY(0)'">
+                            Lưu thay đổi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ============ 2. MODAL ĐỔI MẬT KHẨU (NỀN TRẮNG, 4 TIÊU CHÍ 2 CỘT) ============ -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 18px; background-color: #ffffff; color: #212529; box-shadow: 0 8px 25px rgba(0,0,0,0.1);">
+                <form id="changePasswordForm" asp-controller="Profile" asp-action="ChangePassword" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold" style="font-family: 'Inter', sans-serif; color: #181c1f;">Thay đổi mật khẩu</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Mật khẩu hiện tại -->
+                        <div class="mb-3">
+                            <label class="acc-label" style="color: #575e70; font-family: 'Inter', sans-serif;">Mật khẩu hiện tại</label>
+                            <div class="position-relative">
+                                <input type="password" id="currentPassword" name="CurrentPassword" class="form-control" placeholder="Nhập mật khẩu hiện tại" required style="border-radius: 12px; background-color: #f2f4f8; color: #212529; border: 1px solid #eceef2; padding-right: 2.5rem;">
+                                <img src="/images/password-reveal-toggle.svg" alt="Toggle" class="position-absolute end-0 top-50 translate-middle-y me-3" style="z-index: 10; cursor: pointer; width: 20px; height: 20px;" onclick="togglePasswordVisibility('currentPassword', this)">
+                            </div>
+                        </div>
+
+                        <!-- Mật khẩu mới -->
+                        <div class="mb-2">
+                            <label class="acc-label" style="color: #575e70; font-family: 'Inter', sans-serif;">Mật khẩu mới</label>
+                            <div class="position-relative">
+                                <input type="password" id="newPassword" name="NewPassword" class="form-control" placeholder="Nhập mật khẩu mới" minlength="6" required style="border-radius: 12px; background-color: #f2f4f8; color: #212529; border: 1px solid #eceef2; padding-right: 2.5rem;">
+                                <img src="/images/password-reveal-toggle.svg" alt="Toggle" class="position-absolute end-0 top-50 translate-middle-y me-3" style="z-index: 10; cursor: pointer; width: 20px; height: 20px;" onclick="togglePasswordVisibility('newPassword', this)">
+                            </div>
+                        </div>
+
+                        <!-- Thanh progress đo độ mạnh (4 đoạn) - Giữ nguyên như cũ -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="small" style="font-family: 'Inter', sans-serif; color: #575e70;">Độ mạnh mật khẩu: <strong id="strengthLabel" style="color: #111827;">Chưa nhập</strong></span>
+                            </div>
+                            <div class="progress" style="height: 6px; background-color: #eceef2; border-radius: 3px; overflow: hidden;">
+                                <div class="progress-bar" id="strengthBar1" role="progressbar" style="width: 25%; background-color: #111827; transition: background-color 0.3s ease, width 0.3s ease;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                <div class="progress-bar" id="strengthBar2" role="progressbar" style="width: 25%; background-color: #111827; transition: background-color 0.3s ease, width 0.3s ease;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                <div class="progress-bar" id="strengthBar3" role="progressbar" style="width: 25%; background-color: #111827; transition: background-color 0.3s ease, width 0.3s ease;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                <div class="progress-bar" id="strengthBar4" role="progressbar" style="width: 25%; background-color: #111827; transition: background-color 0.3s ease, width 0.3s ease;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+
+                        <!-- 4 tiêu chí quy tắc (2 cột, nền sáng) - Giữ nguyên như cũ -->
+                        <div class="mb-3" style="background-color: #f2f4f8; border-radius: 12px; padding: 16px;">
+                            <div class="small fw-bold mb-2" style="color: #181c1f; font-family: 'Inter', sans-serif;">QUY TẮC MẬT KHẨU:</div>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="d-flex align-items-center" id="ruleLength">
+                                        <i class="fa-regular fa-circle me-2" style="color: #adb5bd; font-size: 0.9rem;"></i>
+                                        <span class="small" style="color: #212529;">Tối thiểu 6 ký tự</span>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="d-flex align-items-center" id="ruleUppercase">
+                                        <i class="fa-regular fa-circle me-2" style="color: #adb5bd; font-size: 0.9rem;"></i>
+                                        <span class="small" style="color: #212529;">Ít nhất 1 chữ hoa</span>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="d-flex align-items-center" id="ruleNumber">
+                                        <i class="fa-regular fa-circle me-2" style="color: #adb5bd; font-size: 0.9rem;"></i>
+                                        <span class="small" style="color: #212529;">Ít nhất 1 số</span>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="d-flex align-items-center" id="ruleSpecial">
+                                        <i class="fa-regular fa-circle me-2" style="color: #adb5bd; font-size: 0.9rem;"></i>
+                                        <span class="small" style="color: #212529;">Ít nhất 1 ký tự đặc biệt</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Xác nhận mật khẩu mới -->
+                        <div class="mb-3">
+                            <label class="acc-label" style="color: #575e70; font-family: 'Inter', sans-serif;">Xác nhận mật khẩu mới</label>
+                            <div class="position-relative">
+                                <input type="password" id="confirmPassword" name="ConfirmPassword" class="form-control" placeholder="Nhập lại mật khẩu mới" minlength="6" required style="border-radius: 12px; background-color: #f2f4f8; color: #212529; border: 1px solid #eceef2; padding-right: 2.5rem;">
+                                <img src="/images/password-reveal-toggle.svg" alt="Toggle" class="position-absolute end-0 top-50 translate-middle-y me-3" style="z-index: 10; cursor: pointer; width: 20px; height: 20px;" onclick="togglePasswordVisibility('confirmPassword', this)">
+                            </div>
+                            <div id="confirmPasswordError" class="text-danger small mt-1 d-none">Mật khẩu xác nhận không khớp.</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 10px; font-family: 'Inter', sans-serif; font-weight: 600; color: #212529; background-color: #f2f4f8; border: 1px solid #eceef2;">Hủy</button>
+                        <button type="submit" id="btnSubmitChangePassword" class="btn" disabled style="border-radius: 10px; background-color: #ffc107; color: #261a00; font-family: 'Inter', sans-serif; font-weight: 700; transition: transform 0.2s; border: none; opacity: 0.6;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0px)'">Đổi mật khẩu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div> <!-- đóng .container mở ở đầu file -->
+<!-- ============ 3. SCRIPT XỬ LÝ ============ -->
+<script>
+    // Bổ sung validation chặn paste không hợp lệ và kiểm tra số lượng số
+    document.addEventListener('DOMContentLoaded', function() {
+        const phoneInput = document.getElementById('phoneNumber');
+        if (phoneInput) {
+            phoneInput.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const pasted = (e.clipboardData || window.clipboardData).getData('text');
+                const cleaned = pasted.replace(/\D/g, '').slice(0, 9);
+                this.value = cleaned;
+            });
+
+            phoneInput.addEventListener('keydown', function(e) {
+                const key = e.key;
+                if (key === 'Backspace' || key === 'Delete' || key === 'Tab' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Home' || key === 'End') {
+                    return;
+                }
+                if (!/^\d$/.test(key)) {
+                    e.preventDefault();
+                }
+            });
+        }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // Hàm toggle password visibility
+            window.togglePasswordVisibility = function(inputId, imgElement) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+
+        const isPassword = input.getAttribute('type') === 'password';
+
+        // Đổi type của input
+        input.setAttribute('type', isPassword ? 'text' : 'password');
+
+        // Đổi ảnh icon (Bạn nhớ thay đường dẫn ảnh của bạn vào đây nhé)
+        imgElement.src = isPassword ? '/images/password-hide-toggle.svg' : '/images/password-reveal-toggle.svg';
+    };
+
+        const newPasswordInput = document.getElementById('newPassword');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const submitBtn = document.getElementById('btnSubmitChangePassword');
+        const confirmError = document.getElementById('confirmPasswordError');
+
+        // Danh sách rule (id, regex, element chứa icon và text)
+        const rules = [
+            { id: 'ruleLength', regex: /.{6,}/ },
+            { id: 'ruleUppercase', regex: /[A-Z]/ },
+            { id: 'ruleNumber', regex: /[0-9]/ },
+            { id: 'ruleSpecial', regex: /[^A-Za-z0-9]/ }
+        ];
+
+        const strengthLabel = document.getElementById('strengthLabel');
+        const bars = [
+            document.getElementById('strengthBar1'),
+            document.getElementById('strengthBar2'),
+            document.getElementById('strengthBar3'),
+            document.getElementById('strengthBar4')
+        ];
+
+        const strengthLevels = [
+            { label: 'Rất yếu', color: '#ba1a1a' },
+            { label: 'Yếu', color: '#fb923c' },
+            { label: 'Trung bình', color: '#ffc107' },
+            { label: 'Khá mạnh', color: '#a3e635' },
+            { label: 'Rất mạnh', color: '#10b981' }
+        ];
+
+        let debounceTimer;
+
+        // Hàm kiểm tra và cập nhật
+        function checkPasswordStrength() {
+            const password = newPasswordInput.value;
+            let checksPassed = 0;
+
+            rules.forEach(rule => {
+                const element = document.getElementById(rule.id);
+                const icon = element.querySelector('i');
+                const textSpan = element.querySelector('span');
+                const isMatched = rule.regex.test(password);
+                if (isMatched) {
+                    icon.className = 'fa-solid fa-check-circle me-2 text-success';
+                    textSpan.style.color = '#10b981'; // xanh success
+                    checksPassed++;
+                } else {
+                    icon.className = 'fa-regular fa-circle me-2 text-muted';
+                    textSpan.style.color = '#212529'; // reset về đen
+                }
+            });
+
+            // Cập nhật thanh progress và label
+            const strengthIndex = Math.min(checksPassed, strengthLevels.length - 1);
+            const level = strengthLevels[strengthIndex];
+            strengthLabel.innerText = level.label;
+            strengthLabel.style.color = level.color;
+
+            // Reset all bars về màu nền tối khi chưa nhập
+            if (password.length === 0) {
+                bars.forEach(bar => {
+                    bar.style.width = '25%';
+                    bar.style.backgroundColor = '#111827';
+                    bar.setAttribute('aria-valuenow', '0');
+                });
+                strengthLabel.innerText = 'Chưa nhập';
+                strengthLabel.style.color = '#111827';
+            } else {
+                // Set màu cho các thanh
+                bars.forEach((bar, index) => {
+                    if (index < checksPassed) {
+                        bar.style.width = '25%';
+                        bar.style.backgroundColor = level.color;
+                        bar.setAttribute('aria-valuenow', '25');
+                    } else {
+                        bar.style.width = '25%';
+                        bar.style.backgroundColor = '#111827';
+                        bar.setAttribute('aria-valuenow', '0');
+                    }
+                });
+            }
+
+            checkSubmitState();
+        }
+
+        function checkSubmitState() {
+            const password = newPasswordInput.value;
+            const confirm = confirmPasswordInput.value;
+            let checksPassed = 0;
+            rules.forEach(rule => {
+                if (rule.regex.test(password)) checksPassed++;
+            });
+
+            const rulesValid = checksPassed === 4;
+            const passwordsMatch = password === confirm;
+            const confirmNotEmpty = confirm.length > 0;
+
+            // Khi disabled: border none, opacity 0.6
+            // Khi enabled: border none (vẫn giữ), opacity 1
+            submitBtn.disabled = !(rulesValid && passwordsMatch && confirmNotEmpty);
+            submitBtn.style.opacity = submitBtn.disabled ? '0.6' : '1';
+
+            if (confirmNotEmpty && !passwordsMatch) {
+                confirmError.classList.remove('d-none');
+            } else {
+                confirmError.classList.add('d-none');
+            }
+        }
+
+        // Debounce 500ms
+        newPasswordInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(checkPasswordStrength, 500);
+        });
+
+        confirmPasswordInput.addEventListener('input', function() {
+            checkSubmitState();
+        });
+    });
+</script>

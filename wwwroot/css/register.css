@@ -1,0 +1,184 @@
+.auth-container {
+    background-color: var(--light);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.auth-card .text-muted {
+    color: #9ca3af !important;
+}
+
+.auth-card {
+    display: flex;
+    flex-direction: row;
+    background-color: var(--dark2);
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    max-width: 1000px;
+    width: 100%;
+}
+
+.auth-left {
+    background-color: var(--dark);
+    color: #ffffff;
+    padding: 4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    flex: 1;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.auth-left h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--primary);
+}
+
+.auth-left p {
+    font-size: 1.1rem;
+    line-height: 1.5;
+    color: #cbd5e1;
+}
+
+.auth-right {
+    padding: 4rem;
+    flex: 1.2;
+    color: #ffffff;
+}
+
+.auth-right h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #ffffff;
+}
+
+.auth-right p.text-muted-desc {
+    color: #9ca3af;
+    margin-bottom: 2rem;
+}
+
+.form-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    color: #f8fafc;
+}
+
+.form-control {
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #374151;
+    background-color: var(--dark);
+    color: #ffffff;
+}
+
+.form-control:focus {
+    box-shadow: none;
+    border-color: var(--primary);
+    background-color: var(--dark);
+    color: #ffffff;
+}
+
+.form-control::placeholder {
+    color: #6b7280;
+}
+
+.password-rules-container {
+    background-color: var(--dark);
+    border: 1px solid #374151;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-top: 0.5rem;
+}
+
+.password-rules-container ul {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.password-rules-container li {
+    width: 50%;
+    font-size: 0.85rem;
+    color: #9ca3af;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.password-rules-container li:nth-last-child(-n+2) {
+    margin-bottom: 0;
+}
+
+.password-rules-container li i {
+    margin-right: 0.5rem;
+    font-size: 1rem;
+}
+
+.text-success-custom {
+    color: #10b981 !important;
+}
+
+.btn-auth-submit {
+    background-color: var(--primary);
+    color: var(--dark);
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    font-weight: 700;
+    width: 100%;
+    transition: background-color 0.3s;
+}
+
+.btn-auth-submit:hover {
+    background-color: var(--primary-hover);
+    color: var(--dark);
+}
+
+.auth-link {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-link:hover {
+    text-decoration: underline;
+    color: var(--primary-hover);
+}
+
+.toggle-password i {
+    color: #9ca3af !important;
+}
+
+@media (max-width: 768px) {
+    .auth-card {
+        flex-direction: column;
+    }
+    
+    .auth-left {
+        padding: 3rem 2rem;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .auth-right {
+        padding: 3rem 2rem;
+    }
+}
+
+/* Custom style cho checkbox Ghi nhớ đăng nhập khi được tích */
+.form-check-input:checked {
+    background-color: #ffc107; /* Màu nền vàng */
+    border-color: #ffc107; /* Màu viền vàng */
+    accent-color: #ffc107; /* Sử dụng accent-color cho các trình duyệt hiện đại */
+}

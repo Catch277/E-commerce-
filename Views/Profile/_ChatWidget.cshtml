@@ -1,0 +1,301 @@
+﻿<!--
+    _ChatWidget.cshtml
+    Chat box tạm thời - chưa có Admin thật nên chỉ lưu tin nhắn vào DB,
+    hiển thị trạng thái "Đang chờ phản hồi". Khi có hệ thống Admin,
+    chỉ cần thêm polling/SignalR để nhận tin nhắn SenderType = "Admin".
+-->
+<style>
+    .chat-fab {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: #ffc107; /* Đã đổi thành màu vàng */
+        color: #212529; /* Đổi màu tương phản nếu bạn vẫn muốn dùng text/icon sau này */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        border: none;
+        box-shadow: 0 8px 20px rgba(0,0,0,.2);
+        cursor: pointer;
+        z-index: 1050;
+        transition: transform 0.2s ease;
+    }
+
+        .chat-fab:hover {
+            transform: scale(1.08);
+        }
+
+    .chat-panel {
+        position: fixed;
+        bottom: 92px;
+        right: 24px;
+        width: 340px;
+        max-height: 460px;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 12px 32px rgba(0,0,0,.18);
+        display: none;
+        flex-direction: column;
+        overflow: hidden;
+        z-index: 1050;
+    }
+
+        .chat-panel.open {
+            display: flex;
+        }
+
+    .chat-panel-header {
+        background: #212529;
+        color: #fff;
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+        .chat-panel-header .chat-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .chat-panel-header .chat-subtitle {
+            font-size: 0.72rem;
+            color: #ffc107;
+        }
+
+        .chat-panel-header .chat-close-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+    .chat-panel-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 14px;
+        background: #f7f9fd;
+        min-height: 240px;
+    }
+
+    .chat-empty-state {
+        text-align: center;
+        color: #adb5bd;
+        font-size: 0.85rem;
+        margin-top: 40px;
+    }
+
+    .chat-bubble {
+        max-width: 78%;
+        padding: 8px 12px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+        line-height: 1.4;
+    }
+
+        .chat-bubble.from-user {
+            background: #ffc107;
+            color: #212529;
+            margin-left: auto;
+            border-bottom-right-radius: 2px;
+        }
+
+        .chat-bubble.from-admin {
+            background: #eceef2;
+            color: #212529;
+            margin-right: auto;
+            border-bottom-left-radius: 2px;
+        }
+
+    .chat-bubble-time {
+        font-size: 0.65rem;
+        color: #adb5bd;
+        margin-top: 2px;
+    }
+
+    .chat-panel-footer {
+        padding: 10px;
+        border-top: 1px solid #eceef2;
+        display: flex;
+        gap: 8px;
+    }
+
+        .chat-panel-footer input {
+            flex: 1;
+            border: 1px solid #d4c5ab;
+            border-radius: 20px;
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+            .chat-panel-footer input:focus {
+                border-color: #ffc107;
+            }
+
+    .chat-send-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: none;
+        background: #ffc107;
+        color: #212529;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+        .chat-send-btn:hover {
+            background: #e0a800;
+        }
+
+        .chat-send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+</style>
+
+<button type="button" class="chat-fab" id="chatFabBtn" aria-label="Mở chat hỗ trợ">
+    <img src="~/images/boxchat.svg" alt="Icon Chat" style="width: 32px; height: 32px; object-fit: contain;" />
+</button>
+
+@* Token riêng cho widget - để widget hoạt động độc lập trên mọi trang, không phụ thuộc form khác có sẵn token hay không *@
+<form id="chatAntiForgeryForm" style="display:none;">
+    @Html.AntiForgeryToken()
+</form>
+
+<div class="chat-panel" id="chatPanel">
+    <div class="chat-panel-header">
+        <div>
+            <div class="chat-title">Hỗ trợ khách hàng</div>
+            <div class="chat-subtitle">● Đang chờ phản hồi</div>
+        </div>
+        <button type="button" class="chat-close-btn" id="chatCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="chat-panel-body" id="chatMessagesContainer">
+        <div class="chat-empty-state">Đang tải tin nhắn...</div>
+    </div>
+    <div class="chat-panel-footer">
+        <input type="text" id="chatInput" placeholder="Nhập tin nhắn..." maxlength="1000">
+        <button type="button" class="chat-send-btn" id="chatSendBtn">
+            <img src="~/images/boxchat-customer.svg" alt="Icon Chat" style="width: 24px; height: 24px; object-fit: contain;" />
+        </button>
+    </div>
+</div>
+
+@* Partial view KHÔNG dùng được @section Scripts (chỉ view chính mới dùng được).
+   Để script chạy đúng, đặt trực tiếp ở đây, ngay sau HTML - trình duyệt sẽ thực thi
+   theo đúng thứ tự nên các phần tử DOM bên trên đã tồn tại khi script chạy. *@
+<script>
+    (function () {
+        var fabBtn = document.getElementById('chatFabBtn');
+        var closeBtn = document.getElementById('chatCloseBtn');
+        var panel = document.getElementById('chatPanel');
+        var messagesContainer = document.getElementById('chatMessagesContainer');
+        var input = document.getElementById('chatInput');
+        var sendBtn = document.getElementById('chatSendBtn');
+        var historyLoaded = false;
+
+        function formatTime(isoString) {
+            var d = new Date(isoString);
+            return d.toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
+        }
+
+        function renderMessages(messages) {
+            if (!messages || messages.length === 0) {
+                messagesContainer.innerHTML = '<div class="chat-empty-state">Chưa có tin nhắn nào.<br>Gửi tin nhắn để được hỗ trợ nhé!</div>';
+                return;
+            }
+            var html = '';
+            messages.forEach(function (m) {
+                var bubbleClass = m.senderType === 'Admin' ? 'from-admin' : 'from-user';
+                html += '<div class="chat-bubble ' + bubbleClass + '">' +
+                    escapeHtml(m.message) +
+                    '<div class="chat-bubble-time">' + formatTime(m.createdAt) + '</div>' +
+                    '</div>';
+            });
+            messagesContainer.innerHTML = html;
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            var div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function loadHistory() {
+            fetch('/Profile/GetChatHistory')
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    renderMessages(data);
+                    historyLoaded = true;
+                })
+                .catch(function () {
+                    messagesContainer.innerHTML = '<div class="chat-empty-state">Không thể tải tin nhắn. Vui lòng thử lại.</div>';
+                });
+        }
+
+        function getAntiForgeryToken() {
+            var tokenInput = document.querySelector('#chatAntiForgeryForm input[name="__RequestVerificationToken"]');
+            return tokenInput ? tokenInput.value : '';
+        }
+
+        function sendMessage() {
+            var text = input.value.trim();
+            if (!text) return;
+
+            sendBtn.disabled = true;
+
+            var formData = new FormData();
+            formData.append('message', text);
+            formData.append('__RequestVerificationToken', getAntiForgeryToken());
+
+            fetch('/Profile/SendChatMessage', {
+                method: 'POST',
+                body: formData
+            })
+                .then(function (res) {
+                    if (!res.ok) throw new Error('Gửi thất bại');
+                    return res.json();
+                })
+                .then(function () {
+                    input.value = '';
+                    loadHistory();
+                })
+                .catch(function () {
+                    alert('Gửi tin nhắn thất bại, vui lòng thử lại.');
+                })
+                .finally(function () {
+                    sendBtn.disabled = false;
+                });
+        }
+
+        fabBtn.addEventListener('click', function () {
+            panel.classList.toggle('open');
+            if (panel.classList.contains('open') && !historyLoaded) {
+                loadHistory();
+            }
+        });
+
+        closeBtn.addEventListener('click', function () {
+            panel.classList.remove('open');
+        });
+
+        sendBtn.addEventListener('click', sendMessage);
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    })();
+</script>

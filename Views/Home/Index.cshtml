@@ -1,8 +1,269 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model ECommerceWeb.ViewModels.HomeIndexViewModel
+@{
+    ViewData["Title"] = "Trang chủ";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@await Html.PartialAsync("_Hero")
+
+<!-- ================= DANH MỤC NỔI BẬT ================= -->
+<section class="container py-4 mt-2 mb-3">
+    <h2 class="mb-3" style="font-size: 24px;">
+        Danh mục nổi bật
+    </h2>
+
+    <div class="row g-3 row-cols-2 row-cols-md-4">
+        <!-- CPU -->
+        <div class="col">
+            <a asp-controller="Product"
+               asp-action="Category"
+               asp-route-id="1"
+               class="category-card text-decoration-none text-dark d-block p-4 text-center h-100">
+
+                <i class="bi bi-cpu category-icon"></i>
+
+                <div class="fw-bold mt-2">
+                    CPU
+                </div>
+
+                <div class="text-muted small">
+                    Intel • AMD
+                </div>
+            </a>
+        </div>
+
+        <!-- VGA -->
+        <div class="col">
+            <a asp-controller="Product"
+               asp-action="Category"
+               asp-route-id="2"
+               class="category-card text-decoration-none text-dark d-block p-4 text-center h-100">
+
+                <i class="bi bi-gpu-card category-icon"></i>
+
+                <div class="fw-bold mt-2">
+                    VGA
+                </div>
+
+                <div class="text-muted small">
+                    NVIDIA • AMD
+                </div>
+            </a>
+        </div>
+
+        <!-- RAM -->
+        <div class="col">
+            <a asp-controller="Product"
+               asp-action="Category"
+               asp-route-id="3"
+               class="category-card text-decoration-none text-dark d-block p-4 text-center h-100">
+
+                <i class="bi bi-memory category-icon"></i>
+
+                <div class="fw-bold mt-2">
+                    RAM
+                </div>
+
+                <div class="text-muted small">
+                    DDR4 • DDR5
+                </div>
+            </a>
+        </div>
+
+        <!-- SSD -->
+        <div class="col">
+            <a asp-controller="Product"
+               asp-action="Category"
+               asp-route-id="4"
+               class="category-card text-decoration-none text-dark d-block p-4 text-center h-100">
+
+                <i class="bi bi-device-ssd category-icon"></i>
+
+                <div class="fw-bold mt-2">
+                    SSD
+                </div>
+
+                <div class="text-muted small">
+                    NVMe • SATA
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ================= SĂN DEAL GIÁ HỜI ================= -->
+<section id="hot-deals" class="container py-4">
+    <div class="deal-section">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <div>
+                <h2 class="deal-title mb-1" style="font-size:24px;"><i class="fa-solid fa-fire me-2"></i>Săn Deal Giá Hời</h2>
+                <div class="deal-subtitle">Ưu đãi cực sốc, số lượng có hạn</div>
+            </div>
+            <div class="countdown-box">
+                <span>Kết thúc trong:</span>
+                <span class="countdown-digit">@ViewBag.CountdownHours</span>:
+                <span class="countdown-digit">@ViewBag.CountdownMinutes</span>:
+                <span class="countdown-digit">@ViewBag.CountdownSeconds</span>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            @foreach (var product in Model.DealProducts)
+            {
+                <div class="col-6 col-md-3">
+                    @await Html.PartialAsync("_ProductCard", product)
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- ================= SẢN PHẨM MỚI VỀ ================= -->
+<section id="new-arrivals" class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 style="font-size:24px;">Sản phẩm mới về</h2>
+        <a href="#" class="fw-semibold text-dark text-decoration-none">Xem tất cả <i class="fa-solid fa-arrow-right ms-1"></i></a>
+    </div>
+    <div class="row g-4">
+        @foreach (var product in Model.NewArrivals)
+        {
+            <div class="col-6 col-md-3">
+                @await Html.PartialAsync("_ProductCard", product)
+            </div>
+        }
+    </div>
+</section>
+
+<!-- ================= PC GAMING BỘ SẴN ================= -->
+<section id="prebuilt-pc" class="container py-4">
+    <div class="text-center mb-4">
+        <h2 style="font-size:24px;">PC Gaming Bộ Sẵn</h2>
+        <p class="text-muted">Hiệu năng tối ưu, lắp ráp chuyên nghiệp, bảo hành dài hạn</p>
+    </div>
+    <div class="row g-3">
+        @foreach (var pc in Model.PrebuiltPcs)
+        {
+            <div class="col-md-4">
+                <div class="prebuilt-card">
+                    <div class="prebuilt-img-wrap">
+                        @if (pc.IsBestSeller)
+                        {
+                            <span class="prebuilt-bestseller-tag">BÁN CHẠY</span>
+                        }
+                        <img src="@(string.IsNullOrEmpty(pc.ImageUrl) ? "/images/no-image.png" : pc.ImageUrl)" alt="@pc.Name">
+                    </div>
+                    <div class="prebuilt-body">
+                        <div class="prebuilt-name">@pc.Name</div>
+                        <ul class="prebuilt-specs">
+                            @foreach (var spec in pc.Specs)
+                            {
+                                <li><i class="fa-solid fa-circle-check"></i> @spec</li>
+                            }
+                        </ul>
+                        <div class="prebuilt-footer">
+                            <span class="prebuilt-price">@pc.Price.ToString("N0")đ</span>
+                            <a href="@pc.DetailUrl" class="btn btn-warning">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- ================= TIN TỨC & KINH NGHIỆM ================= -->
+<section id="news" class=" container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 style="font-size:24px;">Tin tức &amp; Kinh nghiệm Build PC</h2>
+        <a href="#" class="fw-semibold text-dark text-decoration-none">Xem tất cả <i class="fa-solid fa-arrow-right ms-1"></i></a>
+    </div>
+    <div class="row g-4">
+        @foreach (var article in Model.NewsArticles)
+        {
+            <div class="col-md-4">
+                <a href="@article.DetailUrl" class="news-card text-decoration-none">
+                    <img src="@(string.IsNullOrEmpty(article.ImageUrl) ? "/images/no-image.png" : article.ImageUrl)" alt="@article.Title">
+                    <div class="news-body">
+                        <div class="news-category">@article.Category</div>
+                        <div class="news-title">@article.Title</div>
+                        <div class="news-excerpt">@article.Excerpt</div>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- ================= ĐĂNG KÝ NHẬN TIN ================= -->
+<section class="container py-4">
+    <div class="newsletter-section">
+        <div class="row align-items-center g-3">
+            <div class="col-lg-6">
+                <h3 class="mb-1">Đăng ký nhận tin</h3>
+                <p class="text-white-50 mb-0">Nhận ngay các thông tin khuyến mãi mới nhất, mã giảm giá độc quyền và tin tức công nghệ hàng tuần từ @ViewBag.StoreName.</p>
+            </div>
+            <div class="col-lg-6">
+                <form class="d-flex">
+                    <input type="email" placeholder="Nhập email của bạn..." class="flex-grow-1" required>
+                    <button type="submit" class="btn btn-warning">Đăng ký</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- ================= THƯƠNG HIỆU ĐỒNG HÀNH ================= -->
+<section class="container py-4">
+    <h5 class="text-center mb-4">Thương hiệu đồng hành</h5>
+    <div class="brand-strip">
+
+        <!-- ROW 1: Trượt sang TRÁI -->
+        <div class="marquee-row">
+            <div class="brand-track track-left">
+                <div class="brand-content">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Intel_logo_2023.svg/500px-Intel_logo_2023.svg.png" alt="Intel">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/21/Nvidia_logo.svg" alt="NVIDIA">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/ASUS_Logo.svg/500px-ASUS_Logo.svg.png" alt="ASUS">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Micro-Star_International_logo.svg/500px-Micro-Star_International_logo.svg.png" alt="MSI">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/1/17/Logitech_logo.svg" alt="Logitech">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Lenovo_%282015%29.svg/500px-Lenovo_%282015%29.svg.png" alt="Lenovo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_logo_black.svg/330px-Apple_logo_black.svg.png" alt="Apple">
+                </div>
+                <!-- Bản sao y hệt để tạo vòng lặp vô tận -->
+                <div class="brand-content" aria-hidden="true">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Intel_logo_2023.svg/500px-Intel_logo_2023.svg.png" alt="Intel">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/21/Nvidia_logo.svg" alt="NVIDIA">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/ASUS_Logo.svg/500px-ASUS_Logo.svg.png" alt="ASUS">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Micro-Star_International_logo.svg/500px-Micro-Star_International_logo.svg.png" alt="MSI">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/1/17/Logitech_logo.svg" alt="Logitech">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Lenovo_%282015%29.svg/500px-Lenovo_%282015%29.svg.png" alt="Lenovo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_logo_black.svg/330px-Apple_logo_black.svg.png" alt="Apple">
+                </div>
+            </div>
+        </div>
+
+        <!-- ROW 2: Trượt sang PHẢI -->
+        <div class="marquee-row">
+            <div class="brand-track track-right">
+                <div class="brand-content">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Dell_logo_2016.svg/330px-Dell_logo_2016.svg.png" alt="Dell">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Acer_2011.svg/500px-Acer_2011.svg.png" alt="Acer">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Samsung_Black_icon.svg/960px-Samsung_Black_icon.svg.png" alt="Samsung">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/LG_logo_%282014%29.svg/500px-LG_logo_%282014%29.svg.png" alt="LG">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/HP_logo_2025.svg/330px-HP_logo_2025.svg.png" alt="HP">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Gigabyte_Technology_logo_20080107.svg/500px-Gigabyte_Technology_logo_20080107.svg.png" alt="Gigabyte">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Sony_logo.svg/960px-Sony_logo.svg.png" alt="Sony">
+                </div>
+                <!-- Bản sao y hệt để tạo vòng lặp vô tận -->
+                <div class="brand-content" aria-hidden="true">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Dell_logo_2016.svg/330px-Dell_logo_2016.svg.png" alt="Dell">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Acer_2011.svg/500px-Acer_2011.svg.png" alt="Acer">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Samsung_Black_icon.svg/960px-Samsung_Black_icon.svg.png" alt="Samsung">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/LG_logo_%282014%29.svg/500px-LG_logo_%282014%29.svg.png" alt="LG">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/HP_logo_2025.svg/330px-HP_logo_2025.svg.png" alt="HP">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Gigabyte_Technology_logo_20080107.svg/500px-Gigabyte_Technology_logo_20080107.svg.png" alt="Gigabyte">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Sony_logo.svg/960px-Sony_logo.svg.png" alt="Sony">
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>

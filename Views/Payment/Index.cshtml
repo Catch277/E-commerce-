@@ -1,0 +1,54 @@
+﻿@{
+    ViewData["Title"] = "Thanh toán đơn hàng";
+    var order = ViewBag.Order as ECommerceWeb.Models.Order;
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fa-solid fa-credit-card"></i> Thanh toán</h4>
+                </div>
+                <div class="card-body">
+                    @if (order != null)
+                    {
+                        <div class="mb-3">
+                            <h5>Đơn hàng #@order.OrderID</h5>
+                            <p><strong>Tổng tiền:</strong> @order.TotalAmount.ToString("N0") VNĐ</p>
+                            <p><strong>Trạng thái:</strong> @order.OrderStatus</p>
+                        </div>
+                        <div class="d-flex gap-3">
+                            <form asp-controller="Payment" asp-action="CreatePaymentUrl" method="post">
+                                <input type="hidden" name="orderId" value="@order.OrderID" />
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fa-solid fa-money-bill-transfer"></i> Thanh toán VNPay
+                                </button>
+                            </form>
+                            <form asp-controller="Payment" asp-action="CreateMoMoPayment" method="post">
+                                <input type="hidden" name="orderId" value="@order.OrderID" />
+                                <button type="submit" class="btn btn-info">
+                                    <i class="fa-solid fa-wallet"></i> Thanh toán MoMo
+                                </button>
+                            </form>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Form nhập mã đơn hàng (giữ nguyên như cũ) -->
+                        <p>Nhập mã đơn hàng để thanh toán:</p>
+                        <form asp-controller="Payment" asp-action="CreatePaymentUrl" method="post">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Mã đơn hàng (OrderID):</label>
+                                <input type="number" name="orderId" class="form-control" required placeholder="Ví dụ: 1" />
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="fa-solid fa-money-bill-transfer"></i> Chuyển đến VNPay
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

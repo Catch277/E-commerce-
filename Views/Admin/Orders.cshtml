@@ -1,0 +1,299 @@
+﻿@model IEnumerable<ECommerceWeb.ViewModels.Admin.AdminOrderListItemViewModel>
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Quản lý đơn hàng";
+
+    string selectedStatus =
+        ViewBag.SelectedStatus as string ?? "";
+
+    string selectedPaymentMethod =
+        ViewBag.SelectedPaymentMethod as string ?? "";
+
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalOrders = ViewBag.TotalOrders ?? 0;
+    int pendingCount = ViewBag.PendingOrderCount ?? 0;
+}
+
+<div class="d-flex flex-wrap justify-content-between
+            align-items-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">
+            <i class="bi bi-receipt text-warning me-2"></i>
+            Quản lý đơn hàng
+        </h2>
+
+        <p class="text-muted mb-0">
+            Có @totalOrders đơn phù hợp.
+            Trong đó
+            <strong class="text-danger">
+                @pendingCount đơn chờ xác nhận
+            </strong>.
+        </p>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        @TempData["SuccessMessage"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="bi bi-exclamation-circle-fill me-2"></i>
+        @TempData["ErrorMessage"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
+    </div>
+}
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form asp-action="Orders"
+              method="get"
+              class="row g-3">
+
+            <div class="col-lg-5">
+                <label class="form-label fw-semibold">
+                    Tìm kiếm
+                </label>
+
+                <input type="search"
+                       name="search"
+                       value="@ViewBag.Search"
+                       class="form-control"
+                       placeholder="Mã đơn, tên, SĐT hoặc email..." />
+            </div>
+
+            <div class="col-lg-3">
+                <label class="form-label fw-semibold">
+                    Trạng thái đơn
+                </label>
+
+                <select name="status"
+                        class="form-select">
+                    <option value="">
+                        Tất cả trạng thái
+                    </option>
+
+                    <option value="Chờ xác nhận"
+                            selected="@(selectedStatus == "Chờ xác nhận")">
+                        Chờ xác nhận
+                    </option>
+
+                    <option value="Đã xác nhận"
+                            selected="@(selectedStatus == "Đã xác nhận")">
+                        Đã xác nhận
+                    </option>
+
+                    <option value="Đang giao"
+                            selected="@(selectedStatus == "Đang giao")">
+                        Đang giao
+                    </option>
+
+                    <option value="Đã giao"
+                            selected="@(selectedStatus == "Đã giao")">
+                        Đã giao
+                    </option>
+
+                    <option value="Chờ thanh toán"
+                            selected="@(selectedStatus == "Chờ thanh toán")">
+                        Chờ thanh toán
+                    </option>
+
+                    <option value="Thanh toán thất bại"
+                            selected="@(selectedStatus == "Thanh toán thất bại")">
+                        Thanh toán thất bại
+                    </option>
+                </select>
+            </div>
+
+            <div class="col-lg-2">
+                <label class="form-label fw-semibold">
+                    Thanh toán
+                </label>
+
+                <select name="paymentMethod"
+                        class="form-select">
+                    <option value="">
+                        Tất cả
+                    </option>
+
+                    <option value="COD"
+                            selected="@(selectedPaymentMethod == "COD")">
+                        COD
+                    </option>
+
+                    <option value="VNPay"
+                            selected="@(selectedPaymentMethod == "VNPay")">
+                        VNPay
+                    </option>
+
+                    <option value="MoMo"
+                            selected="@(selectedPaymentMethod == "MoMo")">
+                        MoMo
+                    </option>
+                </select>
+            </div>
+
+            <div class="col-lg-2 d-flex align-items-end">
+                <button type="submit"
+                        class="btn btn-dark w-100">
+                    <i class="bi bi-search me-1"></i>
+                    Lọc
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Đơn hàng</th>
+                        <th>Khách hàng</th>
+                        <th>Sản phẩm</th>
+                        <th>Tổng tiền</th>
+                        <th>Thanh toán</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end pe-4"></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="7"
+                                class="text-center py-5 text-muted">
+                                Không tìm thấy đơn hàng.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var order in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold">
+                                        #@order.OrderID
+                                    </div>
+
+                                    <small class="text-muted">
+                                        @order.OrderDate.ToString(
+                                            "dd/MM/yyyy HH:mm")
+                                    </small>
+                                </td>
+
+                                <td>
+                                    <div class="fw-semibold">
+                                        @order.CustomerName
+                                    </div>
+
+                                    <small class="text-muted">
+                                        @order.CustomerPhone
+                                    </small>
+                                </td>
+
+                                <td>
+                                    @order.TotalItems sản phẩm
+                                </td>
+
+                                <td class="fw-bold text-danger">
+                                    @order.TotalAmount.ToString("N0") đ
+                                </td>
+
+                                <td>
+                                    <div class="fw-semibold">
+                                        @order.PaymentMethod
+                                    </div>
+
+                                    <small class="text-muted">
+                                        @order.PaymentStatus
+                                    </small>
+                                </td>
+
+                                <td>
+                                    @{
+                                        string badgeClass =
+                                            order.OrderStatus switch
+                                            {
+                                                "Chờ xác nhận"
+                                                    => "bg-warning-subtle text-warning-emphasis",
+
+                                                "Đã xác nhận"
+                                                    => "bg-info-subtle text-info-emphasis",
+
+                                                "Đang giao"
+                                                    => "bg-primary-subtle text-primary-emphasis",
+
+                                                "Đã giao"
+                                                    => "bg-success-subtle text-success-emphasis",
+
+                                                "Thanh toán thất bại"
+                                                    => "bg-danger-subtle text-danger-emphasis",
+
+                                                _ => "bg-secondary-subtle text-secondary-emphasis"
+                                            };
+                                    }
+
+                                    <span class="badge @badgeClass">
+                                        @order.OrderStatus
+                                    </span>
+                                </td>
+
+                                <td class="text-end pe-4">
+                                    <a asp-action="OrderDetails"
+                                       asp-route-id="@order.OrderID"
+                                       class="btn btn-sm btn-outline-dark">
+                                        Xem chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@if (totalPages > 1)
+{
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item
+                    @(i == currentPage ? "active" : "")">
+
+                    <a class="page-link"
+                       asp-action="Orders"
+                       asp-route-page="@i"
+                       asp-route-search="@ViewBag.Search"
+                       asp-route-status="@selectedStatus"
+                       asp-route-paymentMethod="@selectedPaymentMethod">
+                        @i
+                    </a>
+                </li>
+            }
+        </ul>
+    </nav>
+}

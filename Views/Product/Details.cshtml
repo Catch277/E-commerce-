@@ -1,0 +1,252 @@
+@model ECommerceWeb.Models.Product
+
+@{
+    ViewData["Title"] = Model.ProductName;
+    var imageUrl = string.IsNullOrWhiteSpace(Model.ImageUrl) ? "/images/no-image.png" : Model.ImageUrl;
+    var hasDiscount = Model.OldPrice.HasValue && Model.OldPrice.Value > Model.Price;
+    var discountPercent = hasDiscount
+        ? (int)Math.Round((Model.OldPrice!.Value - Model.Price) / Model.OldPrice.Value * 100)
+        : 0;
+}
+
+<section class="product-details-page py-4 py-lg-5">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb catalog-breadcrumb mb-0">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Product" asp-action="Index">Sản phẩm</a></li>
+                @if (Model.Category != null)
+                {
+                    <li class="breadcrumb-item">
+                        <a asp-controller="Product" asp-action="Category" asp-route-id="@Model.CategoryID">@Model.Category.CategoryName</a>
+                    </li>
+                }
+                <li class="breadcrumb-item active" aria-current="page">@Model.ProductName</li>
+            </ol>
+        </nav>
+
+        <div class="product-details-card mb-4 mb-lg-5">
+            <div class="row g-4 g-xl-5 align-items-start">
+                <div class="col-lg-6">
+                    <div class="product-details-media">
+                        @if (Model.IsNew)
+                        {
+                            <span class="product-details-media__badge">NEW ARRIVAL</span>
+                        }
+                        <img src="@imageUrl" alt="@Model.ProductName" />
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="product-details-info">
+                        <div class="product-details-info__category">@Model.Category?.CategoryName</div>
+                        <h1>@Model.ProductName</h1>
+
+                        <div class="product-details-status @(Model.Quantity > 0 ? "in-stock" : "out-stock")">
+                            <i class="fa-solid @(Model.Quantity > 0 ? "fa-circle-check" : "fa-circle-xmark")"></i>
+                            @(Model.Quantity > 0 ? $"Còn {Model.Quantity} sản phẩm" : "Sản phẩm hiện đã hết hàng")
+                        </div>
+
+                        <div class="product-details-price">
+                            <strong>@Model.Price.ToString("N0")đ</strong>
+                            @if (hasDiscount)
+                            {
+                                <del>@Model.OldPrice!.Value.ToString("N0")đ</del>
+                                <span>-@discountPercent%</span>
+                            }
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Description))
+                        {
+                            <div class="product-details-summary">@Model.Description</div>
+                        }
+
+                        <div class="product-details-perks">
+                            <div><i class="fa-solid fa-truck-fast"></i><span><strong>Giao hàng nhanh</strong><small>Phí vận chuyển tính hợp lý - miễn phí nội thành TP.HCM & Hà Nội</small></span></div>
+                            <div><i class="fa-solid fa-shield-halved"></i><span><strong>Bảo hành chính hãng</strong><small>Theo chính sách sản phẩm</small></span></div>
+                            <div><i class="fa-solid fa-rotate-left"></i><span><strong>Hỗ trợ đổi trả</strong><small>Theo điều kiện của cửa hàng</small></span></div>
+                        </div>
+
+                        <div class="d-grid d-sm-flex gap-3 mt-4">
+                            <button type="button"
+                                    id="detailAddToCart"
+                                    class="btn btn-warning btn-lg flex-grow-1"
+                                    data-product-id="@Model.ProductID"
+                                @(Model.Quantity <= 0 ? "disabled" : null)>
+
+                                <i class="fa-solid fa-cart-shopping me-2"></i>
+
+                                @(Model.Quantity <= 0
+                                    ? "Hết hàng"
+                                    : "Thêm vào giỏ")
+                            </button>
+
+                            <a class="btn btn-dark btn-lg flex-grow-1"
+                               asp-controller="Product"
+                               asp-action="Index">
+                                Tiếp tục mua sắm
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <section class="product-content-card h-100">
+                    <div class="product-section-heading">
+                        <span></span>
+                        <h2>Mô tả sản phẩm</h2>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(Model.Description))
+                    {
+                        <p class="mb-0">@Model.Description</p>
+                    }
+                    else
+                    {
+                        <p class="text-secondary mb-0">Sản phẩm hiện chưa có mô tả chi tiết.</p>
+                    }
+                </section>
+            </div>
+
+            <div class="col-lg-4">
+                <aside class="product-spec-card h-100">
+                    <h2>Thông tin sản phẩm</h2>
+                    <dl>
+                        <div><dt>Mã sản phẩm</dt><dd>#@Model.ProductID</dd></div>
+                        <div><dt>Danh mục</dt><dd>@(Model.Category?.CategoryName ?? "Chưa phân loại")</dd></div>
+                        <div><dt>Giá bán</dt><dd>@Model.Price.ToString("N0")đ</dd></div>
+                        <div><dt>Tồn kho</dt><dd>@Model.Quantity</dd></div>
+                    </dl>
+                </aside>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const addButton = document.getElementById('detailAddToCart');
+
+            if (!addButton) {
+                return;
+            }
+
+            addButton.addEventListener('click', async function () {
+                const productId = this.dataset.productId;
+                const oldContent = this.innerHTML;
+
+                this.disabled = true;
+                this.innerHTML = `
+                    <span class="spinner-border spinner-border-sm me-2"
+                          aria-hidden="true"></span>
+                    Đang thêm...
+                `;
+
+                try {
+                    const response = await fetch('@Url.Action("AddToCart", "Cart")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type':
+                                'application/x-www-form-urlencoded; charset=UTF-8',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: new URLSearchParams({
+                            productId: productId,
+                            quantity: '1'
+                        })
+                    });
+
+                    const contentType = response.headers.get('content-type') || '';
+                    let result;
+
+                    if (contentType.includes('application/json')) {
+                        result = await response.json();
+                    } else {
+                        throw new Error('Phản hồi từ máy chủ không đúng định dạng.');
+                    }
+
+                    if (!response.ok || !result.success) {
+                        throw new Error(
+                            result.message ||
+                            'Không thể thêm sản phẩm vào giỏ hàng.'
+                        );
+                    }
+
+                    showCartToast(
+                        result.message || 'Đã thêm sản phẩm vào giỏ hàng.',
+                        'success'
+                    );
+
+                    updateHeaderCartBadge(result.cartCount);
+                } catch (error) {
+                    showCartToast(
+                        error.message || 'Đã xảy ra lỗi khi thêm vào giỏ hàng.',
+                        'error'
+                    );
+                } finally {
+                    this.disabled = false;
+                    this.innerHTML = oldContent;
+                }
+            });
+
+            function showCartToast(message, icon) {
+                if (typeof Swal === 'undefined') {
+                    console.error('SweetAlert2 chưa được nạp:', message);
+                    return;
+                }
+
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: icon,
+                    title: message,
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: toast => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer);
+                        toast.addEventListener('mouseleave', Swal.resumeTimer);
+                    }
+                });
+            }
+
+            function updateHeaderCartBadge(cartCount) {
+                if (cartCount === undefined || cartCount === null) {
+                    return;
+                }
+
+                const normalizedCount = Number(cartCount) || 0;
+
+                // Hỗ trợ các selector badge thường dùng trong Header/CartBadge ViewComponent.
+                const badges = document.querySelectorAll([
+                    '#cart-badge',
+                    '#cart-count',
+                    '#cartCount',
+                    '.cart-count',
+                    '.cart-badge',
+                    '.cart-badge-count',
+                    '[data-cart-count]'
+                ].join(','));
+
+                badges.forEach(function (badge) {
+                    badge.textContent = normalizedCount;
+                    badge.dataset.cartCount = normalizedCount;
+                    badge.classList.toggle('d-none', normalizedCount <= 0);
+                    badge.hidden = false;
+                    badge.setAttribute(
+                        'aria-label',
+                        `${normalizedCount} sản phẩm trong giỏ hàng`
+                    );
+                });
+
+                // Phát sự kiện để Header hoặc script dùng chung có thể đồng bộ thêm nếu cần.
+                window.dispatchEvent(new CustomEvent('cart:updated', {
+                    detail: { cartCount: normalizedCount }
+                }));
+            }
+        });
+    </script>
+}

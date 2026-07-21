@@ -1,0 +1,113 @@
+@model IEnumerable<ECommerceWeb.Models.Product>
+
+@{
+    string categoryName = ViewBag.CategoryName as string ?? "Danh mục";
+    int? categoryId = ViewBag.CategoryId as int?;
+    ViewData["Title"] = categoryName;
+}
+
+<section class="catalog-page py-4 py-lg-5">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb catalog-breadcrumb mb-0">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Product" asp-action="Index">Sản phẩm</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@categoryName</li>
+            </ol>
+        </nav>
+
+        <div class="category-hero mb-4 mb-lg-5">
+            <div class="category-hero__content">
+                <span class="category-hero__badge">DANH MỤC NỔI BẬT</span>
+                <h1>@categoryName</h1>
+                <p>Khám phá các sản phẩm @categoryName đang có tại cửa hàng với thông tin giá và tồn kho được lấy trực tiếp từ hệ thống.</p>
+                <a class="btn btn-warning fw-bold px-4" asp-controller="Product" asp-action="Index">
+                    Xem tất cả sản phẩm <i class="fa-solid fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+            <div class="category-hero__icon" aria-hidden="true">
+                <i class="fa-solid fa-microchip"></i>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <aside class="col-lg-3">
+                <div class="catalog-sidebar sticky-lg-top">
+                    <div class="catalog-sidebar__title">Danh mục sản phẩm</div>
+                    <a class="catalog-category-link" asp-controller="Product" asp-action="Index">
+                        <span><i class="fa-solid fa-border-all"></i> Tất cả</span>
+                    </a>
+                    <a class="catalog-category-link @(categoryId == 1 ? "active" : "")" asp-action="Category" asp-route-id="1"><span><i class="fa-solid fa-microchip"></i> CPU</span></a>
+                    <a class="catalog-category-link @(categoryId == 2 ? "active" : "")" asp-action="Category" asp-route-id="2"><span><i class="fa-solid fa-display"></i> VGA</span></a>
+                    <a class="catalog-category-link @(categoryId == 3 ? "active" : "")" asp-action="Category" asp-route-id="3"><span><i class="fa-solid fa-memory"></i> RAM</span></a>
+                    <a class="catalog-category-link @(categoryId == 4 ? "active" : "")" asp-action="Category" asp-route-id="4"><span><i class="fa-solid fa-hard-drive"></i> SSD</span></a>
+                    <a class="catalog-category-link @(categoryId == 5 ? "active" : "")" asp-action="Category" asp-route-id="5"><span><i class="fa-solid fa-desktop"></i> Màn hình</span></a>
+                    <a class="catalog-category-link @(categoryId == 6 ? "active" : "")" asp-action="Category" asp-route-id="6"><span><i class="fa-regular fa-keyboard"></i> Bàn phím</span></a>
+                    <a class="catalog-category-link @(categoryId == 7 ? "active" : "")" asp-action="Category" asp-route-id="7"><span><i class="fa-solid fa-computer-mouse"></i> Chuột</span></a>
+                </div>
+            </aside>
+
+            <div class="col-lg-9">
+                <div class="catalog-toolbar mb-4">
+                    <div>
+                        <span class="catalog-eyebrow">BỘ SƯU TẬP</span>
+                        <h2 class="catalog-title mb-1">Danh mục @categoryName</h2>
+                        <p class="catalog-count mb-0">Có @Model.Count() sản phẩm</p>
+                    </div>
+                </div>
+
+                @if (Model.Any())
+                {
+                    <div class="row g-3 g-xl-4">
+                        @foreach (var product in Model)
+                        {
+                            <div class="col-12 col-sm-6 col-xl-4">
+                                <article class="catalog-product-card h-100">
+                                    <div class="catalog-product-card__media">
+                                        @if (product.IsNew)
+                                        {
+                                            <span class="catalog-product-card__badge">NEW</span>
+                                        }
+                                        <a asp-action="Details" asp-route-id="@product.ProductID">
+                                            <img src="@(string.IsNullOrWhiteSpace(product.ImageUrl) ? "/images/no-image.png" : product.ImageUrl)"
+                                                 alt="@product.ProductName" loading="lazy" />
+                                        </a>
+                                    </div>
+                                    <div class="catalog-product-card__body">
+                                        <div class="catalog-product-card__category">@product.Category?.CategoryName</div>
+                                        <h3>
+                                            <a asp-action="Details" asp-route-id="@product.ProductID">@product.ProductName</a>
+                                        </h3>
+                                        <div class="catalog-product-card__stock @(product.Quantity > 0 ? "in-stock" : "out-stock")">
+                                            <i class="fa-solid @(product.Quantity > 0 ? "fa-circle-check" : "fa-circle-xmark")"></i>
+                                            @(product.Quantity > 0 ? $"Còn {product.Quantity} sản phẩm" : "Hết hàng")
+                                        </div>
+                                        <div class="catalog-product-card__price-row">
+                                            <strong>@product.Price.ToString("N0")đ</strong>
+                                            @if (product.OldPrice.HasValue && product.OldPrice.Value > product.Price)
+                                            {
+                                                <del>@product.OldPrice.Value.ToString("N0")đ</del>
+                                            }
+                                        </div>
+                                        <a class="btn btn-outline-dark w-100 mt-auto" asp-action="Details" asp-route-id="@product.ProductID">
+                                            Xem chi tiết
+                                        </a>
+                                    </div>
+                                </article>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="catalog-empty text-center">
+                        <i class="fa-solid fa-box-open"></i>
+                        <h2>Chưa có sản phẩm</h2>
+                        <p>Hiện chưa có sản phẩm thuộc danh mục <strong>@categoryName</strong>.</p>
+                        <a class="btn btn-warning" asp-action="Index">Xem tất cả sản phẩm</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>

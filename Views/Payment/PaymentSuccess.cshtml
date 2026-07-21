@@ -1,0 +1,35 @@
+@using ECommerceWeb.Models
+@{
+    ViewData["Title"] = "Thanh toán thành công";
+    var payment = ViewBag.Payment as Payment;
+}
+
+<div class="container py-5 d-flex justify-content-center">
+    <div class="card border-0 shadow mx-auto text-center" style="max-width: 550px; border-radius: 12px; padding: 3rem 2rem;">
+        <div class="mb-3">
+            <i class="fa-solid fa-circle-check" style="font-size: 6rem; color: #52a163;"></i>
+        </div>
+        
+        <h2 class="fw-bold mb-3" style="color: #52a163;">Giao dịch thành công!</h2>
+        
+        <p class="fs-5 text-dark mb-3">
+            Đơn hàng <strong>#@(payment?.OrderID)</strong> đã được thanh toán qua <strong>@(payment?.PaymentMethod)</strong>.
+        </p>
+
+        @if (!string.IsNullOrWhiteSpace(payment?.TransactionCode))
+        {
+            <p class="mb-5 text-dark">
+                Mã giao dịch: <strong>@payment.TransactionCode</strong>
+            </p>
+        }
+
+        <div class="d-flex justify-content-center gap-3">
+            <a asp-controller="Profile" asp-action="OrderHistory" class="btn fw-semibold" style="background-color: #386bc0; color: #fff; padding: 10px 24px;">
+                <i class="fa-solid fa-file-lines me-2"></i>Xem đơn hàng
+            </a>
+            <a asp-controller="Home" asp-action="Index" class="btn bg-white border-dark fw-semibold" style="color: #000; padding: 10px 24px;">
+                <i class="fa-solid fa-house me-2"></i>Về trang chủ
+            </a>
+        </div>
+    </div>
+</div>

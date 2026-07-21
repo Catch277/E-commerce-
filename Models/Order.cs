@@ -26,6 +26,33 @@ namespace ECommerceWeb.Models
         [StringLength(50)]
         public string OrderStatus { get; set; } = "Chờ xác nhận";
 
-        public ICollection<OrderDetail> OrderDetails { get; set; }
+        // ---- Thông tin khách hàng nhập tại checkout ----
+        [StringLength(100)]
+        public string CustomerName { get; set; } = "";
+
+        [StringLength(20)]
+        public string CustomerPhone { get; set; } = "";
+
+        [StringLength(100)]
+        public string CustomerEmail { get; set; } = "";
+
+        [StringLength(20)]
+        public string PaymentMethod { get; set; } = "COD";
+
+        [StringLength(500)]
+        public string Note { get; set; } = string.Empty;
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal ShippingFee { get; set; } = 0;
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal DiscountAmount { get; set; } = 0;
+
+        public int? VoucherID { get; set; }
+
+        [ForeignKey(nameof(VoucherID))]
+        public Voucher? Voucher { get; set; }
+
+        public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
     }
 }

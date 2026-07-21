@@ -1,0 +1,126 @@
+﻿@{
+    // Lấy tên action hiện tại để tự động highlight đúng tab, không cần truyền tham số ở mỗi trang
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+
+    string ActiveClass(string action) => currentAction == action ? "active" : "";
+}
+
+<style>
+    /* Token màu lấy từ DESIGN.md (Technical Gaming) - dùng chung cho toàn bộ khu vực Profile */
+    :root {
+        --pf-primary-container: #ffc107;
+        --pf-on-primary-container: #6d5100;
+        --pf-account-active-bg: #fff3c2;
+        --pf-text-main: #212529;
+        --pf-secondary: #575e70;
+        --pf-surface-container-low: #f2f4f8;
+        --pf-surface-container-lowest: #ffffff;
+        --pf-rounded-lg: 18px;
+    }
+
+    .profile-card {
+        border: none;
+        border-radius: var(--pf-rounded-lg);
+        box-shadow: 0 8px 25px rgba(0,0,0,.06);
+        background: var(--pf-surface-container-lowest);
+    }
+
+    .sidebar-menu .list-group-item {
+        border: none;
+        padding: 12px 20px;
+        color: var(--pf-text-main);
+        font-weight: 500;
+        transition: all 0.2s;
+        border-left: 3px solid transparent;
+    }
+
+        .sidebar-menu .list-group-item:hover {
+            background-color: var(--pf-surface-container-low);
+        }
+
+        .sidebar-menu .list-group-item.active {
+            background-color: var(--pf-account-active-bg);
+            color: var(--pf-on-primary-container);
+            border-left: 3px solid var(--pf-primary-container);
+            font-weight: 700;
+        }
+
+    .sidebar-menu i {
+        width: 25px;
+        text-align: center;
+        margin-right: 10px;
+        font-size: 1.1rem;
+        color: var(--pf-secondary);
+    }
+
+    .sidebar-menu .list-group-item.active i {
+        color: var(--pf-on-primary-container);
+    }
+</style>
+
+<div class="profile-card py-2 sidebar-menu">
+      <style>
+            .sidebar-menu .list-group-item {
+                border: none;
+                padding: 12px 20px;
+                color: var(--pf-text-main, #212529);
+                font-weight: 500;
+                transition: all 0.2s;
+                border-left: 3px solid transparent;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+                .sidebar-menu .list-group-item:hover {
+                    background-color: var(--pf-surface-container-low, #f2f4f8);
+                }
+
+                .sidebar-menu .list-group-item.active {
+                    background-color: var(--pf-account-active-bg, #fff3c2);
+                    color: var(--pf-on-primary-container, #6d5100);
+                    border-left: 3px solid var(--pf-primary-container, #ffc107);
+                    font-weight: 700;
+                }
+
+                .sidebar-menu .list-group-item img.sidebar-icon {
+                    width: 20px;
+                    height: 20px;
+                    object-fit: contain;
+                    flex-shrink: 0;
+                }
+    </style>
+
+    <div class="profile-card py-2 sidebar-menu">
+        <div class="list-group list-group-flush">
+            <a asp-controller="Profile" asp-action="Index" class="list-group-item list-group-item-action @ActiveClass("Index")">
+                <img src="~/images/overall.svg" alt="Tổng quan" class="sidebar-icon"/>
+                Tổng quan
+            </a>
+            <a asp-controller="Profile" asp-action="OrderHistory" class="list-group-item list-group-item-action @ActiveClass("OrderHistory")">
+                <img src="~/images/order-history.svg" alt="Lịch sử mua hàng" class="sidebar-icon"/>
+                Lịch sử mua hàng
+            </a>
+            <a asp-controller="Profile" asp-action="WarrantyLookup" class="list-group-item list-group-item-action @ActiveClass("WarrantyLookup")">
+                <img src="/images/warranty-search.svg" alt="Tra cứu bảo hành" class="sidebar-icon"/>
+                Tra cứu bảo hành
+            </a>
+            <a asp-controller="Profile" asp-action="Membership" class="list-group-item list-group-item-action @ActiveClass("Membership")">
+                <img src="~/images/rank-voucher.svg" alt="Hạng thành viên và ưu đãi" class="sidebar-icon"/>
+                Hạng thành viên và ưu đãi
+            </a>
+            <a asp-controller="Profile" asp-action="AccountInfo" class="list-group-item list-group-item-action @ActiveClass("AccountInfo")">
+                <img src="~/images/account-info.svg" alt="Thông tin tài khoản" class="sidebar-icon"/>
+                Thông tin tài khoản
+            </a>
+            <a asp-controller="Profile" asp-action="StoreLocator" class="list-group-item list-group-item-action @ActiveClass("StoreLocator")">
+                <img src="~/images/shop-search.svg" alt="Tìm kiếm cửa hàng" class="sidebar-icon"/>
+                Tìm kiếm cửa hàng
+            </a>
+            <a asp-controller="Profile" asp-action="Feedback" class="list-group-item list-group-item-action @ActiveClass("Feedback")">
+                <img src="~/images/feedback-response.svg" alt="Góp ý - Phản hồi" class="sidebar-icon"/>
+                Góp ý - Phản hồi
+            </a>
+        </div>
+    </div>
+</div>
