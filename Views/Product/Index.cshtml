@@ -1,0 +1,132 @@
+@model IEnumerable<ECommerceWeb.ViewModels.ProductCardViewModel>
+
+@{
+    ViewData["Title"] = "Tất cả sản phẩm";
+    var totalProducts = ViewBag.TotalProducts ?? Model.Count();
+    var currentPage = ViewBag.CurrentPage is int cp ? cp : 1;
+    var totalPages = ViewBag.TotalPages is int tp ? tp : 1;
+}
+
+<section class="catalog-page py-4 py-lg-5">
+    <div class="container">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                <i class="fa-solid fa-circle-check me-2"></i>
+                @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+            </div>
+        }
+
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb catalog-breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a asp-controller="Home" asp-action="Index">Trang chủ</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Tất cả sản phẩm</li>
+            </ol>
+        </nav>
+
+        <div class="row g-4">
+            <aside class="col-lg-3">
+                <div class="catalog-sidebar sticky-lg-top">
+                    <div class="catalog-sidebar__title">Danh mục</div>
+
+                    <a class="catalog-category-link active" asp-controller="Product" asp-action="Index">
+                        <span><i class="fa-solid fa-border-all"></i> Tất cả</span>
+                    </a>
+                    <a class="catalog-category-link" asp-controller="Product" asp-action="Category" asp-route-id="1">
+                        <span><i class="fa-solid fa-microchip"></i> CPU</span>
+                    </a>
+                    <a class="catalog-category-link" asp-controller="Product" asp-action="Category" asp-route-id="2">
+                        <span><i class="fa-solid fa-display"></i> VGA</span>
+                    </a>
+                    <a class="catalog-category-link" asp-controller="Product" asp-action="Category" asp-route-id="3">
+                        <span><i class="fa-solid fa-memory"></i> RAM</span>
+                    </a>
+                    <a class="catalog-category-link" asp-controller="Product" asp-action="Category" asp-route-id="4">
+                        <span><i class="fa-solid fa-hard-drive"></i> SSD</span>
+                    </a>
+                    <a class="catalog-category-link" asp-controller="Product" asp-action="Category" asp-route-id="5">
+                        <span><i class="fa-solid fa-desktop"></i> Màn hình</span>
+                    </a>
+                    <a class="catalog-category-link" asp-controller="Product" asp-action="Category" asp-route-id="6">
+                        <span><i class="fa-regular fa-keyboard"></i> Bàn phím</span>
+                    </a>
+                    <a class="catalog-category-link" asp-controller="Product" asp-action="Category" asp-route-id="7">
+                        <span><i class="fa-solid fa-computer-mouse"></i> Chuột</span>
+                    </a>
+
+                    <div class="catalog-benefit mt-4">
+                        <i class="fa-solid fa-truck-fast"></i>
+                        <div>
+                            <strong>Miễn phí vận chuyển</strong>
+                            <span>Áp dụng theo chính sách cửa hàng</span>
+                        </div>
+                    </div>
+                    <div class="catalog-benefit">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <div>
+                            <strong>Bảo hành chính hãng</strong>
+                            <span>Yên tâm mua sắm</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <div class="col-lg-9">
+                <div class="catalog-toolbar mb-4">
+                    <div>
+                        <span class="catalog-eyebrow">PC STORE</span>
+                        <h1 class="catalog-title mb-1">Tất cả sản phẩm</h1>
+                        <p class="catalog-count mb-0">Tìm thấy @totalProducts sản phẩm</p>
+                    </div>
+                </div>
+
+                @if (Model.Any())
+                {
+                    <div class="row g-3 g-xl-4 product-grid">
+                        @foreach (var item in Model)
+                        {
+                            <partial name="_ProductCard" model="item" />
+                        }
+                    </div>
+
+                    @if (totalPages > 1)
+                    {
+                        <nav class="catalog-pagination mt-5" aria-label="Phân trang sản phẩm">
+                            <ul class="pagination justify-content-center mb-0">
+                                <li class="page-item @(currentPage <= 1 ? "disabled" : "")">
+                                    <a class="page-link" asp-action="Index" asp-route-page="@(currentPage - 1)" aria-label="Trang trước">
+                                        <i class="fa-solid fa-chevron-left"></i>
+                                    </a>
+                                </li>
+
+                                @for (int i = 1; i <= totalPages; i++)
+                                {
+                                    <li class="page-item @(i == currentPage ? "active" : "")">
+                                        <a class="page-link" asp-action="Index" asp-route-page="@i">@i</a>
+                                    </li>
+                                }
+
+                                <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
+                                    <a class="page-link" asp-action="Index" asp-route-page="@(currentPage + 1)" aria-label="Trang sau">
+                                        <i class="fa-solid fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    }
+                }
+                else
+                {
+                    <div class="catalog-empty text-center">
+                        <i class="fa-solid fa-box-open"></i>
+                        <h2>Chưa có sản phẩm</h2>
+                        <p>Danh sách sản phẩm hiện đang trống.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>

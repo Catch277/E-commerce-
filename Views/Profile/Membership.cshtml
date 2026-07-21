@@ -1,0 +1,371 @@
+﻿@model ECommerceWeb.ViewModels.MembershipVM
+@{
+    ViewData["Title"] = "Hạng thành viên và Ưu đãi";
+}
+<!-- Swiper CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+<style>
+    body {
+        background-color: #f4f6f8;
+    }
+
+    .sidebar-menu .list-group-item:hover {
+        background-color: #fff3c2; /* Vàng nhạt */
+        color: #785900; /* Vàng đậm */
+    }
+
+    .membership-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        padding: 25px;
+    }
+
+    /* Box bọc ngoài để gắn 2 nút điều hướng */
+    .swiper-nav-wrapper {
+        position: relative;
+        padding: 0 20px;
+    }
+
+    /* Thiết kế thẻ hạng (Tier Cards) */
+    .tier-box {
+        border-radius: 10px;
+        padding: 20px;
+        color: #333;
+        position: relative;
+        overflow: hidden;
+        min-height: 120px;
+        opacity: 0.6;
+        transition: all 0.3s ease;
+        height: 100%;
+        cursor: pointer;
+    }
+
+        /* Gỡ bỏ viền đỏ ở active, chỉ giữ opacity để thẻ sáng lên */
+        .tier-box.active {
+            opacity: 1;
+        }
+
+        /* Khi click (previewing) mới hiện viền đỏ và phóng to */
+        .tier-box.previewing {
+            transform: scale(1.05);
+            opacity: 1;
+            box-shadow: 0 0 0 2px #d70018, 0 8px 20px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
+
+        .tier-box .lock-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            color: rgba(0,0,0,0.2);
+        }
+
+    /* Thiết kế 2 nút mũi tên Tròn */
+    .custom-swiper-btn {
+        width: 36px;
+        height: 36px;
+        background: #fff;
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        color: #d70018;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 20;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+        .custom-swiper-btn:hover {
+            background: #fcebeb;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .custom-swiper-btn.btn-prev {
+            left: -15px;
+        }
+
+        .custom-swiper-btn.btn-next {
+            right: -15px;
+        }
+
+    /* Progress Bar */
+    .progress-track {
+        height: 4px;
+        background: #e0e0e0;
+        border-radius: 2px;
+        position: relative;
+        margin: 40px 0;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: #d70018;
+        border-radius: 2px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        transition: width 1s ease-in-out;
+    }
+
+    .progress-point {
+        width: 20px;
+        height: 20px;
+        background: #fff;
+        border: 4px solid #e0e0e0;
+        border-radius: 50%;
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2;
+    }
+
+        .progress-point.achieved {
+            border-color: #d70018;
+            background: #d70018;
+        }
+
+    /* Ưu đãi list */
+    .benefit-item {
+        padding: 15px 0;
+        border-bottom: 1px dashed #eee;
+        display: flex;
+        align-items: flex-start;
+    }
+
+        .benefit-item:last-child {
+            border-bottom: none;
+        }
+
+    .benefit-icon {
+        width: 40px;
+        height: 40px;
+        background: #fcebeb;
+        color: #d70018;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
+
+    .swiper-slide {
+        width: auto !important; /* để slide tự co theo nội dung */
+    }
+
+    .tier-box {
+        min-width: 200px; /* đảm bảo các thẻ đồng đều */
+    }
+    /* Tăng z-index cho nút nếu bị che */
+    .custom-swiper-btn {
+        z-index: 30;
+    }
+    .custom-swiper-btn.swiper-button-disabled {
+    opacity: 0;
+    pointer-events: none;
+}
+</style>
+
+<div class="container mt-4 mb-5">
+    <!-- Quick Links -->
+    @await Html.PartialAsync("_ProfileQuickLinksPartial")
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3 mb-4">
+            @await Html.PartialAsync("_ProfileSidebarPartial")
+        </div>
+        <!-- Nội dung chính -->
+        <div class="col-lg-9">
+            <div class="membership-card mb-4">
+
+                <!-- Wrapper chứa Swiper và 2 nút mũi tên -->
+                <div class="swiper-nav-wrapper mb-4">
+                    <!-- Phải có overflow: hidden để tính năng Drag hoạt động -->
+                    <div class="swiper tier-swiper" style="padding: 15px 5px; overflow: hidden;">
+                        <div class="swiper-wrapper">
+                            @foreach (var tier in Model.AllTiers)
+                            {
+                                bool isCurrent = tier.TierID == Model.CurrentTier.TierID;
+                                bool isLocked = tier.MinPoints > Model.CurrentPoints;
+
+                                <div class="swiper-slide">
+                                    <div class="tier-box @(isCurrent ? "active previewing" : "")"
+                                         data-tier-id="@tier.TierID"
+                                         data-tier-name="@tier.TierName"
+                                         style="background-color: @(tier.ColorHex);">
+
+                                        <h5 class="fw-bold mb-1">@tier.TierName</h5>
+                                        @if (isCurrent)
+                                        {
+                                            <span class="badge bg-dark mt-2">Hạng hiện tại</span>
+                                        }
+                                        else if (isLocked)
+                                        {
+                                            <i class="bi bi-lock-fill lock-icon"></i>
+                                            <small class="text-muted position-absolute bottom-0 start-0 p-3 w-100 text-center">Cần thêm @(tier.MinPoints - Model.CurrentPoints) điểm</small>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-unlock-fill lock-icon"></i>
+                                            <span class="badge bg-success mt-2">Đã mở khóa</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- 2 Nút bấm Tròn -->
+                    <div class="custom-swiper-btn btn-prev"><i class="bi bi-chevron-left"></i></div>
+                    <div class="custom-swiper-btn btn-next"><i class="bi bi-chevron-right"></i></div>
+                </div>
+                    
+
+                <!-- Thanh Progress Bar Thăng Cấp (Giữ nguyên) -->
+                <h6 class="fw-bold text-center mb-0">ĐIỀU KIỆN THĂNG CẤP</h6>
+                <div class="text-center small text-muted mb-4">1 điểm tương đương 10.000đ chi tiêu</div>
+
+                <div class="progress-track">
+                    <div class="progress-fill" style="width: @Model.ProgressPercentage.ToString("0.##")%;"></div>
+                    @foreach (var tier in Model.AllTiers)
+                    {
+                        var maxPoints = Model.AllTiers.Max(t => t.MinPoints);
+                        double position = maxPoints == 0 ? 0 : ((double)tier.MinPoints / maxPoints) * 100;
+                        bool isAchieved = Model.CurrentPoints >= tier.MinPoints;
+                        <div class="progress-point @(isAchieved ? "achieved" : "")" style="left: @position%;"></div>
+                    }
+                </div>
+            </div>
+
+            <!-- Danh sách Ưu đãi động (Dynamic) -->
+            <div class="membership-card">
+                <h6 class="fw-bold text-center mb-4" id="benefit-title">ƯU ĐÃI MUA HÀNG (@Model.CurrentTier.TierName)</h6>
+
+                <div id="benefits-container">
+                    @foreach (var tier in Model.AllTiers)
+                    {
+                        // Ẩn tất cả ngoại trừ hạng hiện tại
+                        string displayStyle = tier.TierID == Model.CurrentTier.TierID ? "block" : "none";
+
+                        <div class="tier-benefits-list" id="benefits-list-@tier.TierID" style="display: @displayStyle;">
+                            @if (tier.Benefits != null && tier.Benefits.Any())
+                            {
+                                @foreach (var benefit in tier.Benefits)
+                                {
+                                    <div class="benefit-item">
+                                        <div class="benefit-icon">
+                                            <i class="@benefit.IconClass"></i>
+                                        </div>
+                                        <div>
+                                            <p class="mb-0 fw-bold text-dark">@benefit.Description</p>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="text-center py-4 text-muted">
+                                    <i class="bi bi-box2 text-light" style="font-size: 3rem;"></i>
+                                    <p class="mt-2">Hạng này hiện chưa có ưu đãi cụ thể.</p>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+        // Lấy ID hạng hiện tại từ hidden field
+        var currentTierId = document.getElementById('currentTierId')?.value;
+
+        // Tìm index của slide chứa thẻ đúng với hạng hiện tại
+        function getInitialSlideIndex() {
+        if (!currentTierId) return 0;
+        const slides = document.querySelectorAll('.swiper-slide');
+        for (let i = 0; i < slides.length; i++) {
+        const tierBox = slides[i].querySelector('.tier-box');
+        if (tierBox && tierBox.getAttribute('data-tier-id') === currentTierId) {
+        return i;
+        }
+        }
+        return 0; // fallback
+        }
+
+        // Cập nhật ưu đãi và class previewing cho slide đang active
+        function updateBenefitsFromSlide(swiper) {
+        const activeSlide = swiper.slides[swiper.activeIndex];
+        if (!activeSlide) return;
+        const tierBox = activeSlide.querySelector('.tier-box');
+        if (!tierBox) return;
+        const tierId = tierBox.getAttribute('data-tier-id');
+        const tierName = tierBox.getAttribute('data-tier-name');
+        if (!tierId) return;
+
+        // Cập nhật tiêu đề ưu đãi
+        document.getElementById('benefit-title').innerText = 'ƯU ĐÃI MUA HÀNG (' + tierName + ')';
+
+        // Ẩn tất cả danh sách ưu đãi, hiện đúng hạng
+        document.querySelectorAll('.tier-benefits-list').forEach(list => {
+        list.style.display = 'none';
+        });
+        const targetList = document.getElementById('benefits-list-' + tierId);
+        if (targetList) targetList.style.display = 'block';
+
+        // Xóa previewing cũ, thêm cho thẻ active
+        document.querySelectorAll('.tier-box').forEach(box => {
+        box.classList.remove('previewing');
+        });
+        tierBox.classList.add('previewing');
+        }
+
+        // Khởi tạo Swiper (không dùng loop)
+        const swiper = new Swiper('.tier-swiper', {
+        slidesPerView: 'auto',
+        centeredSlides: true,
+        spaceBetween: 20,
+        grabCursor: true,
+        initialSlide: getInitialSlideIndex(),
+        navigation: {
+        nextEl: '.btn-next',
+        prevEl: '.btn-prev',
+        },
+        on: {
+        init: function () {
+        updateBenefitsFromSlide(this);
+        },
+        slideChange: function () {
+        updateBenefitsFromSlide(this);
+        }
+        }
+        });
+
+        // Click vào thẻ hạng -> chuyển đến slide đó
+        document.querySelector('.tier-swiper').addEventListener('click', function (e) {
+        const tierBox = e.target.closest('.tier-box');
+        if (!tierBox) return;
+        const slide = tierBox.closest('.swiper-slide');
+        if (!slide) return;
+        const index = swiper.slides.indexOf(slide);
+        if (index !== -1) {
+        swiper.slideTo(index);
+        }
+        });
+        });
+    </script>
+}

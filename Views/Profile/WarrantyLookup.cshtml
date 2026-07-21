@@ -1,0 +1,96 @@
+@model ECommerceWeb.ViewModels.WarrantyLookupViewModel
+@{
+    ViewData["Title"] = "Tra cứu bảo hành";
+}
+
+<style>
+    body { background: #f4f6f8; }
+
+    .warranty-page { padding-top: 2rem; padding-bottom: 3.5rem; }
+    .warranty-card {
+        background: #fff;
+        border: 0;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(17, 24, 39, .06);
+    }
+    .warranty-heading { font-size: 1.55rem; font-weight: 700; margin-bottom: 1.35rem; }
+    .warranty-tabs {
+        display: flex;
+        gap: .25rem;
+        overflow-x: auto;
+        border-bottom: 1px solid #e7e9ee;
+        scrollbar-width: thin;
+    }
+    .warranty-tabs .nav-link {
+        color: #5c6475;
+        border: 0;
+        border-bottom: 3px solid transparent;
+        border-radius: 0;
+        font-weight: 600;
+        padding: .85rem 1.25rem;
+        white-space: nowrap;
+    }
+    .warranty-tabs .nav-link.active { color: #d70018; border-bottom-color: #d70018; }
+    .warranty-search { display: flex; gap: 1rem; padding-top: 1.5rem; }
+    .warranty-search-field {
+        align-items: center;
+        background: #f8fafc;
+        border: 1px solid #d7c5aa;
+        border-radius: 8px;
+        display: flex;
+        flex: 1;
+        gap: .75rem;
+        min-width: 0;
+        padding: .7rem .9rem;
+    }
+    .warranty-search-field i { color: #a8b0bd; font-size: 1.1rem; }
+    .warranty-search-field input { background: transparent; border: 0; box-shadow: none; min-width: 0; outline: 0; width: 100%; }
+    .warranty-search .btn { border-radius: 8px; font-weight: 700; min-width: 122px; }
+    .warranty-empty { color: #697386; padding: 3.5rem 1.5rem; text-align: center; }
+    .warranty-empty .empty-icon { color: #b8c0cc; font-size: 2.5rem; }
+    .warranty-empty h2 { color: #343a46; font-size: 1.05rem; font-weight: 700; margin: 1rem 0 .4rem; }
+
+    @@media (max-width: 767.98px) {
+        .warranty-page { padding-top: 1.25rem; }
+        .warranty-search { flex-direction: column; gap: .75rem; }
+        .warranty-search .btn { width: 100%; }
+        .warranty-tabs .nav-link { padding-inline: 1rem; }
+    }
+</style>
+
+<div class="container warranty-page">
+    <div class="row g-4">
+        <aside class="col-lg-3">
+            @await Html.PartialAsync("_ProfileSidebarPartial")
+        </aside>
+
+        <section class="col-lg-9">
+            <h1 class="warranty-heading">Tra cứu bảo hành</h1>
+
+            <div class="warranty-card p-3 p-md-4">
+                <nav class="warranty-tabs" aria-label="Trạng thái bảo hành">
+                    <a class="nav-link active" href="#warranty-results">Tất cả</a>
+                    <a class="nav-link" href="#warranty-results">Đã tiếp nhận</a>
+                    <a class="nav-link" href="#warranty-results">Đang điều phối</a>
+                    <a class="nav-link" href="#warranty-results">Đang sửa</a>
+                    <a class="nav-link" href="#warranty-results">Đã sửa xong</a>
+                    <a class="nav-link" href="#warranty-results">Đã trả máy</a>
+                </nav>
+
+                <form asp-action="WarrantyLookup" method="get" class="warranty-search">
+                    <label class="warranty-search-field" for="warranty-keyword">
+                        <i class="bi bi-search" aria-hidden="true"></i>
+                        <input id="warranty-keyword" name="keyword" value="@Model.Keyword" placeholder="Nhập số điện thoại hoặc mã bảo hành..." autocomplete="off" />
+                    </label>
+                    <button type="submit" class="btn btn-warning">Tra cứu</button>
+                </form>
+            </div>
+
+            <div id="warranty-results" class="warranty-card warranty-empty mt-4">
+                <i class="bi bi-shield-check empty-icon" aria-hidden="true"></i>
+                <h2>Chưa có thông tin bảo hành để hiển thị</h2>
+                <p class="mb-0">Nhập số điện thoại hoặc mã bảo hành để tra cứu tiến trình hỗ trợ của bạn.</p>
+            </div>
+        </section>
+    </div>
+</div>

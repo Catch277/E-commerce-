@@ -1,0 +1,220 @@
+@model ECommerceWeb.ViewModels.ProductCardViewModel
+
+<div class="product-card h-100 d-flex flex-column">
+
+    <div class="product-image position-relative">
+        @if (Model.IsNew)
+        {
+            <span class="badge-new">NEW</span>
+        }
+        else if (Model.DiscountPercent.HasValue)
+        {
+            <span class="badge-discount">
+                -@Model.DiscountPercent%
+            </span>
+        }
+
+        <a asp-controller="Product"
+           asp-action="Details"
+           asp-route-id="@Model.ProductID"
+           class="d-block text-decoration-none"
+           aria-label="Xem chi tiết @Model.ProductName">
+
+            <img src="@(string.IsNullOrEmpty(Model.ImageUrl)
+                                                                   ? "/images/no-image.png"
+                                                                   : Model.ImageUrl)"
+                 alt="@Model.ProductName">
+        </a>
+    </div>
+
+    <div class="p-3 d-flex flex-column flex-grow-1">
+
+        <div class="text-uppercase text-muted small fw-bold mb-1"
+             style="font-size: .72rem;">
+            @Model.CategoryName
+        </div>
+
+        <a asp-controller="Product"
+           asp-action="Details"
+           asp-route-id="@Model.ProductID"
+           class="product-title product-title-link mb-2 text-decoration-none text-dark">
+            @Model.ProductName
+        </a>
+
+        <div class="mb-2"
+             style="color: #ffc107; font-size: .85rem;">
+            ★★★★★ (@Model.Rating.ToString("0.0"))
+
+            <span class="text-muted">
+                (@Model.ReviewCount)
+            </span>
+        </div>
+
+        <div class="mb-3">
+            <span class="fw-bold"
+                  style="color: #d70018; font-size: 18px;">
+                @Model.Price.ToString("N0")đ
+            </span>
+
+            @if (Model.OldPrice.HasValue)
+            {
+                <span class="text-muted text-decoration-line-through small ms-2">
+                    @Model.OldPrice.Value.ToString("N0")đ
+                </span>
+            }
+        </div>
+
+        <div class="d-flex gap-2 mt-auto align-items-center">
+
+            <a asp-controller="Product"
+               asp-action="Details"
+               asp-route-id="@Model.ProductID"
+               class="btn btn-outline-dark btn-sm flex-fill">
+                Chi tiết
+            </a>
+
+            <button type="button"
+                    class="btn btn-warning btn-sm flex-fill add-to-cart-btn"
+                    data-product-id="@Model.ProductID"
+                    data-quantity="1">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span>Thêm vào giỏ</span>
+            </button>
+
+            <button type="button"
+                    class="btn-favorite border-0 bg-transparent p-0"
+                    data-id="@Model.ProductID"
+                    title="Yêu thích"
+                    aria-label="Yêu thích @Model.ProductName"
+                    aria-pressed="@Model.IsFavorite.ToString().ToLowerInvariant()">
+
+                <img src="@(Model.IsFavorite
+                                                                                   ? "/images/is-favorited-yes.svg"
+                                                                                   : "/images/is-favorited-no.svg")"
+                     alt="Yêu thích"
+                     class="favorite-icon"
+                     style="width: 24px; height: 24px;" />
+            </button>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    (() => {
+        if (window.productCardCartInitialized) {
+            return;
+        }
+
+        window.productCardCartInitialized = true;
+
+        document.addEventListener('click', async function (event) {
+            const button = event.target.closest('.add-to-cart-btn');
+
+            if (!button) {
+                return;
+            }
+
+            event.preventDefault();
+
+            const productId = button.dataset.productId;
+            const quantity = button.dataset.quantity || '1';
+            const oldContent = button.innerHTML;
+
+            button.disabled = true;
+            button.innerHTML = `
+                <span class="spinner-border spinner-border-sm me-1"
+                      aria-hidden="true"></span>
+                Đang thêm...
+            `;
+
+            try {
+                const response = await fetch('/Cart/AddToCart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type':
+                            'application/x-www-form-urlencoded; charset=UTF-8',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: new URLSearchParams({
+                        productId: productId,
+                        quantity: quantity
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(
+                        result.message ||
+                        'Không thể thêm sản phẩm vào giỏ hàng.'
+                    );
+                }
+
+                showCartToast(
+                    result.message || 'Đã thêm sản phẩm vào giỏ hàng.',
+                    'success'
+                );
+
+                updateProductCartCount(result.cartCount);
+            } catch (error) {
+                showCartToast(
+                    error.message || 'Đã xảy ra lỗi khi thêm vào giỏ hàng.',
+                    'error'
+                );
+            } finally {
+                button.disabled = false;
+                button.innerHTML = oldContent;
+            }
+        });
+
+        function showCartToast(message, icon) {
+            // Dùng SweetAlert2 toast đã có sẵn trong project.
+            if (typeof Swal === 'undefined') {
+                console.error('SweetAlert2 chưa được nạp.', message);
+                return;
+            }
+
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: icon,
+                title: message,
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: toast => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer);
+                    toast.addEventListener('mouseleave', Swal.resumeTimer);
+                }
+            });
+        }
+
+        function updateProductCartCount(cartCount) {
+            if (cartCount === undefined || cartCount === null) {
+                return;
+            }
+
+            const normalizedCount = Number(cartCount) || 0;
+
+            const badges = document.querySelectorAll(
+                '#cart-badge, #cart-count, #cartCount, .cart-count, .cart-badge, .cart-badge-count, [data-cart-count]'
+            );
+
+            badges.forEach(badge => {
+                badge.textContent = normalizedCount;
+                badge.dataset.cartCount = normalizedCount;
+                badge.classList.toggle('d-none', normalizedCount <= 0);
+                badge.hidden = false;
+                badge.setAttribute(
+                    'aria-label',
+                    `${normalizedCount} sản phẩm trong giỏ hàng`
+                );
+            });
+
+            window.dispatchEvent(new CustomEvent('cart:updated', {
+                detail: { cartCount: normalizedCount }
+            }));
+        }
+    })();
+</script>

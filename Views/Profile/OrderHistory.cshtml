@@ -1,0 +1,377 @@
+﻿@model ECommerceWeb.ViewModels.OrderHistoryViewModel
+@{
+    ViewData["Title"] = "Lịch sử mua hàng";
+}
+
+<!-- Custom CSS đồng bộ với Index.cshtml (Theme Vàng/Vàng đậm) -->
+<style>
+    body {
+        background-color: #f7f9fd; /* Đồng bộ background với Index */
+    }
+
+    .profile-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        background: #fff;
+    }
+
+    .sidebar-menu .list-group-item {
+        border: none;
+        padding: 12px 20px;
+        color: #4a4a4a;
+        font-weight: 500;
+        transition: all 0.2s;
+        border-radius: 0 8px 8px 0;
+    }
+
+        .sidebar-menu .list-group-item:hover {
+            background-color: #fff3c2; /* Vàng nhạt */
+            color: #785900; /* Vàng đậm */
+        }
+
+        .sidebar-menu .list-group-item.active {
+            background-color: #fff3c2;
+            color: #785900;
+            border-left: 4px solid #ffc107; /* Vàng chủ đạo */
+            border-radius: 0 8px 8px 0;
+        }
+
+    .sidebar-menu i {
+        width: 25px;
+        text-align: center;
+        margin-right: 10px;
+        font-size: 1.1rem;
+        color: #ffc107; /* Icon đồng bộ màu vàng */
+    }
+
+    .quick-links .btn {
+        border-radius: 20px;
+        border: 1px solid #e0e0e0;
+        color: #4a4a4a;
+        margin-right: 10px;
+        font-weight: 500;
+        padding: 6px 15px;
+        transition: all 0.2s;
+    }
+
+        .quick-links .btn:hover {
+            border-color: #ffc107;
+            color: #785900;
+            background-color: #fffdf5;
+        }
+
+        .quick-links .btn.active-link {
+            border-color: #ffc107;
+            color: #785900;
+            background-color: #fff3c2;
+        }
+
+    .empty-state-img {
+        max-width: 120px;
+        margin-bottom: 15px;
+        opacity: 0.8;
+    }
+
+    /* Style riêng cho trang Lịch sử mua hàng */
+    .order-status-tabs .nav-link {
+        color: #4a4a4a;
+        font-weight: 500;
+        border: none;
+        border-bottom: 3px solid transparent;
+        border-radius: 0;
+        padding: 10px 18px;
+        transition: all 0.2s;
+    }
+
+        .order-status-tabs .nav-link.active {
+            color: #785900;
+            border-bottom: 3px solid #ffc107;
+            background: transparent;
+        }
+
+    .order-item {
+        border: 1px solid #eee;
+        border-radius: 10px;
+        padding: 16px;
+        transition: all 0.2s;
+        background: #fff;
+    }
+
+        .order-item:hover {
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.15); /* Shadow ám vàng nhẹ */
+            border-color: #ffc107;
+        }
+
+    .order-thumb {
+        width: 64px;
+        height: 64px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #eee;
+        background: #f9f9f9;
+    }
+
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+
+    .status-cho {
+        background-color: #fff3cd;
+        color: #997404;
+    }
+
+    .status-dang-giao {
+        background-color: #cfe2ff;
+        color: #084298;
+    }
+
+    .status-hoan-thanh {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .status-huy {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+
+    /* Date range picker */
+    .date-range-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+        .date-range-wrapper label {
+            color: #4a4a4a;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+    .date-range-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid #dcdcdc;
+        border-radius: 8px;
+        padding: 6px 12px;
+        background: #fff;
+        transition: border-color 0.2s;
+    }
+
+        .date-range-box:focus-within {
+            border-color: #ffc107;
+        }
+
+        .date-range-box input[type="date"] {
+            border: none;
+            outline: none;
+            color: #4a4a4a;
+            font-weight: 500;
+            padding: 2px;
+            background: transparent;
+            width: 120px;
+        }
+
+        .date-range-box .arrow-icon {
+            color: #999;
+        }
+
+        .date-range-box .calendar-icon {
+            color: #ffc107; /* Đổi từ đỏ sang vàng */
+            cursor: pointer;
+        }
+
+    /* Nút custom theo theme vàng */
+    .btn-theme-outline {
+        border: 1px solid #ffc107;
+        color: #785900;
+        background-color: transparent;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+        .btn-theme-outline:hover {
+            background-color: #ffc107;
+            color: #6d5100;
+            border-color: #ffc107;
+        }
+
+    .text-theme {
+        color: #785900 !important;
+    }
+</style>
+
+@functions {
+    string StatusCssClass(string status) => status switch
+    {
+        "Chờ xác nhận" => "status-cho",
+        "Đang xử lý" => "status-cho",
+        "Đang vận chuyển" => "status-dang-giao",
+        "Đã nhận hàng" => "status-hoan-thanh",
+        "Đã huỷ" => "status-huy",
+        "Đã hủy" => "status-huy",
+        _ => "status-cho"
+    };
+}
+
+<div class="container mt-4 mb-5">
+
+    <!-- SECTION 1: Header - Tổng quan tài khoản (rút gọn) -->
+    <div class="profile-card p-3 mb-3">
+        <div class="d-flex align-items-center">
+            <!-- Cập nhật màu avatar đồng bộ với Index (background=ffc107, color=6d5100) -->
+            <img src="https://ui-avatars.com/api/?name=@Model.FullName&background=ffc107&color=6d5100&rounded=true&size=64" alt="Avatar" class="me-3">
+            <div>
+                <h5 class="mb-0 fw-bold">@Model.FullName</h5>
+                <span class="text-muted small">Lịch sử mua hàng</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 2: Thanh Quick Links -->
+    @await Html.PartialAsync("_ProfileQuickLinksPartial")
+
+    <!-- SECTION 3: Main Layout (Sidebar + Nội dung) -->
+    <div class="row">
+        <!-- Sidebar Menu -->
+        <div class="col-lg-3 mb-4">
+            <div class="profile-card py-2 sidebar-menu">
+                @await Html.PartialAsync("_ProfileSidebarPartial")
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+
+            <div class="profile-card p-4">
+                <h6 class="fw-bold mb-3">Lịch sử mua hàng</h6>
+
+                <!-- Form lọc: tabs trạng thái + khoảng ngày -->
+                <form asp-action="OrderHistory" method="get" id="orderFilterForm">
+                    <!-- Tabs lọc theo trạng thái -->
+                    <ul class="nav order-status-tabs mb-3 border-bottom">
+                        @{
+                            var statuses = new (string Value, string Label)[]
+                            {
+                                (null, "Tất cả"),
+                                ("Chờ xác nhận", "Chờ xác nhận"),
+                                ("Đang xử lý", "Đang xử lý"),
+                                ("Đang vận chuyển", "Đang vận chuyển"),
+                                ("Đã nhận hàng", "Đã nhận hàng"),
+                                ("Đã huỷ", "Đã huỷ")
+                            };
+                        }
+                        @foreach (var s in statuses)
+                        {
+                            var isActive = (Model.CurrentFilter == s.Value) || (string.IsNullOrEmpty(Model.CurrentFilter) && s.Value == null);
+                            <li class="nav-item">
+                                <a class="nav-link @(isActive ? "active" : "")"
+                                   asp-action="OrderHistory"
+                                   asp-route-status="@s.Value"
+                                   asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                                   asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")"
+                                   asp-route-page="1">@s.Label</a>
+                            </li>
+                        }
+                    </ul>
+
+                    <!-- Date range picker -->
+                    <div class="date-range-wrapper mb-4">
+                        <label class="mb-0">Lịch sử mua hàng</label>
+                        <div class="date-range-box">
+                            <input type="date" name="fromDate" id="fromDate"
+                                   value="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                                   onchange="document.getElementById('orderFilterForm').submit()" />
+                            <i class="fa-solid fa-arrow-right arrow-icon"></i>
+                            <input type="date" name="toDate" id="toDate"
+                                   value="@Model.ToDate?.ToString("yyyy-MM-dd")"
+                                   onchange="document.getElementById('orderFilterForm').submit()" />
+                        </div>
+                    </div>
+
+                    <!-- Giữ lại trạng thái đang chọn khi submit theo ngày -->
+                    <input type="hidden" name="status" value="@Model.CurrentFilter" />
+                </form>
+
+                @if (!Model.Orders.Any())
+                {
+                    <!-- Empty state -->
+                    <div class="text-center py-5">
+                        <i class="fa-solid fa-box-open text-muted" style="font-size: 4rem; opacity: 0.3; margin-bottom: 15px;"></i>
+                        <p class="text-muted small mb-1">Bạn chưa có đơn hàng nào@(string.IsNullOrEmpty(Model.CurrentFilter) ? "" : $" ở trạng thái \"{Model.CurrentFilter}\"").</p>
+                        <!-- Đổi màu link sang theme vàng đậm -->
+                        <a asp-controller="Home" asp-action="Index" class="text-decoration-none fw-semibold text-theme">Mua sắm ngay</a>
+                    </div>
+                }
+                else
+                {
+                    <!-- Danh sách đơn hàng -->
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (var order in Model.Orders)
+                        {
+                            <div class="order-item">
+                                <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                                    <div>
+                                        <span class="fw-bold">Đơn hàng #@order.OrderID</span>
+                                        <span class="text-muted small ms-2">@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</span>
+                                    </div>
+                                    <span class="status-badge @StatusCssClass(order.OrderStatus)">@order.OrderStatus</span>
+                                </div>
+
+                                <div class="d-flex align-items-center">
+                                    <img src="@(string.IsNullOrEmpty(order.ThumbnailUrl) ? "/images/no-image.png" : order.ThumbnailUrl)"
+                                         alt="@order.FirstProductName" class="order-thumb me-3">
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold">@order.FirstProductName</div>
+                                        <div class="text-muted small">
+                                            @order.TotalProducts sản phẩm
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="text-muted small">Tổng tiền</div>
+                                        <!-- Đổi màu tiền sang theme vàng đậm để đồng bộ -->
+                                        <div class="fw-bold text-theme">@order.TotalAmount.ToString("N0")đ</div>
+                                    </div>
+                                </div>
+
+                                <div class="text-end mt-2">
+                                    <!-- Đổi nút sang btn-theme-outline -->
+                                    <a asp-controller="Order" asp-action="Detail" asp-route-id="@order.OrderID"
+                                       class="btn btn-sm btn-theme-outline">Xem chi tiết</a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Phân trang -->
+                    @if (Model.TotalPages > 1)
+                    {
+                        <nav class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                @for (int i = 1; i <= Model.TotalPages; i++)
+                                {
+                                    var isActive = i == Model.CurrentPage;
+                                    <li class="page-item @(isActive ? "active" : "")">
+                                        <a class="page-link"
+                                           asp-action="OrderHistory"
+                                           asp-route-status="@Model.CurrentFilter"
+                                           asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                                           asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")"
+                                           asp-route-page="@i"
+                                           style="@(isActive ? "background-color:#ffc107; border-color:#ffc107; color:#6d5100; font-weight:bold;" : "color:#785900;")">@i</a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    }
+                }
+            </div>
+
+        </div>
+    </div>
+</div>

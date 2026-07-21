@@ -1,0 +1,9 @@
+﻿@model int
+
+<span id="cart-badge"
+      class="cart-badge badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle @(Model <= 0 ? "d-none" : "")"
+      data-cart-count="@Model"
+      aria-label="@Model sản phẩm trong giỏ hàng"
+      style="font-size:.6rem;">
+    @Model
+</span>
