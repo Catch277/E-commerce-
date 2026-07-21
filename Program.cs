@@ -9,13 +9,18 @@ var builder = WebApplication.CreateBuilder(args);
 // Đăng ký ApplicationDbContext với SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 // Đăng ký GHN API
 builder.Services.AddScoped<IGhnService, GhnService>();
+builder.Services.AddMemoryCache();
+
 // Đăng ký VnPayAPI
 builder.Services.AddScoped<IVnPayService, VnPayService>();
+
 // Đăng ký MoMoAPI
 builder.Services.Configure<MomoOptionModel>(builder.Configuration.GetSection("MomoAPI"));
 builder.Services.AddScoped<IMomoService, MomoService>();
+
 // Cấu hình Authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -24,12 +29,25 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LogoutPath = "/Auth/Logout";
         options.AccessDeniedPath = "/Auth/AccessDenied"; // Đường dẫn khi không đủ quyền
     });
+
 // Cấu hình Service Hạng thành viên
 builder.Services.AddScoped<IMembershipService, MembershipService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<EmailService>();
+
+// ==========================================
+// [THÊM MỚI] Cấu hình Session
+// ==========================================
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+// ==========================================
 
 var app = builder.Build();
 
@@ -47,12 +65,18 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// ==========================================
+// [THÊM MỚI] Kích hoạt Session Middleware
+// (Bắt buộc phải nằm sau UseRouting() và UseAuthorization())
+// ==========================================
+app.UseSession();
+// ==========================================
+
 app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
-
 
 app.Run();

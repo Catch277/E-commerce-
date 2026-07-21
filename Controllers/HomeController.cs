@@ -3,6 +3,7 @@ using ECommerceWeb.Models;
 using ECommerceWeb.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +22,20 @@ namespace ECommerceWeb.Controllers
 
         public async Task<IActionResult> Index()
         {
+            var favoriteProductIds = new HashSet<int>();
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity.Name;
+                if (!string.IsNullOrWhiteSpace(userEmail))
+                {
+                    favoriteProductIds = (await _context.Favorites
+                        .Where(f => f.User.Email == userEmail)
+                        .Select(f => f.ProductID)
+                        .ToListAsync())
+                        .ToHashSet();
+                }
+            }
+
             // Deal: sản phẩm đang có giảm giá (OldPrice > Price)
             var dealProducts = await _context.Products
                 .Include(p => p.Category)
@@ -38,6 +53,11 @@ namespace ECommerceWeb.Controllers
                 .Take(4)
                 .Select(p => MapToProductCard(p))
                 .ToListAsync();
+
+            foreach (var product in dealProducts.Concat(newArrivals))
+            {
+                product.IsFavorite = favoriteProductIds.Contains(product.ProductID);
+            }
 
             var prebuiltPcs = await _context.PrebuiltPcs
                 .Include(p => p.Specs)

@@ -1,6 +1,6 @@
 <header class="py-3">
     <div class="container d-flex flex-wrap align-items-center justify-content-between gap-3">
-        <a href="/Index/Home" class="text-decoration-none">
+        <a href="/Home/Index" class="text-decoration-none">
             <h2 class="fw-bold mb-0" style="color:#ffc107;">PC Store</h2>
         </a>
 
@@ -35,9 +35,9 @@
                 </ul>
             </div>
 
-            <a href="#" class="text-white position-relative" style="text-decoration:none;">
+            <a href="/Cart/Index" class="text-white position-relative" style="text-decoration:none;">
                 <i class="fa-solid fa-cart-shopping fs-5"></i>
-                <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle" style="font-size:.6rem;">@(ViewBag.CartCount ?? 0)</span>
+                @await Component.InvokeAsync("CartBadge")
             </a>
         </div>
     </div>

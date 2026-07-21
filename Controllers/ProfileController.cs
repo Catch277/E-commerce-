@@ -29,6 +29,31 @@ namespace ECommerceWeb.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
+            // Lấy danh sách sản phẩm yêu thích
+            var favoriteProducts = await _context.Favorites
+                .Where(f => f.UserID == user.UserID)
+                .Include(f => f.Product)
+                    .ThenInclude(p => p.Category)
+                .Select(f => f.Product)
+                .ToListAsync();
+
+            // Ánh xạ sang ProductCardViewModel
+            var favoriteViewModels = favoriteProducts.Select(p => new ProductCardViewModel
+            {
+                ProductID = p.ProductID,
+                ProductName = p.ProductName,
+                Price = p.Price,
+                OldPrice = p.OldPrice,
+                ImageUrl = p.ImageUrl,
+                CategoryName = p.Category?.CategoryName,
+                Rating = p.Rating,
+                ReviewCount = p.ReviewCount,
+                IsNew = p.IsNew,
+                IsFavorite = true, // tất cả đều là yêu thích
+                DetailUrl = Url.Action("Details", "Product", new { id = p.ProductID }) // tạo link chi tiết
+            }).ToList();
+
+            // Lấy thông tin đơn hàng
             var userOrders = await _context.Orders
                 .Where(o => o.UserID == user.UserID && o.OrderStatus != "Đã hủy")
                 .ToListAsync();
@@ -49,6 +74,7 @@ namespace ECommerceWeb.Controllers
                 TotalSpent = (decimal)totalSpent,
                 Role = user.Role,
                 MemberTier = tier,
+                FavoriteProducts = favoriteViewModels // 👈 Gán danh sách yêu thích
             };
 
             return View(model);

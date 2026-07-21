@@ -1,29 +1,35 @@
-﻿@{
+@using ECommerceWeb.Models
+@{
     ViewData["Title"] = "Thanh toán thành công";
+    var payment = ViewBag.Payment as Payment;
 }
 
-<div class="container mt-5 text-center">
-    <div class="card shadow p-5">
-        <div class="mb-4">
-            <i class="fa-solid fa-circle-check text-success" style="font-size: 5rem;"></i>
+<div class="container py-5 d-flex justify-content-center">
+    <div class="card border-0 shadow mx-auto text-center" style="max-width: 550px; border-radius: 12px; padding: 3rem 2rem;">
+        <div class="mb-3">
+            <i class="fa-solid fa-circle-check" style="font-size: 6rem; color: #52a163;"></i>
         </div>
-        <h2 class="text-success mb-3">Giao dịch thành công!</h2>
-        <p class="fs-5">Cảm ơn bạn đã mua sắm tại TechStore. Đơn hàng của bạn đã được thanh toán qua VNPay.</p>
-        <p>Hệ thống đã cập nhật trạng thái đơn hàng và ghi nhận giao dịch.</p>
-        <div class="mt-4">
-            <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
-                <i class="fa-solid fa-house"></i> Về trang chủ
+        
+        <h2 class="fw-bold mb-3" style="color: #52a163;">Giao dịch thành công!</h2>
+        
+        <p class="fs-5 text-dark mb-3">
+            Đơn hàng <strong>#@(payment?.OrderID)</strong> đã được thanh toán qua <strong>@(payment?.PaymentMethod)</strong>.
+        </p>
+
+        @if (!string.IsNullOrWhiteSpace(payment?.TransactionCode))
+        {
+            <p class="mb-5 text-dark">
+                Mã giao dịch: <strong>@payment.TransactionCode</strong>
+            </p>
+        }
+
+        <div class="d-flex justify-content-center gap-3">
+            <a asp-controller="Profile" asp-action="OrderHistory" class="btn fw-semibold" style="background-color: #386bc0; color: #fff; padding: 10px 24px;">
+                <i class="fa-solid fa-file-lines me-2"></i>Xem đơn hàng
+            </a>
+            <a asp-controller="Home" asp-action="Index" class="btn bg-white border-dark fw-semibold" style="color: #000; padding: 10px 24px;">
+                <i class="fa-solid fa-house me-2"></i>Về trang chủ
             </a>
         </div>
     </div>
 </div>
-
-<!-- Tích hợp SweetAlert2 để bật popup thông báo góc phải -->
-@if (TempData["SuccessMessage"] != null)
-{
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            showSuccessMsg('@TempData["SuccessMessage"]');
-        });
-    </script>
-}

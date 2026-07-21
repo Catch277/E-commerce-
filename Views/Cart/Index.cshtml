@@ -1,109 +1,563 @@
 @model ECommerceWeb.Models.Cart
 
-<h2>Giỏ hàng</h2>
-
-@if (Model == null || Model.CartItems == null || !Model.CartItems.Any())
-{
-    <p>Giỏ hàng trống.</p>
+@{
+    ViewData["Title"] = "Giỏ hàng";
+    var items = Model?.CartItems?.ToList() ?? new List<ECommerceWeb.Models.CartItem>();
+    decimal subTotal = items.Sum(i => i.Quantity * i.UnitPrice);
+    decimal originalTotal = items.Sum(i => i.Quantity * (i.Product.OldPrice ?? i.Product.Price));
+    decimal discount = originalTotal - subTotal;
+    decimal grandTotal = subTotal;
 }
-else
-{
-    decimal total = 0;
 
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Sản phẩm</th>
-                <th>Đơn giá</th>
-                <th>Số lượng</th>
-                <th>Thành tiền</th>
-                <th></th>
-            </tr>
-        </thead>
+<style>
+    .cart-page {
+        background-color: #f7f9fd;
+    }
 
-        <tbody>
+    .cart-card {
+        background: #ffffff;
+        border: 1px solid #e0e3e6;
+        border-radius: .75rem;
+        box-shadow: 0 8px 25px rgba(0,0,0,.06);
+        transition: all .25s ease;
+        position: relative;
+    }
 
-        @foreach (var item in Model.CartItems)
-        {
-            total += item.Quantity * item.UnitPrice;
-
-            <tr>
-
-                <td>@item.Product.ProductName</td>
-
-                <td>@item.UnitPrice.ToString("N0") VNĐ</td>
-
-                <td>
-
-                    <form asp-action="UpdateQuantity" method="post">
-
-                        <input type="hidden"
-                               name="cartItemId"
-                               value="@item.CartItemID" />
-
-                        <input type="number"
-                               name="quantity"
-                               value="@item.Quantity"
-                               min="1"/>
-
-                        <button class="btn btn-primary">
-                            Cập nhật
-                        </button>
-
-                    </form>
-
-                </td>
-
-                <td>
-
-                    @((item.Quantity * item.UnitPrice).ToString("N0")) VNĐ
-
-                </td>
-
-                <td>
-
-                    <a asp-action="Remove"
-                       asp-route-cartItemId="@item.CartItemID"
-                       class="btn btn-danger">
-
-                        Xóa
-
-                    </a>
-
-                </td>
-
-            </tr>
+        .cart-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 30px rgba(0,0,0,.10);
         }
 
-        </tbody>
+    .cart-badge-new {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: #d70018;
+        color: #fff;
+        font-size: .7rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: .75rem 0 .75rem 0;
+        z-index: 2;
+    }
 
-    </table>
+    .cart-thumb {
+        width: 96px;
+        height: 96px;
+        flex-shrink: 0;
+        background: #eceef2;
+        border-radius: .5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px;
+    }
 
-    <h4>Tổng tiền :
-        @total.ToString("N0") VNĐ
-    </h4>
+        .cart-thumb img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
 
-    <a asp-action="Clear"
-       asp-route-userId="@Model.UserID"
-       class="btn btn-warning">
+    .qty-box {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid #d8dade;
+        border-radius: .5rem;
+        overflow: hidden;
+    }
 
-       Xóa toàn bộ
+        .qty-box button {
+            border: none;
+            background: #fff;
+            padding: .35rem .7rem;
+            color: #212529;
+            font-weight: 600;
+        }
 
-    </a>
+            .qty-box button:hover {
+                background: #eceef2;
+            }
 
-    <a asp-controller="Checkout"
-       asp-action="Index"
-       asp-route-userId="@Model.UserID"
-       class="btn btn-success">
+        .qty-box input {
+            width: 44px;
+            text-align: center;
+            border: none;
+            border-left: 1px solid #d8dade;
+            border-right: 1px solid #d8dade;
+            font-weight: 600;
+            padding: .35rem 0;
+        }
 
-       Đặt hàng
+    .price-main {
+        color: #d70018;
+        font-weight: 700;
+        font-size: 1.15rem;
+    }
 
-    </a>
-    <a asp-controller="Checkout"
-   asp-action="Index"
-   asp-route-userId="@Model.UserID"
-   class="btn btn-success">
-    Đặt hàng
-</a>
+    .price-old {
+        color: #adb5bd;
+        text-decoration: line-through;
+        font-size: .85rem;
+    }
 
+    .btn-remove-item {
+        color: #adb5bd;
+        background: transparent;
+        border: none;
+        padding: .4rem;
+        border-radius: 50%;
+    }
+
+        .btn-remove-item:hover {
+            color: #d70018;
+            background: #fcebeb;
+        }
+
+    .order-summary {
+        position: sticky;
+        top: 90px;
+    }
+
+    .btn-checkout {
+        background: #ffc107;
+        color: #6d5100;
+        font-weight: 700;
+        border: none;
+        border-radius: .75rem;
+        padding: .9rem;
+        transition: all .2s ease;
+    }
+
+        .btn-checkout:hover {
+            background: #e0a800;
+            color: #6d5100;
+            transform: translateY(-1px);
+        }
+
+    .free-ship-pill {
+        background: #d9e3f6;
+        color: #3d4756;
+        border-radius: .5rem;
+        padding: .5rem 1rem;
+        font-size: .85rem;
+    }
+</style>
+
+<div class="cart-page py-4">
+    <div class="container">
+
+        <!-- Breadcrumb & thông báo freeship -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <div class="d-flex align-items-center gap-2 small">
+                <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-secondary">
+                    <i class="fa-solid fa-chevron-left"></i> Tiếp tục mua sắm
+                </a>
+                <span class="text-secondary">/</span>
+                <span class="fw-semibold">Giỏ hàng của bạn</span>
+            </div>
+            <div class="free-ship-pill">
+                <i class="fa-solid fa-truck-fast text-warning me-1"></i>
+                <strong>Miễn phí vận chuyển</strong> với đơn hàng giao trong nội thành TP.HCM & Hà Nội
+            </div>
+        </div>
+        @{
+            var outOfStockItems = items.Where(i => i.Quantity > i.Product.Quantity).ToList();
+        }
+        @if (outOfStockItems.Any())
+        {
+            <div class="alert alert-danger">
+                <ul class="mb-0 ps-3">
+                    @foreach (var i in outOfStockItems)
+                    {
+                        <li class="d-flex justify-content-between align-items-center flex-wrap gap-2 py-1">
+                            <span>
+                                @if (i.Product.Quantity > 0)
+                                {
+                                    <text>Sản phẩm <strong>@i.Product.ProductName</strong> chỉ còn <strong>@i.Product.Quantity</strong>, giỏ hàng đang chọn @i.Quantity.</text>
+                                }
+                                else
+                                {
+                                    <text>Sản phẩm <strong>@i.Product.ProductName</strong> hiện đã hết hàng.</text>
+                                }
+                            </span>
+
+                            @if (i.Product.Quantity > 0)
+                            {
+                                <form asp-action="UpdateQuantity" method="post" class="d-inline">
+                                    <input type="hidden" name="cartItemId" value="@i.CartItemID" />
+                                    <input type="hidden" name="quantity" value="@i.Product.Quantity" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        Cập nhật về @i.Product.Quantity
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form asp-controller="Cart"
+                                      asp-action="Remove"
+                                      method="post"
+                                      class="d-inline">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <input type="hidden"
+                                           name="cartItemId"
+                                           value="@i.CartItemID" />
+
+                                    <button type="submit"
+                                            class="btn btn-sm btn-outline-danger">
+                                        Xóa khỏi giỏ
+                                    </button>
+                                </form>
+                            }
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+        @if (TempData["CartWarning"] != null)
+        {
+            <div class="alert alert-warning">
+                <i class="fa-solid fa-triangle-exclamation me-1"></i> @TempData["CartWarning"]
+            </div>
+        }
+        @if (!items.Any())
+        {
+            <div class="cart-card text-center py-5">
+                <i class="fa-solid fa-cart-shopping fs-1 text-secondary mb-3"></i>
+                <p class="fs-5 mb-3">Giỏ hàng của bạn đang trống.</p>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-warning fw-semibold px-4">Tiếp tục mua sắm</a>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                <!-- Cột trái: danh sách sản phẩm -->
+                <div class="col-lg-8">
+
+                    @* Form dùng để xóa nhiều sản phẩm đã chọn *@
+                    <form asp-controller="Cart"
+                          asp-action="RemoveSelected"
+                          method="post"
+                          id="removeSelectedForm">
+                        @Html.AntiForgeryToken()
+                    </form>
+
+                    @* Thanh chọn tất cả và xóa đã chọn *@
+                    <div class="cart-card d-flex justify-content-between align-items-center px-4 py-3 mb-3">
+                        <label class="d-flex align-items-center gap-2 mb-0">
+                            <input type="checkbox"
+                                   class="form-check-input"
+                                   id="selectAll"
+                                   checked>
+
+                            <span>Tất cả (@items.Count sản phẩm)</span>
+                        </label>
+
+                        <button type="button"
+                                class="btn btn-link text-danger text-decoration-none small fw-semibold p-0"
+                                data-bs-toggle="modal"
+                                data-bs-target="#confirmModal"
+                                data-confirm-title="Xóa sản phẩm đã chọn?"
+                                data-confirm-message="Các sản phẩm bạn đã chọn sẽ bị xóa khỏi giỏ hàng."
+                                data-confirm-action="submit-selected">
+                            <i class="fa-solid fa-trash-can me-1"></i>
+                            Xóa đã chọn
+                        </button>
+                    </div>
+
+                    <div class="d-flex flex-column gap-3 mb-4">
+                        @foreach (var item in items)
+                        {
+                            <div class="cart-card p-4 position-relative">
+
+                                @if (item.Product.IsNew)
+                                {
+                                    <span class="cart-badge-new">NEW</span>
+                                }
+
+                                @* Form xóa riêng từng sản phẩm — phải nằm trong foreach *@
+                                <form asp-controller="Cart"
+                                      asp-action="Remove"
+                                      method="post"
+                                      class="position-absolute top-0 end-0 mt-3 me-3 remove-item-form">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <input type="hidden"
+                                           name="cartItemId"
+                                           value="@item.CartItemID" />
+
+                                    <button type="button"
+                                            class="btn-remove-item"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#confirmModal"
+                                            data-confirm-title="Xóa sản phẩm này?"
+                                            data-confirm-message="@($"{item.Product.ProductName} sẽ bị xóa khỏi giỏ hàng.")"
+                                            data-confirm-action="submit-form"
+                                            aria-label="Xóa sản phẩm">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </form>
+
+                                <div class="d-flex flex-column flex-md-row gap-3">
+
+                                    <div class="d-flex align-items-start gap-3">
+                                        <input type="checkbox"
+                                               name="cartItemIds"
+                                               value="@item.CartItemID"
+                                               form="removeSelectedForm"
+                                               class="form-check-input cart-item-check mt-2"
+                                               checked>
+
+                                        <div class="cart-thumb">
+                                            <img src="@(string.IsNullOrEmpty(item.Product.ImageUrl)
+                                                                                 ? "/images/no-image.png"
+                                                                                 : item.Product.ImageUrl)"
+                                                 alt="@item.Product.ProductName">
+                                        </div>
+                                    </div>
+
+                                    <div class="flex-grow-1 d-flex flex-column justify-content-between">
+
+                                        <div class="pe-4">
+                                            @if (item.Product.Category != null)
+                                            {
+                                                <div class="text-uppercase text-secondary small fw-semibold mb-1">
+                                                    @item.Product.Category.CategoryName
+                                                </div>
+                                            }
+
+                                            <h3 class="fs-6 fw-semibold mb-2">
+                                                @item.Product.ProductName
+                                            </h3>
+                                        </div>
+
+                                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-end gap-3 mt-2">
+
+                                            <form asp-controller="Cart"
+                                                  asp-action="UpdateQuantity"
+                                                  method="post"
+                                                  class="d-flex align-items-center gap-2">
+
+                                                @Html.AntiForgeryToken()
+
+                                                <input type="hidden"
+                                                       name="cartItemId"
+                                                       value="@item.CartItemID" />
+
+                                                <div class="qty-box">
+                                                    <button type="submit"
+                                                            name="quantity"
+                                                            value="@(item.Quantity - 1)"
+                                                            disabled="@(item.Quantity <= 1)">
+                                                        −
+                                                    </button>
+
+                                                    <input type="text"
+                                                           value="@item.Quantity"
+                                                           readonly>
+
+                                                    <button type="submit"
+                                                            name="quantity"
+                                                            value="@(item.Quantity + 1)"
+                                                            disabled="@(item.Quantity >= item.Product.Quantity)">
+                                                        +
+                                                    </button>
+                                                </div>
+                                            </form>
+
+                                            <div class="text-end">
+                                                <div class="price-main">
+                                                    @((item.Quantity * item.UnitPrice).ToString("N0"))đ
+                                                </div>
+
+                                                @if (item.Product.OldPrice.HasValue &&
+                                                     item.Product.OldPrice.Value > item.UnitPrice)
+                                                {
+                                                    <div class="price-old">
+                                                        @((item.Quantity * item.Product.OldPrice.Value).ToString("N0"))đ
+                                                    </div>
+                                                }
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Cột phải: tóm tắt đơn hàng -->
+                <div class="col-lg-4">
+                    <div class="cart-card order-summary p-4">
+                        <h2 class="fs-5 fw-bold border-bottom pb-3 mb-3">Thông tin đơn hàng</h2>
+
+                        <div class="d-flex flex-column gap-2 small border-bottom pb-3 mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span class="text-secondary">Tổng tiền hàng (@items.Count sản phẩm)</span>
+                                <span class="fw-semibold">@originalTotal.ToString("N0")đ</span>
+                            </div>
+                            @if (discount > 0)
+                            {
+                                <div class="d-flex justify-content-between text-success">
+                                    <span>Giảm giá trực tiếp</span>
+                                    <span>-@discount.ToString("N0")đ</span>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-end mb-4">
+                            <div>
+                                <div class="fw-bold">TỔNG CỘNG</div>
+                                <div class="text-secondary small">(Đã bao gồm VAT)</div>
+                            </div>
+                            <div class="price-main fs-4">@grandTotal.ToString("N0")đ</div>
+                        </div>
+
+                        <a asp-controller="Checkout"
+                           asp-action="Index"
+                           class="btn btn-checkout w-100 d-flex justify-content-center align-items-center gap-2 mb-3 @(outOfStockItems.Any() ? "disabled" : "")"
+                           aria-disabled="@(outOfStockItems.Any() ? "true" : null)"
+                           onclick="@(outOfStockItems.Any() ? "return false;" : null)">
+                            Mua ngay
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                        <p class="text-center text-secondary small mb-0">
+                            Bằng việc tiến hành đặt mua hàng, bạn đồng ý với
+                            <a href="#" class="text-warning text-decoration-none fw-semibold">Điều khoản dịch vụ</a> của chúng tôi.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal xác nhận (dùng chung cho xóa 1 sản phẩm / xóa đã chọn) -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="confirmModalTitle">Xác nhận</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="text-secondary mb-0" id="confirmModalMessage">Bạn có chắc chắn muốn thực hiện hành động này?</p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" id="confirmModalOkBtn">
+                    <i class="fa-solid fa-trash-can me-1"></i>Xóa
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @if (items.Any())
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const selectAll = document.getElementById('selectAll');
+                const itemChecks = document.querySelectorAll('.cart-item-check');
+
+                function syncSelectAllState() {
+                    const checkedCount =
+                        document.querySelectorAll('.cart-item-check:checked').length;
+
+                    selectAll.checked =
+                        itemChecks.length > 0 &&
+                        checkedCount === itemChecks.length;
+
+                    selectAll.indeterminate =
+                        checkedCount > 0 &&
+                        checkedCount < itemChecks.length;
+                }
+
+                selectAll?.addEventListener('change', function () {
+                    itemChecks.forEach(function (checkbox) {
+                        checkbox.checked = selectAll.checked;
+                    });
+
+                    syncSelectAllState();
+                });
+
+                itemChecks.forEach(function (checkbox) {
+                    checkbox.addEventListener(
+                        'change',
+                        syncSelectAllState
+                    );
+                });
+
+                const confirmModalElement =
+                    document.getElementById('confirmModal');
+
+                const titleElement =
+                    document.getElementById('confirmModalTitle');
+
+                const messageElement =
+                    document.getElementById('confirmModalMessage');
+
+                const confirmButton =
+                    document.getElementById('confirmModalOkBtn');
+
+                let pendingAction = null;
+                let pendingForm = null;
+
+                document
+                    .querySelectorAll('[data-bs-target="#confirmModal"]')
+                    .forEach(function (trigger) {
+                        trigger.addEventListener('click', function () {
+                            titleElement.textContent =
+                                this.dataset.confirmTitle || 'Xác nhận';
+
+                            messageElement.textContent =
+                                this.dataset.confirmMessage ||
+                                'Bạn có chắc chắn muốn thực hiện hành động này?';
+
+                            pendingAction =
+                                this.dataset.confirmAction || null;
+
+                            pendingForm =
+                                this.closest('form');
+                        });
+                    });
+
+                confirmButton.addEventListener('click', function () {
+                    if (pendingAction === 'submit-selected') {
+                        const selectedCount =
+                            document.querySelectorAll(
+                                '.cart-item-check:checked'
+                            ).length;
+
+                        if (selectedCount === 0) {
+                            messageElement.textContent =
+                                'Bạn chưa chọn sản phẩm nào để xóa.';
+                            return;
+                        }
+
+                        document
+                            .getElementById('removeSelectedForm')
+                            .requestSubmit();
+
+                        return;
+                    }
+
+                    if (
+                        pendingAction === 'submit-form' &&
+                        pendingForm
+                    ) {
+                        pendingForm.requestSubmit();
+                    }
+                });
+
+                syncSelectAllState();
+            });
+        </script>
+    }
 }

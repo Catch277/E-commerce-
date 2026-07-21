@@ -23,6 +23,6 @@ namespace ECommerceWeb.Models
         public DateTime? PaymentDate { get; set; }
 
         [StringLength(100)]
-        public string TransactionCode { get; set; }
+        public string? TransactionCode { get; set; }
     }
 }

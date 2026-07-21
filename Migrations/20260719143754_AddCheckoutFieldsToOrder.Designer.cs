@@ -4,6 +4,7 @@ using ECommerceWeb.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ECommerceWeb.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260719143754_AddCheckoutFieldsToOrder")]
+    partial class AddCheckoutFieldsToOrder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -212,24 +214,6 @@ namespace ECommerceWeb.Migrations
                     b.HasIndex("UserID");
 
                     b.ToTable("EmailLogs");
-                });
-
-            modelBuilder.Entity("ECommerceWeb.Models.Favorite", b =>
-                {
-                    b.Property<int>("UserID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProductID")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("UserID", "ProductID");
-
-                    b.HasIndex("ProductID");
-
-                    b.ToTable("Favorites");
                 });
 
             modelBuilder.Entity("ECommerceWeb.Models.Feedback", b =>
@@ -462,6 +446,7 @@ namespace ECommerceWeb.Migrations
                         .HasColumnType("int");
 
                     b.Property<int?>("VoucherID")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.HasKey("OrderID");
@@ -527,6 +512,7 @@ namespace ECommerceWeb.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("TransactionCode")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -753,6 +739,9 @@ namespace ECommerceWeb.Migrations
                         .IsRequired()
                         .HasColumnType("int");
 
+                    b.Property<int?>("CategoryID1")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -789,6 +778,8 @@ namespace ECommerceWeb.Migrations
                     b.HasKey("ProductID");
 
                     b.HasIndex("CategoryID");
+
+                    b.HasIndex("CategoryID1");
 
                     b.ToTable("Products");
 
@@ -1405,25 +1396,6 @@ namespace ECommerceWeb.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ECommerceWeb.Models.Favorite", b =>
-                {
-                    b.HasOne("ECommerceWeb.Models.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ECommerceWeb.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("ECommerceWeb.Models.Feedback", b =>
                 {
                     b.HasOne("ECommerceWeb.Models.User", "User")
@@ -1444,7 +1416,9 @@ namespace ECommerceWeb.Migrations
 
                     b.HasOne("ECommerceWeb.Models.Voucher", "Voucher")
                         .WithMany()
-                        .HasForeignKey("VoucherID");
+                        .HasForeignKey("VoucherID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
 
@@ -1506,10 +1480,14 @@ namespace ECommerceWeb.Migrations
             modelBuilder.Entity("ECommerceWeb.Models.Product", b =>
                 {
                     b.HasOne("ECommerceWeb.Models.Category", "Category")
-                        .WithMany("Products")
+                        .WithMany()
                         .HasForeignKey("CategoryID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("ECommerceWeb.Models.Category", null)
+                        .WithMany("Products")
+                        .HasForeignKey("CategoryID1");
 
                     b.Navigation("Category");
                 });

@@ -17,6 +17,7 @@ namespace ECommerceWeb.Data
         public DbSet<Cart> Carts { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<Favorite> Favorites { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Shipping> Shippings { get; set; }
@@ -54,6 +55,21 @@ namespace ECommerceWeb.Data
                 .WithMany()
                 .HasForeignKey(e => e.UserID)
                 .OnDelete(DeleteBehavior.Restrict);
+            // Favorite
+            modelBuilder.Entity<Favorite>()
+                .HasKey(f => new { f.UserID, f.ProductID });
+
+            modelBuilder.Entity<Favorite>()
+                .HasOne(f => f.User)
+                .WithMany()
+                .HasForeignKey(f => f.UserID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Favorite>()
+                .HasOne(f => f.Product)
+                .WithMany()
+                .HasForeignKey(f => f.ProductID)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Tắt Cascade Delete
             modelBuilder.Entity<PrebuiltPcSpec>()
@@ -64,7 +80,7 @@ namespace ECommerceWeb.Data
 
             modelBuilder.Entity<Product>()
                 .HasOne(p => p.Category)
-                .WithMany()
+                .WithMany(c => c.Products)
                 .HasForeignKey(p => p.CategoryID)
                 .OnDelete(DeleteBehavior.Restrict);
 

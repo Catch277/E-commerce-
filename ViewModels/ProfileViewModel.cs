@@ -13,5 +13,7 @@ namespace ECommerceWeb.ViewModels
         public decimal TotalSpent { get; set; }
         public string Role { get; set; }
         public string MemberTier { get; set; }
+        public IEnumerable<ProductCardViewModel> FavoriteProducts { get; set; } = new List<ProductCardViewModel>();
+
     }
 }
