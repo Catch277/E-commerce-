@@ -120,7 +120,7 @@ namespace ECommerceWeb.Data
                 .HasForeignKey(c => c.UserID)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            //  Mồi dữ liệu (Seed Data) cho Hạng thành viên
+            // SeedData cho Hạng thành viên
             modelBuilder.Entity<MembershipTier>().HasData(
                 new MembershipTier { TierID = 1, TierName = "Tech-Newie", MinPoints = 0, ColorHex = "#e0e0e0", IconClass = "fa-solid fa-user" },
                 new MembershipTier { TierID = 2, TierName = "Tech-Member", MinPoints = 300, ColorHex = "#f5c3a6", IconClass = "fa-solid fa-star" },

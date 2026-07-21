@@ -1,0 +1,169 @@
+﻿@model IEnumerable<ECommerceWeb.Models.Product>
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Quản lý sản phẩm";
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+}
+
+@section Styles {
+    <style>
+        .prod-toolbar { background: #fff; border-radius: 14px; box-shadow: 0 4px 14px rgba(0,0,0,.05); padding: 14px 16px; margin-bottom: 20px; }
+        .prod-table-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 14px rgba(0,0,0,.05); overflow: hidden; }
+        .prod-table thead th { font-weight: 600; color: #575e70; font-size: .82rem; border-bottom: 1px solid #eceef2; padding: 16px 20px; }
+        .prod-table tbody td { padding: 14px 20px; vertical-align: middle; border-bottom: 1px solid #f2f4f8; }
+        .prod-table tbody tr:last-child td { border-bottom: none; }
+        .prod-thumb { width: 52px; height: 52px; object-fit: cover; border-radius: 10px; background: #f2f4f8; }
+        .status-pill { font-size: .72rem; font-weight: 700; padding: 4px 12px; border-radius: 999px; }
+        .status-pill.in-stock { background: #d1fae5; color: #059669; }
+        .status-pill.low-stock { background: #fff3c2; color: #785900; }
+        .status-pill.out-stock { background: #fee2e2; color: #d70018; }
+        .btn-icon-sm {
+            width: 34px; height: 34px; border-radius: 8px; border: 1px solid #eceef2;
+            display: inline-flex; align-items: center; justify-content: center; background: #fff; color: #575e70;
+        }
+        .btn-icon-sm:hover { background: #f2f4f8; }
+        .btn-icon-sm.danger:hover { background: #fee2e2; color: #d70018; border-color: #fee2e2; }
+    </style>
+}
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+    <h1 class="fw-bold mb-0" style="font-size:1.6rem;">Quản lý sản phẩm</h1>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="bi bi-exclamation-circle-fill me-2"></i>@TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Toolbar: search + filter + add -->
+<form method="get" asp-action="Products" class="prod-toolbar d-flex flex-wrap gap-2 align-items-center">
+    <div class="flex-grow-1" style="min-width:220px;">
+        <input type="search" name="search" value="@ViewBag.Search" class="form-control" placeholder="Tìm kiếm sản phẩm, ID...">
+    </div>
+    <select name="categoryId" class="form-select" style="max-width:200px;">
+        <option value="">Tất cả danh mục</option>
+        @if (ViewBag.Categories != null)
+        {
+            @foreach (var c in (IEnumerable<ECommerceWeb.Models.Category>)ViewBag.Categories)
+            {
+                <option value="@c.CategoryID" selected="@(ViewBag.SelectedCategoryId != null && (int)ViewBag.SelectedCategoryId == c.CategoryID)">@c.CategoryName</option>
+            }
+        }
+    </select>
+    <select name="stockStatus" class="form-select" style="max-width:180px;">
+        <option value="">Trạng thái kho</option>
+        <option value="in-stock" selected="@(ViewBag.SelectedStockStatus == "in-stock")">Còn hàng</option>
+        <option value="low-stock" selected="@(ViewBag.SelectedStockStatus == "low-stock")">Sắp hết</option>
+        <option value="out-stock" selected="@(ViewBag.SelectedStockStatus == "out-stock")">Hết hàng</option>
+    </select>
+    <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-funnel"></i></button>
+    <a asp-action="CreateProduct" class="btn fw-bold ms-auto" style="background:#ffc107; color:#212529;">
+        <i class="bi bi-plus-lg me-1"></i> Thêm sản phẩm
+    </a>
+</form>
+
+<div class="prod-table-card">
+    <div class="table-responsive">
+        <table class="table prod-table mb-0">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Hình ảnh</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Danh mục</th>
+                    <th>Giá bán</th>
+                    <th>Trạng thái</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-5">Không tìm thấy sản phẩm.</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var product in Model)
+                    {
+                        <tr>
+                            <td class="text-muted">#@product.ProductID</td>
+                            <td>
+                                <img src="@(string.IsNullOrWhiteSpace(product.ImageUrl) ? "/images/no-image.png" : product.ImageUrl)"
+                                     alt="@product.ProductName" class="prod-thumb">
+                            </td>
+                            <td class="fw-semibold" style="max-width:280px;">@product.ProductName</td>
+                            <td class="text-muted">@(product.Category?.CategoryName ?? "Chưa phân loại")</td>
+                            <td class="fw-bold" style="color:#d70018;">@product.Price.ToString("N0")đ</td>
+                            <td>
+                                @if (product.Quantity <= 0)
+                                {
+                                    <span class="status-pill out-stock">HẾT HÀNG</span>
+                                }
+                                else if (product.Quantity <= 10)
+                                {
+                                    <span class="status-pill low-stock">SẮP HẾT</span>
+                                }
+                                else
+                                {
+                                    <span class="status-pill in-stock">CÒN HÀNG</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <a asp-action="EditProduct" asp-route-id="@product.ProductID" class="btn-icon-sm" title="Sửa">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form asp-action="DeleteProduct" asp-route-id="@product.ProductID" method="post" class="d-inline"
+                                      onsubmit="return confirm('Bạn chắc chắn muốn xóa sản phẩm này?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn-icon-sm danger" title="Xóa">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="d-flex justify-content-between align-items-center px-4 py-3 border-top">
+            <span class="text-muted small">
+                Hiển thị @Model.Count() / @(ViewBag.TotalProducts ?? Model.Count()) sản phẩm
+            </span>
+            @if (totalPages > 1)
+            {
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+                        @for (int i = 1; i <= totalPages; i++)
+                        {
+                            <li class="page-item @(i == currentPage ? "active" : "")">
+                                <a class="page-link" asp-action="Products" asp-route-page="@i" asp-route-search="@ViewBag.Search"
+                                   asp-route-categoryId="@ViewBag.SelectedCategoryId" asp-route-stockStatus="@ViewBag.SelectedStockStatus"
+                                   style="@(i == currentPage ? "background-color:#ffc107;border-color:#ffc107;color:#212529;" : "color:#212529;")">
+                                    @i
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
+        </div>
+    }
+</div>

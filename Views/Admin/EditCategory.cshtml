@@ -1,0 +1,108 @@
+﻿@model ECommerceWeb.Models.Category
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Sửa danh mục";
+}
+
+@section Styles {
+    <style>
+        .admin-form-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 14px rgba(0,0,0,.05);
+        }
+
+        .icon-option-preview {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            background: #fff3c2;
+            color: #785900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .btn-admin-primary {
+            background: #ffc107;
+            color: #212529;
+            font-weight: 700;
+            border: none;
+        }
+
+            .btn-admin-primary:hover {
+                background: #e0a800;
+                color: #212529;
+            }
+    </style>
+}
+
+<div class="admin-form-card mx-auto" style="max-width: 700px;">
+    <div class="p-4 p-md-5">
+        <h2 class="fw-bold mb-4">Sửa danh mục</h2>
+
+        <form asp-action="EditCategory" asp-route-id="@Model.CategoryID" method="post">
+            @Html.AntiForgeryToken()
+            <input asp-for="CategoryID" type="hidden" />
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="CategoryName" class="form-label fw-bold"></label>
+                <input asp-for="CategoryName" class="form-control" />
+                <span asp-validation-for="CategoryName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label fw-bold"></label>
+                <textarea asp-for="Description" rows="4" class="form-control"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="IconClass" class="form-label fw-bold">Icon danh mục</label>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="icon-option-preview" id="iconPreview">
+                        <i class="bi @(string.IsNullOrWhiteSpace(Model.IconClass) ? "bi-cpu" : Model.IconClass)" id="iconPreviewTag"></i>
+                    </span>
+                    <select asp-for="IconClass" class="form-select" id="iconSelect">
+                        <option value="bi-cpu">CPU (bi-cpu)</option>
+                        <option value="bi-gpu-card">VGA (bi-gpu-card)</option>
+                        <option value="bi-memory">RAM (bi-memory)</option>
+                        <option value="bi-device-ssd">SSD (bi-device-ssd)</option>
+                        <option value="bi-display">Màn hình (bi-display)</option>
+                        <option value="bi-motherboard">Mainboard (bi-motherboard)</option>
+                        <option value="bi-plug-fill">Nguồn - PSU (bi-plug-fill)</option>
+                        <option value="bi-keyboard">Bàn phím (bi-keyboard)</option>
+                        <option value="bi-mouse">Chuột (bi-mouse)</option>
+                        <option value="bi-pc-display-horizontal">PC Case (bi-pc-display-horizontal)</option>
+                        <option value="bi-headset">Tai nghe (bi-headset)</option>
+                        <option value="bi-fan">Tản nhiệt (bi-fan)</option>
+                        <option value="bi-tag-fill">Khác (bi-tag-fill)</option>
+                    </select>
+                </div>
+                <span asp-validation-for="IconClass" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-admin-primary">Lưu thay đổi</button>
+            <a asp-action="Categories" class="btn btn-light border">Hủy</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const iconSelect = document.getElementById('iconSelect');
+        const iconPreviewTag = document.getElementById('iconPreviewTag');
+
+        function updateIconPreview() {
+            iconPreviewTag.className = 'bi ' + iconSelect.value;
+        }
+
+        iconSelect.addEventListener('change', updateIconPreview);
+    </script>
+}

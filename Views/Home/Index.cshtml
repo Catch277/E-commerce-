@@ -7,34 +7,84 @@
 
 <!-- ================= DANH MỤC NỔI BẬT ================= -->
 <section class="container py-4 mt-2 mb-3">
-    <h2 class="mb-3" style="font-size:24px;">Danh mục nổi bật</h2>
+    <h2 class="mb-3" style="font-size: 24px;">
+        Danh mục nổi bật
+    </h2>
+
     <div class="row g-3 row-cols-2 row-cols-md-4">
+        <!-- CPU -->
         <div class="col">
-            <a href="#" class="category-card text-decoration-none text-dark d-block p-4 text-center h-100">
+            <a asp-controller="Product"
+               asp-action="Category"
+               asp-route-id="1"
+               class="category-card text-decoration-none text-dark d-block p-4 text-center h-100">
+
                 <i class="bi bi-cpu category-icon"></i>
-                <div class="fw-bold mt-2">CPU</div>
-                <div class="text-muted small">Intel • AMD</div>
+
+                <div class="fw-bold mt-2">
+                    CPU
+                </div>
+
+                <div class="text-muted small">
+                    Intel • AMD
+                </div>
             </a>
         </div>
+
+        <!-- VGA -->
         <div class="col">
-            <a href="#" class="category-card text-decoration-none text-dark d-block p-4 text-center h-100">
+            <a asp-controller="Product"
+               asp-action="Category"
+               asp-route-id="2"
+               class="category-card text-decoration-none text-dark d-block p-4 text-center h-100">
+
                 <i class="bi bi-gpu-card category-icon"></i>
-                <div class="fw-bold mt-2">VGA</div>
-                <div class="text-muted small">NVIDIA • AMD</div>
+
+                <div class="fw-bold mt-2">
+                    VGA
+                </div>
+
+                <div class="text-muted small">
+                    NVIDIA • AMD
+                </div>
             </a>
         </div>
+
+        <!-- RAM -->
         <div class="col">
-            <a href="#" class="category-card text-decoration-none text-dark d-block p-4 text-center h-100">
+            <a asp-controller="Product"
+               asp-action="Category"
+               asp-route-id="3"
+               class="category-card text-decoration-none text-dark d-block p-4 text-center h-100">
+
                 <i class="bi bi-memory category-icon"></i>
-                <div class="fw-bold mt-2">RAM</div>
-                <div class="text-muted small">DDR4 • DDR5</div>
+
+                <div class="fw-bold mt-2">
+                    RAM
+                </div>
+
+                <div class="text-muted small">
+                    DDR4 • DDR5
+                </div>
             </a>
         </div>
+
+        <!-- SSD -->
         <div class="col">
-            <a href="#" class="category-card text-decoration-none text-dark d-block p-4 text-center h-100">
+            <a asp-controller="Product"
+               asp-action="Category"
+               asp-route-id="4"
+               class="category-card text-decoration-none text-dark d-block p-4 text-center h-100">
+
                 <i class="bi bi-device-ssd category-icon"></i>
-                <div class="fw-bold mt-2">SSD</div>
-                <div class="text-muted small">NVMe • SATA</div>
+
+                <div class="fw-bold mt-2">
+                    SSD
+                </div>
+
+                <div class="text-muted small">
+                    NVMe • SATA
+                </div>
             </a>
         </div>
     </div>

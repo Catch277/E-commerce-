@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - PC Stor - Admin</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <style>
+    :root {
+        --admin-yellow: #ffc107;
+        --admin-yellow-hover: #e0a800;
+        --admin-sidebar: #1f2937;
+        --admin-sidebar-hover: #29323f;
+        --admin-bg: #f5f7fb;
+        --admin-text: #212529;
+    }
+
+    body { font-family: 'Inter', sans-serif; background: var(--admin-bg); color: var(--admin-text); }
+
+    .admin-shell { display: flex; min-height: 100vh; }
+
+    /* ---- Sidebar ---- */
+    .admin-sidebar {
+        width: 260px; flex-shrink: 0;
+        background: var(--admin-sidebar);
+        color: #e5e7eb;
+        display: flex; flex-direction: column;
+        position: sticky; top: 0; height: 100vh;
+    }
+    .admin-sidebar .brand { padding: 24px 22px; }
+    .admin-sidebar .brand .brand-title { color: var(--admin-yellow); font-weight: 800; font-size: 1.25rem; letter-spacing: .02em; }
+    .admin-sidebar .brand .brand-sub { color: #9ca3af; font-size: .78rem; }
+
+    .admin-sidebar-footer .nav-link {
+    color: #d1d5db;
+    display: flex;          /* <-- Thêm */
+    align-items: center;    /* <-- Thêm */
+    gap: 14px;              /* <-- Thêm: khoảng cách giữa icon và chữ */
+    padding: 10px 14px;     /* <-- Thêm: đệm đều như nav-link phía trên */
+    border-radius: 10px;    /* <-- Thêm: bo góc giống menu chính */
+    transition: all .15s ease;
+}
+
+.admin-sidebar-footer .nav-link img {
+    width: 20px;
+    height: 20px;
+    margin-right: 0;        /* <-- Đổi từ 8px về 0 vì đã dùng gap */
+    vertical-align: middle;
+    flex-shrink: 0;         /* <-- Thêm: giữ icon không bị co */
+}
+
+.admin-sidebar-footer .nav-link.logout-link:hover {
+    background: rgba(215,0,24,.15);
+    color: #ff6b6b;
+}
+
+    .admin-nav { flex: 1; padding: 8px 14px; }
+    .admin-nav .nav-link {
+        color: #d1d5db; font-weight: 500; border-radius: 10px;
+        padding: 11px 14px; margin-bottom: 4px; display: flex; align-items: center; gap: 12px;
+        transition: all .15s ease;
+    }
+    .admin-nav .nav-link i { font-size: 1.1rem; width: 20px; text-align: center; }
+    .admin-nav .nav-link:hover { background: var(--admin-sidebar-hover); color: #fff; }
+    .admin-nav .nav-link.active {
+        background: #fff3c2; color: #6d5100; font-weight: 700;
+    }
+
+    .admin-sidebar-footer { padding: 14px; border-top: 1px solid rgba(255,255,255,.08); }
+    .admin-sidebar-footer .nav-link { color: #d1d5db; }
+    .admin-sidebar-footer .nav-link.logout-link:hover { background: rgba(215,0,24,.15); color: #ff6b6b; }
+
+    /* ---- Main area ---- */
+    .admin-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+    .admin-topbar {
+        background: #fff; border-bottom: 1px solid #eceef2;
+        padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; gap: 20px;
+        position: sticky; top: 0; z-index: 10;
+    }
+    .admin-topbar .topbar-title { font-weight: 800; font-size: 1.15rem; }
+    .admin-topbar .topbar-nav { display: flex; gap: 22px; }
+    .admin-topbar .topbar-nav a { color: #575e70; font-weight: 600; font-size: .92rem; text-decoration: none; padding-bottom: 4px; }
+    .admin-topbar .topbar-nav a.active { color: var(--admin-text); border-bottom: 2px solid var(--admin-yellow); }
+    .admin-topbar .topbar-nav a:hover { color: var(--admin-text); }
+
+    .admin-search { position: relative; }
+    .admin-search input {
+        background: #f2f4f8; border: none; border-radius: 10px; padding: 8px 14px 8px 36px; font-size: .88rem; width: 220px;
+    }
+    .admin-search input:focus { outline: none; box-shadow: 0 0 0 2px rgba(255,193,7,.3); }
+    .admin-search i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #adb5bd; }
+
+    .topbar-icon-btn {
+        width: 38px; height: 38px; border-radius: 50%; background: #f2f4f8;
+        display: flex; align-items: center; justify-content: center; color: #575e70;
+        position: relative; border: none; cursor: pointer;
+    }
+    .topbar-icon-btn .dot { position: absolute; top: 8px; right: 9px; width: 7px; height: 7px; border-radius: 50%; background: #d70018; }
+
+    .topbar-avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; }
+
+    .admin-content { padding: 28px; flex: 1; }
+
+    .admin-breadcrumb { color: #adb5bd; font-size: .85rem; margin-bottom: 6px; }
+    .admin-breadcrumb a { color: #adb5bd; text-decoration: none; }
+    .admin-breadcrumb .current { color: var(--admin-text); font-weight: 600; }
+</style>
+
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <div class="admin-shell">
+
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="brand">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <span style="background:var(--admin-yellow); width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#212529;">
+                        <i class="bi bi-grid-3x3-gap-fill"></i>
+                    </span>
+                    <span class="brand-title">PC STORE</span>
+                </div>
+                <div class="brand-sub">Trang quản trị PC Store</div>
+            </div>
+
+            <nav class="admin-nav">
+                <a asp-controller="Admin" asp-action="Index" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+                    <i class="bi bi-grid-1x2-fill"></i> Dashboard
+                </a>
+                <a asp-controller="Admin" asp-action="Products" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Products" ? "active" : "")">
+                    <i class="bi bi-box-seam-fill"></i> Sản phẩm
+                </a>
+                <a asp-controller="Admin" asp-action="Categories" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Categories" ? "active" : "")">
+                    <i class="bi bi-diagram-3-fill"></i> Danh mục
+                </a>
+            </nav>
+
+            <div class="admin-sidebar-footer">
+                <a href="#" class="nav-link"><img src="~/images/admin-setting.svg" alt="setting" /> Cấu hình</a>
+                <a asp-controller="Auth" asp-action="Logout" class="nav-link logout-link"><img src="~/images/admin-logout.svg" alt="logout" /> Đăng xuất</a>
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <div class="admin-main">
+            <header class="admin-topbar">
+                <div class="d-flex align-items-center gap-4">
+                    <span class="topbar-title">PC Store Admin</span>
+                    <nav class="topbar-nav d-none d-lg-flex">
+                        <a href="#">Báo cáo</a>
+                        <a href="#" class="@(ViewData["Title"]?.ToString() == "Quản lý sản phẩm" ? "active" : "")">Kho</a>
+                        <a href="#">Nhân viên</a>
+                    </nav>
+                </div>
+
+                <div class="d-flex align-items-center gap-3">
+                    <div class="admin-search d-none d-md-block">
+                        <i class="bi bi-search"></i>
+                        <input type="text" placeholder="Tìm kiếm...">
+                    </div>
+                    <button class="topbar-icon-btn"><i class="bi bi-bell"></i><span class="dot"></span></button>
+                    <button class="topbar-icon-btn"><i class="bi bi-question-circle"></i></button>
+                    <img src="https://ui-avatars.com/api/?name=@(User.Identity?.Name ?? "Admin")&background=ffc107&color=212529&rounded=true"
+                         class="topbar-avatar" alt="Avatar">
+                </div>
+            </header>
+
+            <main class="admin-content">
+                <div class="admin-breadcrumb">
+                    <a asp-controller="Admin" asp-action="Index">Admin</a>
+                    <span class="mx-1">›</span>
+                    <span class="current">@ViewData["Title"]</span>
+                </div>
+
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
